@@ -31,7 +31,7 @@ from pathlib import Path
 
 from . import SCHEMA_VERSION
 from .db import get_meta, open_db
-from .export import EXPORT_PATH, build_export, render
+from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, render
 from .ids import id_number
 
 REQUIRED_TRIGGERS = {
@@ -85,6 +85,36 @@ def check_export_matches(con, export_path, errors):
     if regenerated != committed:
         errors.append(f"{export_path} is not what the database produces; "
                       f"regenerate it with python -m registry.export")
+
+    sha_path = checksum_path(export_path)
+    if not sha_path.exists():
+        errors.append(f"checksum file missing: {sha_path}")
+    else:
+        import hashlib
+        actual = hashlib.sha256(committed.encode("utf-8")).hexdigest()
+        stated = sha_path.read_text(encoding="utf-8").split()[0]
+        if actual != stated:
+            errors.append(f"{sha_path} does not match {export_path}; "
+                          f"regenerate both with python -m registry.export")
+
+    # Schema validation runs when the jsonschema package is available
+    # (CI installs it); locally it degrades to a note, keeping the
+    # pipeline stdlib-only.
+    if SCHEMA_PATH.exists():
+        try:
+            import jsonschema
+        except ImportError:
+            print("note: jsonschema not installed, skipping schema validation")
+        else:
+            schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+            validator = jsonschema.Draft202012Validator(schema)
+            for error in validator.iter_errors(json.loads(committed)):
+                path = "/".join(str(p) for p in error.absolute_path)
+                errors.append(f"schema violation at /{path}: {error.message[:120]}")
+                if len(errors) > 20:
+                    break
+    else:
+        errors.append(f"schema file missing: {SCHEMA_PATH}")
 
     # Both directions of the card <-> printing link must tell the same story.
     export = build_export(con)

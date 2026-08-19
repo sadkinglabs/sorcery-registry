@@ -1,0 +1,458 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/sadkinglabs/sorcery-registry/main/schema/registry.schema.json",
+  "title": "Sorcery Card Registry export",
+  "description": "Stable identifiers for every card and printing in Sorcery: Contested Realm. codex_id (C000042) identifies a card across all its reprints; printing_id (P000042) identifies one physical print. Key on those two - every other field is data that can change. This schema is structural: vocabularies noted in descriptions (product, finish, type, rarity) are the values observed today, not closed sets, so new official values never become schema violations.",
+  "$defs": {
+    "codexId": {
+      "type": "string",
+      "pattern": "^C[0-9]{6}$",
+      "description": "Permanent card-level id, shared by every printing of the card."
+    },
+    "printingId": {
+      "type": "string",
+      "pattern": "^P[0-9]{6}$",
+      "description": "Permanent id of one physical print (set + product + finish)."
+    },
+    "setNumber": {
+      "type": "string",
+      "pattern": "^[0-9]{3}$",
+      "description": "The set's official number from the slug (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promotional). There is no collector number: cards have no official serialisation within a set."
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "threshold": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "integer"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sets": {
+          "type": "integer"
+        },
+        "cards": {
+          "type": "integer"
+        },
+        "printings": {
+          "type": "integer"
+        },
+        "slug_history": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source",
+        "sets",
+        "cards",
+        "printings",
+        "slug_history"
+      ],
+      "additionalProperties": false,
+      "description": "Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a byte-identical file."
+    },
+    "sets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "set_number": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/setNumber"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "set_name": {
+            "type": "string"
+          },
+          "released_at": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cards": {
+            "type": "integer"
+          },
+          "printings": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "set_number",
+          "set_name",
+          "released_at",
+          "cards",
+          "printings"
+        ],
+        "additionalProperties": false,
+        "description": "Derived catalogue of the sets themselves, with distinct-card and printing counts."
+      }
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "codex_id": {
+            "$ref": "#/$defs/codexId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Observed values: Artifact, Aura, Avatar, Magic, Minion, Site."
+          },
+          "rarity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Observed values: Ordinary, Elite, Exceptional, Unique, None."
+          },
+          "subtypes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "elements": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Comma-separated element list as upstream states it, e.g. 'Air' or 'Earth, Fire, Water, Air'."
+          },
+          "cost": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "attack": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "defence": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "life": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Only Avatars have a life value."
+          },
+          "thr_air": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_earth": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_fire": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_water": {
+            "$ref": "#/$defs/threshold"
+          },
+          "rules_text": {
+            "type": "string",
+            "description": "Current text the card plays by. Canonicalised: \n line endings, no trailing whitespace, one line per ability."
+          },
+          "errata": {
+            "type": "boolean",
+            "description": "Derived from the upstream convention that an errata'd card's rules text begins with UPDATED."
+          },
+          "set_numbers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/setNumber"
+            },
+            "description": "Derived, sorted: the sets this card appears in. For products and finishes, follow printing_ids."
+          },
+          "printing_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/printingId"
+            },
+            "description": "Derived, sorted, and it only ever grows."
+          }
+        },
+        "required": [
+          "codex_id",
+          "name",
+          "type",
+          "rarity",
+          "subtypes",
+          "elements",
+          "cost",
+          "attack",
+          "defence",
+          "life",
+          "thr_air",
+          "thr_earth",
+          "thr_fire",
+          "thr_water",
+          "rules_text",
+          "errata",
+          "set_numbers",
+          "printing_ids"
+        ],
+        "additionalProperties": false,
+        "description": "One record per card as a game piece; reprints share one record."
+      }
+    },
+    "printings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "printing_id": {
+            "$ref": "#/$defs/printingId"
+          },
+          "codex_id": {
+            "$ref": "#/$defs/codexId"
+          },
+          "card_name": {
+            "type": "string",
+            "description": "Derived from the card record so a printing is readable without a join."
+          },
+          "set_name": {
+            "type": "string"
+          },
+          "released_at": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "set_number": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/setNumber"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "product": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Official product line. Observed values: Booster, Welcome_Kit, Organized_Play, Box_Topper, Dust, Preconstructed_Deck, Draft_Kit, Kickstarter, Alpha_Investments, Team_Covenant, Star_City_Games."
+          },
+          "finish": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Observed values: Standard, Foil, Rainbow."
+          },
+          "slug": {
+            "type": "string",
+            "description": "Current official API slug. Mutable - never key on it; resolve old ones via slug_history."
+          },
+          "artist": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "flavour_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rarity": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rules_text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The text as printed in this set, which can differ from the card's current text."
+          },
+          "cost": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "attack": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "defence": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "life": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "thr_air": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_earth": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_fire": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_water": {
+            "$ref": "#/$defs/threshold"
+          },
+          "image_hash": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Reserved for a future authoritative art reference; currently always null."
+          },
+          "retired_at": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when the printing vanished upstream. Retired printings keep their rows and ids forever."
+          }
+        },
+        "required": [
+          "printing_id",
+          "codex_id",
+          "card_name",
+          "set_name",
+          "released_at",
+          "set_number",
+          "product",
+          "finish",
+          "slug",
+          "artist",
+          "flavour_text",
+          "type_text",
+          "rarity",
+          "type",
+          "rules_text",
+          "cost",
+          "attack",
+          "defence",
+          "life",
+          "thr_air",
+          "thr_earth",
+          "thr_fire",
+          "thr_water",
+          "image_hash",
+          "retired_at"
+        ],
+        "additionalProperties": false,
+        "description": "One record per physical print: a specific set, product and finish."
+      }
+    },
+    "slug_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "printing_id": {
+            "$ref": "#/$defs/printingId"
+          },
+          "valid_from": {
+            "$ref": "#/$defs/date"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "slug",
+          "printing_id",
+          "valid_from",
+          "valid_to"
+        ],
+        "additionalProperties": false,
+        "description": "Every slug that has ever existed, mapped to its printing. valid_to null = the current slug."
+      }
+    }
+  },
+  "required": [
+    "header",
+    "sets",
+    "cards",
+    "printings",
+    "slug_history"
+  ],
+  "additionalProperties": false
+}

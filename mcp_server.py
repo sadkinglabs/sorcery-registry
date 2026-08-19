@@ -21,6 +21,7 @@ Data source, first match wins:
        (a stale cache is used when offline rather than failing)
 """
 
+import hashlib
 import json
 import os
 import time
@@ -49,6 +50,11 @@ def load_registry():
 
     if CACHE_PATH.exists() and time.time() - CACHE_PATH.stat().st_mtime < CACHE_TTL_SECONDS:
         return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+    if CACHE_PATH.exists() and _cache_still_current():
+        # The published .sha256 matches our cached bytes: revalidated with
+        # a ~100 byte fetch instead of re-downloading the whole export.
+        os.utime(CACHE_PATH)
+        return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
     try:
         data = _fetch(EXPORT_URL)
     except Exception:
@@ -65,6 +71,18 @@ def _fetch(url):
     response = requests.get(url, timeout=60)
     response.raise_for_status()
     return response.json()
+
+
+def _cache_still_current():
+    try:
+        import requests
+        response = requests.get(EXPORT_URL + ".sha256", timeout=10)
+        response.raise_for_status()
+        published = response.text.split()[0]
+        cached = hashlib.sha256(CACHE_PATH.read_bytes()).hexdigest()
+        return published == cached
+    except Exception:
+        return False
 
 
 ID_WIDTH = 6
