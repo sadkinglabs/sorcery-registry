@@ -40,6 +40,25 @@ There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the 
 
 A sync PR should contain: the updated `registry.sqlite`, the regenerated `export/registry.json`, and nothing hand-written except (when relevant) override or decision files. Run `python -m registry.validate --against origin/main` before pushing; CI runs the same check.
 
+## Shipping a set release (the runbook)
+
+When a new set drops, this is the whole flow. Existing IDs never change; a set release is pure append.
+
+1. Branch: `git checkout -b sync/<set-name>`.
+2. `python -m registry.sync --dry-run` - fetches, snapshots the payload to `review/upstream-snapshot.json`, and prints the plan. The expected shape is boring: N new cards, M new printings, possibly attribute updates (errata waves are normal), zero renames, zero retirals, zero ambiguity.
+3. If the plan is NOT boring, that is the guardrails working, not an error: read `review/pending.json`, write `review/decisions.json` (next section), and re-run against the same snapshot until the plan is clean.
+4. Watch the override notes: if upstream fixed an error we correct in `data/overrides.json`, the sync reports the entry as matching nothing - delete it in this same PR.
+5. Apply against the exact reviewed bytes: `python -m registry.sync --from-file review/upstream-snapshot.json`.
+6. `python -m registry.validate --against origin/main`, then push and open the PR. CI re-proves everything, including that every pre-existing ID survived.
+7. After merge: tag a data release (bump the minor version), generate the manifest, and attach it:
+
+   ```bash
+   python -m registry.manifest --dataset-version vX.Y.0 --out manifest.json
+   gh release create vX.Y.0 manifest.json --title "vX.Y.0" --notes "<what the set added>"
+   ```
+
+8. Never run the first sync of a new set through the GitHub Action - it applies with `--yes`. The Action is for routine re-syncs once the drop has been reviewed by a human once.
+
 ## When a sync is ambiguous
 
 The sync auto-applies only what is unambiguous. If a slug vanished and a new one appeared and they cannot be paired with certainty (same card, same set, product, finish - or for whole cards, the full gameplay fingerprint), the case is written to `review/pending.json` and the run exits with code 2. Likewise, any sync in which existing cards disappear while new card names appear quarantines the unmatched remainder rather than issuing new IDs, because a card that was renamed and reworded in the same sync is indistinguishable from a removal plus an unrelated newcomer. **This is by design.** A wrong automatic guess would fork one card into two IDs, which is the one failure this project exists to prevent.
