@@ -57,6 +57,14 @@ def _apply_plan(con, plan, as_of):
     for rename in plan["card_renames"]:
         cur.execute("UPDATE cards SET name = ? WHERE card_id = ?",
                     (rename["new_name"], rename["card_id"]))
+        cur.execute(
+            "UPDATE name_history SET valid_to = ? "
+            "WHERE card_id = ? AND name = ? AND valid_to IS NULL",
+            (as_of, rename["card_id"], rename["old_name"]))
+        cur.execute(
+            "INSERT INTO name_history (name, card_id, valid_from, valid_to) "
+            "VALUES (?, ?, ?, NULL)",
+            (rename["new_name"], rename["card_id"], as_of))
 
     for card in plan["new_cards"]:
         card_id = allocate_id(con, "next_card_id")
@@ -65,6 +73,10 @@ def _apply_plan(con, plan, as_of):
         cur.execute(
             f"INSERT INTO cards (card_id, {columns}) VALUES (?, {holes})",
             [card_id] + [card.get(field) for field in CARD_FIELDS])
+        cur.execute(
+            "INSERT INTO name_history (name, card_id, valid_from, valid_to) "
+            "VALUES (?, ?, ?, NULL)",
+            (card["name"], card_id, as_of))
 
     card_ids = {row["name"]: row["card_id"]
                 for row in con.execute("SELECT name, card_id FROM cards")}

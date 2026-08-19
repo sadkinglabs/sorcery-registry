@@ -51,6 +51,9 @@
         },
         "slug_history": {
           "type": "integer"
+        },
+        "name_history": {
+          "type": "integer"
         }
       },
       "required": [
@@ -59,7 +62,8 @@
         "sets",
         "cards",
         "printings",
-        "slug_history"
+        "slug_history",
+        "name_history"
       ],
       "additionalProperties": false,
       "description": "Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a byte-identical file."
@@ -445,6 +449,41 @@
         "additionalProperties": false,
         "description": "Every slug that has ever existed, mapped to its printing. valid_to null = the current slug."
       }
+    },
+    "name_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "codex_id": {
+            "$ref": "#/$defs/codexId"
+          },
+          "valid_from": {
+            "$ref": "#/$defs/date"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "codex_id",
+          "valid_from",
+          "valid_to"
+        ],
+        "additionalProperties": false,
+        "description": "Every name a card has ever carried. valid_to null = the current name. Unlike slugs, a name is not owned: two cards may hold the same name at different times."
+      }
     }
   },
   "required": [
@@ -452,7 +491,8 @@
     "sets",
     "cards",
     "printings",
-    "slug_history"
+    "slug_history",
+    "name_history"
   ],
   "additionalProperties": false
 }

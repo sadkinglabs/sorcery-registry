@@ -34,7 +34,7 @@ python -m registry.sync                # same, then apply after confirmation
 python -m registry.validate            # check every invariant
 ```
 
-There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the export for AI agents (see the README). It contains no logic of its own beyond indexing and querying `export/registry.json` - if the export is right, the server is right. Its query layer is unit-tested in `tests/test_mcp.py`; running the server itself additionally needs `pip install mcp`. If you change the export's shape, update the server's `Registry` class, its tests, and `schema/registry.schema.json` in the same PR - CI validates the export against the schema.
+There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the export for AI agents (see the README). It contains no logic of its own beyond indexing and querying `export/registry.json` - if the export is right, the server is right. Its query layer is unit-tested in `tests/test_mcp.py`; running the server itself additionally needs `pip install mcp`. If you change the export's shape, update the server's `Registry` class, its tests, and `schema/registry.schema.json` in the same PR - CI validates the export against the schema. Note also `name_history`, the card-name counterpart of `slug_history`: every card rename must close the old name's row and open one for the new name, which the pipeline does automatically.
 
 A sync PR should contain: the updated `registry.sqlite`, the regenerated `export/registry.json`, and nothing hand-written except (when relevant) override or decision files. Run `python -m registry.validate --against origin/main` before pushing; CI runs the same check.
 

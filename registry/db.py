@@ -95,6 +95,20 @@ CREATE TABLE slug_history (
 
 CREATE INDEX idx_slug_history_slug ON slug_history(slug);
 
+-- Card names get the same history treatment as slugs, so a decklist
+-- written against an old name still resolves. Deliberately no ownership
+-- trigger: unlike slugs, two different cards may legitimately hold the
+-- same name at different times. Names are lookup history, not identity.
+CREATE TABLE name_history (
+    name       TEXT NOT NULL,
+    card_id    INTEGER NOT NULL REFERENCES cards(card_id),
+    valid_from TEXT NOT NULL,
+    valid_to   TEXT,
+    UNIQUE (card_id, name, valid_from)
+);
+
+CREATE INDEX idx_name_history_name ON name_history(name);
+
 -- Identifier immutability, enforced at the engine level.
 CREATE TRIGGER cards_no_delete BEFORE DELETE ON cards
 BEGIN SELECT RAISE(ABORT, 'cards are append only: DELETE is forbidden'); END;
