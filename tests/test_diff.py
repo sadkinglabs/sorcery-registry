@@ -242,10 +242,10 @@ class CardRenameTest(unittest.TestCase):
         self.assertFalse(plan["new_cards"])
         self.assertEqual(plan["ambiguous"][0]["kind"], "card")
 
-    def test_distinct_new_card_is_not_mistaken_for_a_rename(self):
-        # A card vanished and an unrelated card appeared: different
-        # fingerprints, so the old card keeps its id (printings retire)
-        # and the new card gets a fresh id.
+    def test_disappearance_plus_newcomer_quarantines(self):
+        # A card vanished and an unrelated-looking card appeared. It may be
+        # a rename whose attributes also changed, so nothing is decided:
+        # auto-issuing "Fresh" an id would fork "Gone" if they are one card.
         reg = registry_of([card("Gone", rules_text="Old ability.")],
                           [printing("004-gone-b-s", "Gone", rules_text="Old ability.")])
         api = api_of([card("Fresh", rules_text="New ability.", cost=9)],
@@ -253,8 +253,147 @@ class CardRenameTest(unittest.TestCase):
                                cost=9, set_number="009")])
         plan = diff(reg, api)
         self.assertFalse(plan["card_renames"])
-        self.assertEqual([c["name"] for c in plan["new_cards"]], ["Fresh"])
-        self.assertEqual(len(plan["retire_printings"]), 1)
+        self.assertFalse(plan["new_cards"])
+        self.assertFalse(plan["retire_printings"])
+        self.assertFalse(plan["new_printings"])
+        self.assertEqual(len(plan["ambiguous"]), 1)
+        case = plan["ambiguous"][0]
+        self.assertEqual(case["kind"], "card")
+        self.assertEqual([c["name"] for c in case["missing"]], ["Gone"])
+        self.assertEqual([c["name"] for c in case["candidates"]], ["Fresh"])
+
+
+class CardForkGuardTest(unittest.TestCase):
+    """A rename plus an attribute change in the same sync defeats the
+    fingerprint. The classifier must fail closed rather than issue the new
+    name a fresh id, which would fork one card into two identities."""
+
+    def assert_no_printing_work(self, plan):
+        self.assertFalse(plan["retire_printings"])
+        self.assertFalse(plan["new_printings"])
+        self.assertFalse(plan["printing_renames"])
+        self.assertFalse([a for a in plan["ambiguous"] if a["kind"] == "printing"])
+
+    def test_rename_with_rules_text_change_quarantines(self):
+        reg = registry_of([card("Old Name", rules_text="Old ability.")],
+                          [printing("004-old_name-b-s", "Old Name",
+                                    rules_text="Old ability.")])
+        api = api_of([card("New Name", rules_text="New ability.")],
+                     [printing("004-new_name-b-s", "New Name",
+                               rules_text="New ability.")])
+        plan = diff(reg, api)
+        self.assertFalse(plan["card_renames"])
+        self.assertFalse(plan["new_cards"])
+        self.assertEqual(len(plan["ambiguous"]), 1)
+        case = plan["ambiguous"][0]
+        self.assertEqual(case["kind"], "card")
+        self.assertEqual([c["name"] for c in case["missing"]], ["Old Name"])
+        self.assertEqual([c["name"] for c in case["candidates"]], ["New Name"])
+        self.assert_no_printing_work(plan)
+
+    def test_rename_with_stat_change_quarantines(self):
+        reg = registry_of([card("Old Name")], [printing("004-old_name-b-s", "Old Name")])
+        api = api_of([card("New Name", cost=4)],
+                     [printing("004-new_name-b-s", "New Name", cost=4)])
+        plan = diff(reg, api)
+        self.assertFalse(plan["card_renames"] or plan["new_cards"])
+        self.assertEqual(len(plan["ambiguous"]), 1)
+        self.assertEqual(plan["ambiguous"][0]["kind"], "card")
+        self.assertEqual(plan["ambiguous"][0]["candidates"][0]["cost"], 4)
+        self.assert_no_printing_work(plan)
+
+    def test_clean_rename_plus_genuinely_new_card_needs_no_review(self):
+        # The gate only fires on disappearances the fingerprint could not
+        # explain: a clean rename is explained, so the newcomer is new.
+        reg = registry_of([card("Wich", rules_text="A very specific ability.")],
+                          [printing("004-wich-b-s", "Wich",
+                                    rules_text="A very specific ability.")])
+        api = api_of(
+            [card("Witch", rules_text="A very specific ability."),
+             card("Brand New", rules_text="Something else entirely.")],
+            [printing("004-witch-b-s", "Witch",
+                      rules_text="A very specific ability."),
+             printing("009-brand_new-b-s", "Brand New", set_number="009",
+                      rules_text="Something else entirely.")])
+        plan = diff(reg, api)
+        self.assertEqual([r["new_name"] for r in plan["card_renames"]], ["Witch"])
+        self.assertEqual([c["name"] for c in plan["new_cards"]], ["Brand New"])
+        self.assertEqual([p["slug"] for p in plan["new_printings"]], ["009-brand_new-b-s"])
+        self.assertEqual(len(plan["printing_renames"]), 1)
+        self.assertFalse(plan["ambiguous"])
+
+    def test_unexplained_disappearance_pulls_every_newcomer_into_review(self):
+        # The classifier cannot know which newcomer is the rename, so both
+        # are candidates and neither is auto-added.
+        reg = registry_of([card("Gone", rules_text="Old ability.")],
+                          [printing("004-gone-b-s", "Gone", rules_text="Old ability.")])
+        api = api_of(
+            [card("Renamed Gone", rules_text="Reworded ability."),
+             card("Brand New", rules_text="Something else entirely.")],
+            [printing("004-renamed_gone-b-s", "Renamed Gone",
+                      rules_text="Reworded ability."),
+             printing("009-brand_new-b-s", "Brand New", set_number="009",
+                      rules_text="Something else entirely.")])
+        plan = diff(reg, api)
+        self.assertFalse(plan["new_cards"] or plan["card_renames"])
+        self.assertEqual(len(plan["ambiguous"]), 1)
+        case = plan["ambiguous"][0]
+        self.assertEqual([c["name"] for c in case["missing"]], ["Gone"])
+        self.assertEqual([c["name"] for c in case["candidates"]],
+                         ["Brand New", "Renamed Gone"])
+        self.assert_no_printing_work(plan)
+
+    def test_several_disappeared_and_several_added_land_in_one_case(self):
+        reg = registry_of(
+            [card("Gone One", rules_text="One."), card("Gone Two", rules_text="Two.")],
+            [])
+        api = api_of(
+            [card("New One", rules_text="Three."), card("New Two", rules_text="Four.")],
+            [])
+        plan = diff(reg, api)
+        self.assertFalse(plan["new_cards"] or plan["card_renames"])
+        self.assertEqual(len(plan["ambiguous"]), 1)
+        case = plan["ambiguous"][0]
+        self.assertEqual([c["name"] for c in case["missing"]], ["Gone One", "Gone Two"])
+        self.assertEqual([c["name"] for c in case["candidates"]], ["New One", "New Two"])
+
+    def test_decisions_resolve_the_quarantine(self):
+        reg = registry_of([card("Old Name", rules_text="Old ability.")],
+                          [printing("004-old_name-b-s", "Old Name",
+                                    rules_text="Old ability.")])
+        api = api_of(
+            [card("New Name", rules_text="New ability."),
+             card("Brand New", rules_text="Something else entirely.")],
+            [printing("004-new_name-b-s", "New Name", rules_text="New ability."),
+             printing("009-brand_new-b-s", "Brand New", set_number="009",
+                      rules_text="Something else entirely.")])
+        decisions = {"card_renames": [{"card_id": 1, "new_name": "New Name"}],
+                     "new_cards": ["Brand New"]}
+        plan = diff(reg, api, decisions)
+        self.assertFalse(plan["ambiguous"])
+        self.assertEqual(plan["card_renames"], [{
+            "card_id": 1, "old_name": "Old Name", "new_name": "New Name",
+            "decided_by": "human"}])
+        self.assertEqual([c["name"] for c in plan["new_cards"]], ["Brand New"])
+        # The renamed card's printing follows it instead of retiring.
+        self.assertEqual([r["new_slug"] for r in plan["printing_renames"]],
+                         ["004-new_name-b-s"])
+        self.assertFalse(plan["retire_printings"])
+        self.assertEqual([p["slug"] for p in plan["new_printings"]],
+                         ["009-brand_new-b-s"])
+
+    def test_forced_new_card_leaves_a_lone_disappearance_to_retire(self):
+        reg = registry_of([card("Gone", rules_text="Old ability.")],
+                          [printing("004-gone-b-s", "Gone", rules_text="Old ability.")])
+        api = api_of([card("Brand New", rules_text="Something else entirely.")],
+                     [printing("009-brand_new-b-s", "Brand New", set_number="009",
+                               rules_text="Something else entirely.")])
+        plan = diff(reg, api, {"new_cards": ["Brand New"]})
+        self.assertFalse(plan["ambiguous"])
+        self.assertEqual([c["name"] for c in plan["new_cards"]], ["Brand New"])
+        self.assertEqual(len(plan["notes"]), 1)
+        self.assertIn("Gone", plan["notes"][0])
+        self.assertEqual([r["printing_id"] for r in plan["retire_printings"]], [1])
 
 
 class DecisionsTest(unittest.TestCase):

@@ -36,11 +36,13 @@ If you know Yu-Gi-Oh or Magic tooling, this is the same two-level split you alre
 
 Set, set number, product and finish sit in ordinary columns *next to* the IDs, not inside them. When the official naming convention changes again, the slug column updates, a row is added to `slug_history`, and **the IDs do not move**. Nothing downstream needs remapping, ever.
 
-Three guarantees, enforced by CI on every commit, not by promise:
+Five guarantees, enforced by CI on every commit, not by promise:
 
 1. An ID never changes value and never disappears.
 2. A retired ID is never reused. Assignment is append only.
 3. A slug change never causes a new ID. Old slugs stay resolvable through `slug_history`.
+4. A card that vanishes upstream while new names appear is never automatically issued a new ID. Unmatched disappearances and newcomers stop the sync for human review.
+5. Once a slug has referred to a printing, it can never refer to a different one. The database engine itself rejects such a write, the sync quarantines it, and the resolver refuses to guess if it ever meets corrupt data.
 
 ## What this is not
 

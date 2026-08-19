@@ -112,6 +112,22 @@ class ResolveSlugTest(unittest.TestCase):
     def test_unknown_slug_reports_not_found(self):
         self.assertFalse(self.reg.resolve_slug("999-nothing-b-s")["found"])
 
+    def test_conflicting_slug_refuses_to_guess(self):
+        # Corrupt data: one slug claimed by two printings. Last-write-wins
+        # would silently pick a winner, which is the one thing the registry
+        # must never do.
+        data = copy.deepcopy(DATA)
+        data["slug_history"].append(
+            {"slug": "004-witch-b-s", "printing_id": "P000001",
+             "valid_from": "2026-08-21", "valid_to": None})
+        reg = Registry(data)
+        self.assertIn("004-witch-b-s", reg.conflicted_slugs)
+        result = reg.resolve_slug("004-witch-b-s")
+        self.assertFalse(result["found"])
+        self.assertIn("registry invariant violated", result["error"])
+        # Everything else still resolves normally.
+        self.assertTrue(reg.resolve_slug("001-apprentice_wizard-b-s")["found"])
+
 
 class LookupTest(unittest.TestCase):
     def setUp(self):

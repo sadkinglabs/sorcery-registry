@@ -10,7 +10,19 @@ type, stats, thresholds). Printings pair within a card on set, product and
 finish. Anything that does not
 resolve to exactly one-to-one is quarantined for human review, because a
 wrong guess silently forks one card into two identities, which is the exact
-failure this registry exists to prevent.
+failure this registry exists to prevent. The printing layer also honours slug
+ownership: once a slug has referred to a printing it may never refer to a
+different one, so any classification that would hand a historically owned slug
+to another printing is quarantined instead (a human decision that demands it
+is an error, not a quarantine).
+
+The card layer additionally fails closed: if any card disappeared from the
+API while any unexplained new card name appeared in the same sync, none of
+them is classified automatically. A card can be renamed AND have its
+gameplay attributes changed at once, in which case the fingerprint cannot
+pair them - so issuing the newcomer a fresh id would fork the identity.
+Both sides go to quarantine instead. Disappearances alone still retire
+their printings, and newcomers alone are still genuinely new.
 """
 
 from .db import CARD_FIELDS, PRINTING_FIELDS
@@ -52,6 +64,34 @@ def _one_to_one(pairs_by_key):
         if len(olds) == 1 and len(news) == 1:
             matched.append((olds[0], news[0]))
     return matched
+
+
+def _card_summary(card):
+    """A card as a human reviewer needs to see it in a quarantine case:
+    the name plus the fingerprint fields they must compare by eye."""
+    return {
+        "name": card["name"],
+        "rules_text": card.get("rules_text"),
+        "type": card.get("type"),
+        "cost": card.get("cost"),
+        "attack": card.get("attack"),
+        "defence": card.get("defence"),
+        "life": card.get("life"),
+        "thresholds": {element: card.get(f"thr_{element}")
+                       for element in ("air", "earth", "fire", "water")},
+    }
+
+
+def _case_names(plan):
+    """Card names already spoken for by a card-kind quarantine case.
+    Entries are either bare names or _card_summary dicts."""
+    names = set()
+    for case in plan["ambiguous"]:
+        if case["kind"] != "card":
+            continue
+        for entry in case["missing"] + case["candidates"]:
+            names.add(entry if isinstance(entry, str) else entry["name"])
+    return names
 
 
 def _group(missing, added, key_fn_old, key_fn_new):
@@ -128,8 +168,23 @@ def diff(registry, api, decisions=None):
                 "candidates": sorted(c["name"] for c in news),
             })
 
-    ambiguous_card_names = {n for a in plan["ambiguous"]
-                            for n in a["missing"] + a["candidates"]}
+    # Fail closed: a card can be renamed AND have its attributes changed in
+    # the same sync, which defeats fingerprint pairing. If anything vanished
+    # while anything unexplained appeared, no side is classified
+    # automatically - handing the newcomer a fresh id would fork the card.
+    forced_new_cards = set(decisions["new_cards"])
+    leftover_missing = [n for n in missing_names if n not in _case_names(plan)]
+    leftover_added = [n for n in added_names
+                      if n not in _case_names(plan) and n not in forced_new_cards]
+    if leftover_missing and leftover_added:
+        plan["ambiguous"].append({
+            "kind": "card",
+            "problem": "cards disappeared and appeared in the same sync and could not be matched confidently",
+            "missing": [_card_summary(reg_cards[n]) for n in sorted(leftover_missing)],
+            "candidates": [_card_summary(api_cards[n]) for n in sorted(leftover_added)],
+        })
+
+    ambiguous_card_names = _case_names(plan)
 
     # Cards still missing pair with nothing: the card stays in the registry
     # (cards never retire) and its printings will retire below.
@@ -263,7 +318,58 @@ def diff(registry, api, decisions=None):
     for printing in added:
         plan["new_printings"].append(dict(printing))
 
+    _enforce_slug_ownership(plan, registry.get("slug_owners", {}) or {}, decisions)
+
     return plan
+
+
+def _enforce_slug_ownership(plan, slug_owners, decisions):
+    """A slug belongs permanently to the first printing that carried it.
+    Sweep the classified plan and quarantine anything that would hand a
+    historically owned slug to a different printing. A rename back to a
+    printing's own former slug (A -> B -> A) is untouched: it is still
+    owned by that same printing."""
+    kept_renames = []
+    for rename in plan["printing_renames"]:
+        owner = slug_owners.get(rename["new_slug"])
+        if owner is None or owner == rename["printing_id"]:
+            kept_renames.append(rename)
+            continue
+        if rename["decided_by"] == "human":
+            raise ValueError(
+                f"printing_renames decision would reassign slug "
+                f"{rename['new_slug']!r} away from printing {owner}")
+        plan["printing_updates"] = [
+            update for update in plan["printing_updates"]
+            if update["printing_id"] != rename["printing_id"]]
+        plan["ambiguous"].append({
+            "kind": "printing",
+            "problem": "historical slug would be reassigned to a different printing",
+            "slug": rename["new_slug"],
+            "owned_by_printing_id": owner,
+            "attempted_printing_id": rename["printing_id"],
+        })
+    plan["printing_renames"] = kept_renames
+
+    forced_new = set(decisions["new_printings"])
+    kept_new = []
+    for printing in plan["new_printings"]:
+        owner = slug_owners.get(printing["slug"])
+        if owner is None:
+            kept_new.append(printing)
+            continue
+        if printing["slug"] in forced_new:
+            raise ValueError(
+                f"new_printings decision would reassign slug "
+                f"{printing['slug']!r} away from printing {owner}")
+        plan["ambiguous"].append({
+            "kind": "printing",
+            "problem": "historical slug would be reassigned to a different printing",
+            "slug": printing["slug"],
+            "owned_by_printing_id": owner,
+            "attempted_printing_id": None,
+        })
+    plan["new_printings"] = kept_new
 
 
 def _record_rename(plan, old, new, decided_by):

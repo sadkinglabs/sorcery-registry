@@ -9,7 +9,8 @@ Checks, in order:
  3. No id exceeds its high-water counter (ids are only ever handed out
     by the counters, so an id above the counter means someone bypassed them).
  4. Every printing's current slug has exactly one open slug_history row,
-    and that row agrees with the slug column.
+    and that row agrees with the slug column, and no slug - current or
+    historical - has ever referred to more than one printing.
  5. Regenerating the export from the database is byte-identical to the
     committed export file (nobody edited one without the other), and each
     card's derived printing_ids list agrees with the printings table.
@@ -37,6 +38,8 @@ from .ids import id_number
 REQUIRED_TRIGGERS = {
     "cards_no_delete", "cards_id_immutable",
     "printings_no_delete", "printings_id_immutable", "printings_card_immutable",
+    "slug_history_no_reassign", "printings_slug_owned_insert",
+    "printings_slug_owned_update",
 }
 
 
@@ -73,6 +76,19 @@ def check_internal(con, errors):
         elif row["open_slug"] != row["slug"]:
             errors.append(f"printing {row['printing_id']}: slug column {row['slug']!r} "
                           f"disagrees with open history row {row['open_slug']!r}")
+
+    # A slug belongs permanently to one printing: every slug the registry has
+    # ever used, current or historical, must name exactly one printing_id.
+    owners = {}
+    for row in con.execute("""
+        SELECT slug, printing_id FROM slug_history
+        UNION
+        SELECT slug, printing_id FROM printings"""):
+        owners.setdefault(row["slug"], set()).add(row["printing_id"])
+    for slug in sorted(owners):
+        if len(owners[slug]) > 1:
+            errors.append(f"slug {slug!r} refers to more than one printing: "
+                          f"{sorted(owners[slug])}")
 
 
 def check_export_matches(con, export_path, errors):

@@ -39,7 +39,19 @@ def apply_plan(con, plan, as_of):
     """Write an unambiguous plan to the database in one transaction.
     Ids are only ever allocated here, from the meta counters, and no
     branch updates or deletes an id: the schema's triggers would abort
-    the transaction if one tried."""
+    the transaction if one tried.
+
+    Any failure rolls the whole thing back before re-raising: the caller
+    keeps the connection, and a half-applied transaction left open on it
+    would otherwise still be visible to every later read."""
+    try:
+        _apply_plan(con, plan, as_of)
+    except Exception:
+        con.rollback()
+        raise
+
+
+def _apply_plan(con, plan, as_of):
     cur = con.cursor()
 
     for rename in plan["card_renames"]:

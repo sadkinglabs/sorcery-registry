@@ -199,6 +199,45 @@ class EndToEndTest(unittest.TestCase):
         self.assertEqual(old_rows[0]["printing_id"], foil_id)
         self.assertEqual(old_rows[0]["valid_to"], "2026-08-20")
 
+    def test_rename_with_changed_rules_text_quarantines_then_resolves(self):
+        con = self.fresh_db()
+        snapshot = build_snapshot(copy.deepcopy(RAW_API))
+        apply_plan(con, diff(load_registry_state(con), snapshot), "2026-08-19")
+        wizard_id = load_registry_state(con)["cards"]["Apprentice Wizard"]["card_id"]
+
+        # Upstream renames the card AND rewords it in the same sync, so the
+        # gameplay fingerprint cannot pair the two names.
+        modified = copy.deepcopy(RAW_API)
+        modified[0]["name"] = "Apprentice Sorcerer"
+        modified[0]["guardian"]["rulesText"] = "Spellcaster\r\nGenesis → Draw two spells."
+        modified[0]["sets"][0]["metadata"]["rulesText"] = "Spellcaster\n\nGenesis → Draw two spells."
+        for variant in modified[0]["sets"][0]["variants"]:
+            variant["slug"] = variant["slug"].replace("apprentice_wizard", "apprentice_sorcerer")
+        modified_snapshot = build_snapshot(modified)
+
+        plan = diff(load_registry_state(con), modified_snapshot)
+        self.assertEqual(len(plan["ambiguous"]), 1)
+        self.assertEqual(plan["ambiguous"][0]["kind"], "card")
+        self.assertFalse(plan["new_cards"])
+
+        decisions = {"card_renames": [
+            {"card_id": wizard_id, "new_name": "Apprentice Sorcerer"}]}
+        plan = diff(load_registry_state(con), modified_snapshot, decisions)
+        self.assertFalse(plan["ambiguous"])
+        self.assertFalse(plan["new_cards"])
+        self.assertEqual(plan["card_renames"][0]["new_name"], "Apprentice Sorcerer")
+        self.assertEqual(len(plan["printing_renames"]), 2)
+        apply_plan(con, plan, "2026-08-20")
+
+        # The card kept its identity: same row, same id, new name.
+        state = load_registry_state(con)
+        self.assertNotIn("Apprentice Wizard", state["cards"])
+        self.assertEqual(state["cards"]["Apprentice Sorcerer"]["card_id"], wizard_id)
+        self.assertEqual(len(state["cards"]), 2)
+
+        # And the same snapshot now diffs to nothing at all.
+        self.assertTrue(is_noop(diff(state, modified_snapshot)))
+
     def test_engine_refuses_id_mutation_and_deletion(self):
         import sqlite3
         con = self.fresh_db()

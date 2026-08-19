@@ -1,6 +1,6 @@
 {
   "header": {
-    "schema_version": 4,
+    "schema_version": 5,
     "source": "https://api.sorcerytcg.com/api/cards",
     "sets": 6,
     "cards": 1100,

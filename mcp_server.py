@@ -151,15 +151,28 @@ class Registry:
         # Every slug that has ever existed resolves to its printing.
         # Current slugs are included in slug_history by construction, but
         # index them explicitly so a lookup never depends on that.
+        # A slug belongs permanently to one printing; if the loaded data
+        # ever says otherwise it is corrupt, so record the conflict and
+        # refuse to serve that slug rather than let the last row win.
         self.slug_to_printing = {}
-        for row in data["slug_history"]:
-            self.slug_to_printing[row["slug"]] = row["printing_id"]
-        for p in data["printings"]:
-            self.slug_to_printing[p["slug"]] = p["printing_id"]
+        self.conflicted_slugs = set()
+        pairs = ([(row["slug"], row["printing_id"]) for row in data["slug_history"]]
+                 + [(p["slug"], p["printing_id"]) for p in data["printings"]])
+        for slug, printing_id in pairs:
+            known = self.slug_to_printing.get(slug)
+            if known is not None and known != printing_id:
+                self.conflicted_slugs.add(slug)
+                continue
+            self.slug_to_printing[slug] = printing_id
 
     # -- queries ----------------------------------------------------------
 
     def resolve_slug(self, slug):
+        if slug in self.conflicted_slugs:
+            return {"found": False, "slug": slug,
+                    "error": "registry invariant violated: this slug maps to "
+                             "more than one printing in the loaded data; "
+                             "refusing to guess"}
         printing_id = self.slug_to_printing.get(slug)
         if printing_id is None:
             return {"found": False, "slug": slug,

@@ -40,7 +40,7 @@ A sync PR should contain: the updated `registry.sqlite`, the regenerated `export
 
 ## When a sync is ambiguous
 
-The sync auto-applies only what is unambiguous. If a slug vanished and a new one appeared and they cannot be paired with certainty (same card, same set, product, finish - or for whole cards, the full gameplay fingerprint), the case is written to `review/pending.json` and the run exits with code 2. **This is by design.** A wrong automatic guess would fork one card into two IDs, which is the one failure this project exists to prevent.
+The sync auto-applies only what is unambiguous. If a slug vanished and a new one appeared and they cannot be paired with certainty (same card, same set, product, finish - or for whole cards, the full gameplay fingerprint), the case is written to `review/pending.json` and the run exits with code 2. Likewise, any sync in which existing cards disappear while new card names appear quarantines the unmatched remainder rather than issuing new IDs, because a card that was renamed and reworded in the same sync is indistinguishable from a removal plus an unrelated newcomer. **This is by design.** A wrong automatic guess would fork one card into two IDs, which is the one failure this project exists to prevent.
 
 To resolve a case, write `review/decisions.json`:
 
