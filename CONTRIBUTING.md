@@ -29,10 +29,12 @@ Requirements: Python 3.10+, `pip install requests`. No other dependencies.
 
 ```bash
 python -m unittest discover -s tests   # test suite
-python -m registry.sync --dry-run      # fetch the API, show what would change
-python -m registry.sync                # same, then apply after confirmation
+python -m registry.sync --dry-run      # fetch the API, snapshot the payload, show what would change
+python -m registry.sync --from-file review/upstream-snapshot.json   # apply those exact bytes, after confirmation
 python -m registry.validate            # check every invariant
 ```
+
+Every fetch over the network writes the raw payload to `review/upstream-snapshot.json` (a local working file, never committed) before anything is diffed. Applying from that file rather than fetching a second time is the recommended flow: the apply then acts on exactly the bytes the dry run showed you, not on whatever upstream is serving a minute later. Plain `python -m registry.sync` still works and simply fetches afresh.
 
 There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the export for AI agents (see the README). It contains no logic of its own beyond indexing and querying `export/registry.json` - if the export is right, the server is right. Its query layer is unit-tested in `tests/test_mcp.py`; running the server itself additionally needs `pip install mcp`. If you change the export's shape, update the server's `Registry` class, its tests, and `schema/registry.schema.json` in the same PR - CI validates the export against the schema. Note also `name_history`, the card-name counterpart of `slug_history`: every card rename must close the old name's row and open one for the new name, which the pipeline does automatically.
 

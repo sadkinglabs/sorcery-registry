@@ -4,6 +4,7 @@ round trip through apply_plan proving ids survive a slug rename."""
 import copy
 import unittest
 
+import registry.db
 from registry.canon import canon_text, parse_slug
 from registry.db import init_db, load_registry_state, open_db
 from registry.diff import diff, is_noop
@@ -331,6 +332,76 @@ class NameHistoryValidationTest(unittest.TestCase):
         errors = []
         check_internal(con, errors)
         self.assertTrue(any("open name_history rows" in e for e in errors), errors)
+
+
+class SnapshotArtifactTest(unittest.TestCase):
+    """A network fetch must leave its raw payload on disk; a --from-file run
+    must leave that file untouched."""
+
+    def run_sync(self, argv, fetch_return=None):
+        import contextlib
+        import io
+        import sys
+        from unittest import mock
+        import registry.sync
+
+        # main() keeps its connection; hold on to it so the test can close it.
+        opened = []
+
+        def open_db(*args, **kwargs):
+            con = registry.db.open_db(*args, **kwargs)
+            opened.append(con)
+            return con
+
+        with mock.patch.object(sys, "argv", ["registry.sync"] + argv), \
+                mock.patch.object(registry.sync, "open_db", open_db), \
+                mock.patch.object(registry.sync, "fetch_api",
+                                  return_value=copy.deepcopy(fetch_return)) as fetch:
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    code = registry.sync.main()
+            finally:
+                for con in opened:
+                    con.close()
+        return code, fetch
+
+    def test_network_fetch_snapshots_and_from_file_does_not(self):
+        import json
+        import os
+        import tempfile
+        from pathlib import Path
+
+        snapshot = Path("review") / "upstream-snapshot.json"
+        original_cwd = os.getcwd()
+        # main() keeps its sqlite connection open, and Windows refuses to
+        # delete a file another handle still holds; the temp dir goes on the
+        # OS's cleanup list either way.
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            try:
+                os.chdir(tmp)
+
+                # A run that goes to the network saves exactly what it got.
+                code, fetch = self.run_sync(
+                    ["--db", "one.sqlite", "--init", "--dry-run"], RAW_API)
+                self.assertEqual(code, 0)
+                self.assertEqual(fetch.call_count, 1)
+                self.assertTrue(snapshot.exists())
+                self.assertEqual(
+                    json.loads(snapshot.read_text(encoding="utf-8")), RAW_API)
+
+                # A --from-file run reads its own file and never touches the
+                # snapshot: deleted here, it must stay deleted.
+                other = Path("other-api.json")
+                other.write_text(json.dumps(RAW_API[:1]), encoding="utf-8")
+                snapshot.unlink()
+                code, fetch = self.run_sync(
+                    ["--db", "two.sqlite", "--init", "--dry-run",
+                     "--from-file", str(other)], RAW_API)
+                self.assertEqual(code, 0)
+                self.assertEqual(fetch.call_count, 0)
+                self.assertFalse(snapshot.exists())
+            finally:
+                os.chdir(original_cwd)
 
 
 class ManifestTest(unittest.TestCase):
