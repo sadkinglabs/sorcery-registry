@@ -172,6 +172,33 @@ class SearchTest(unittest.TestCase):
         self.assertEqual(reg.search_cards(errata=False)["total_matches"], 1)
 
 
+class SearchPrintingsTest(unittest.TestCase):
+    def setUp(self):
+        self.reg = Registry(copy.deepcopy(DATA))
+
+    def test_product_filter_tolerates_spaces(self):
+        data = copy.deepcopy(DATA)
+        data["printings"][1]["product"] = "Box_Topper"
+        reg = Registry(data)
+        result = reg.search_printings(product="Box Topper")
+        self.assertEqual([p["printing_id"] for p in result["printings"]], ["P000002"])
+        self.assertEqual(result["distinct_cards"], 1)
+
+    def test_filters_combine(self):
+        result = self.reg.search_printings(card_set="Alpha", finish="Standard")
+        self.assertEqual([p["printing_id"] for p in result["printings"]],
+                         ["P000001", "P000003"])
+        result = self.reg.search_printings(name="wizard", card_set="2")
+        self.assertEqual([p["printing_id"] for p in result["printings"]], ["P000002"])
+        self.assertEqual(result["printings"][0]["card_name"], "Apprentice Wizard")
+
+    def test_counts_and_limit(self):
+        result = self.reg.search_printings(limit=1)
+        self.assertEqual(result["total_matches"], 3)
+        self.assertEqual(result["distinct_cards"], 2)
+        self.assertEqual(result["returned"], 1)
+
+
 class SetContentsTest(unittest.TestCase):
     def test_distinct_cards_and_counts(self):
         # A set is addressable by name or by its official number.

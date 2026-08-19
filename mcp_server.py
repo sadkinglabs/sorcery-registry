@@ -241,18 +241,51 @@ class Registry:
                 "total_printings": sum(len(c["printing_ids"]) for c in cards),
                 "cards": cards}
 
+    def search_printings(self, name=None, card_set=None, product=None,
+                         finish=None, limit=50):
+        # product matching tolerates spaces for underscores ("Box Topper"
+        # finds Box_Topper); the values are the API's own product names.
+        def norm(text):
+            return str(text).strip().lower().replace(" ", "_")
+
+        results = []
+        name_lower = name.lower() if name else None
+        for p in self.printings.values():
+            if name_lower and name_lower not in (p["card_name"] or "").lower():
+                continue
+            if card_set and not self._in_set(p, card_set):
+                continue
+            if product and norm(p["product"] or "") != norm(product):
+                continue
+            if finish and (p["finish"] or "").lower() != finish.lower():
+                continue
+            results.append({k: p[k] for k in
+                            ("printing_id", "codex_id", "card_name", "slug",
+                             "set_name", "set_number", "product", "finish",
+                             "retired_at")})
+        results.sort(key=lambda p: p["printing_id"])
+        return {"total_matches": len(results),
+                "distinct_cards": len({p["codex_id"] for p in results}),
+                "returned": min(len(results), limit),
+                "printings": results[:limit]}
+
     def stats(self):
         sets = {}
+        products = {}
         for p in self.printings.values():
             entry = sets.setdefault(p["set_number"], {
                 "set_number": p["set_number"], "set_name": p["set_name"],
                 "released_at": p["released_at"], "cards": set(), "printings": 0})
             entry["cards"].add(p["codex_id"])
             entry["printings"] += 1
+            products[p["product"]] = products.get(p["product"], 0) + 1
         set_list = [{**s, "cards": len(s["cards"])}
                     for s in sorted(sets.values(),
                                     key=lambda s: (s["released_at"] or "", s["set_number"] or ""))]
-        return {**self.header, "sets": set_list}
+        product_list = [{"product": name, "printings": count}
+                        for name, count in sorted(products.items(),
+                                                  key=lambda kv: -kv[1])]
+        return {**self.header, "sets": set_list, "products": product_list}
 
 
 # --------------------------------------------------------------------------
@@ -322,12 +355,26 @@ def build_server():
         many cards are in set X', which the official data states nowhere."""
         return registry.set_contents(card_set)
 
+    def search_printings(name: str = None, card_set: str = None,
+                         product: str = None, finish: str = None,
+                         limit: int = 50) -> dict:
+        """Search physical printings. name is a case-insensitive substring of
+        the card's name; card_set is a set's official number ('006') or name
+        ('Gothic'); product is the official product line exactly as the API
+        names it (Booster, Welcome_Kit, Organized_Play, Box_Topper, Dust,
+        Preconstructed_Deck, Draft_Kit, Kickstarter, Alpha_Investments,
+        Team_Covenant, Star_City_Games - spaces work too, e.g. 'Box Topper');
+        finish is Standard, Foil or Rainbow. Answers questions like 'what is
+        in the Arthurian Legends box topper' or 'which cards are sold as
+        Dust' in one call."""
+        return registry.search_printings(name, card_set, product, finish, limit)
+
     def registry_stats() -> dict:
-        """Registry totals and the list of known sets with per-set card and
-        printing counts."""
+        """Registry totals, the list of known sets with per-set card and
+        printing counts, and the list of product lines with printing counts."""
         return registry.stats()
 
-    for tool in (resolve_slug, get_card, get_printing, search_cards,
+    for tool in (resolve_slug, get_card, get_printing, search_cards, search_printings,
                  set_contents, registry_stats):
         mcp.tool()(tool)
     return mcp

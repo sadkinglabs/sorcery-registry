@@ -31,7 +31,8 @@ jobs:
           tools = asyncio.run(build_server().list_tools())
           names = sorted(t.name for t in tools)
           expected = ["get_card", "get_printing", "registry_stats",
-                      "resolve_slug", "search_cards", "set_contents"]
+                      "resolve_slug", "search_cards", "search_printings",
+                      "set_contents"]
           assert names == expected, names
           print("ok:", ", ".join(names))
           EOF
