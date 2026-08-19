@@ -17,6 +17,23 @@ This registry follows the pattern that already works elsewhere - Konami's passco
 
 The prefix means a card ID can never be confused with a printing ID, and the fixed width keeps IDs intact in spreadsheets (no stripped leading zeros) and aligned in diffs. Treat the whole string as opaque; if you need a plain number, the digits after the prefix are one (`int("C000042"[1:]) == 42`). Six digits leaves room for a million of each, which will never run out.
 
+## Which ID am I after?
+
+Ask one question: **does my feature care which physical version of the card it is?**
+
+If yes - the copy matters - you want the **printing**. If any copy of the card would do - the game object matters - you want the **card**.
+
+| You're building… | Key on | Why |
+|---|---|---|
+| A collection tracker or inventory | `printing_id` | People own specific printings: an Alpha Foil is not a Beta Standard. |
+| Pricing, trades, scans, condition tracking | `printing_id` | Value and identity are per physical print. |
+| A decklist format | `card_id` | A deck runs "4x Apprentice Wizard"; any printing fills the slot. |
+| Deck buildability ("can I build this from my collection?") | Both | The deck wants `card_id`s; you own `printing_id`s; every printing carries its `card_id`, so the join is one lookup. |
+| Rulings, errata, card search, game databases | `card_id` | Rules apply to the card, all printings at once. |
+| "Show all versions of this card" | `card_id` → `printing_ids` | Each card record lists its printings. |
+
+If you know Yu-Gi-Oh or Magic tooling, this is the same two-level split you already use. Konami's printed passcode is a *card*-level ID (every reprint of a card shares it), while the printing level in Yu-Gi-Oh is the set number (`LOB-001`) - a composite of set code and collector number, which is precisely the kind of derived key that breaks when naming changes. Scryfall gives Magic stable IDs at both levels (`oracle_id` for the card, a per-printing id for the print). This registry does what Scryfall did: both levels, both stable, so nobody has to reconstruct either one by string-matching.
+
 Set, collector number, product and finish sit in ordinary columns *next to* the IDs, not inside them. When the official naming convention changes again, the slug column updates, a row is added to `slug_history`, and **the IDs do not move**. Nothing downstream needs remapping, ever.
 
 Three guarantees, enforced by CI on every commit, not by promise:
