@@ -25,14 +25,6 @@ def canon_text(value):
     return re.sub(r"\n+", "\n", text)
 
 
-def set_code(set_name):
-    """Derive a stable machine-friendly code from a set's display name.
-    'Arthurian Legends' -> 'arthurian_legends'."""
-    code = canon_text(set_name).lower()
-    code = re.sub(r"[^a-z0-9]+", "_", code)
-    return code.strip("_")
-
-
 SLUG_RE = re.compile(r"^(\d+)-(.+)-([a-z_]+)-([a-z]+)$")
 
 

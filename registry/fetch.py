@@ -15,7 +15,7 @@ holds the corrected truth and the corrections themselves live in git.
 import json
 
 from . import API_URL
-from .canon import canon_text, parse_slug, released_date, set_code
+from .canon import canon_text, parse_slug, released_date
 
 CARD_NUMERIC = ["cost", "attack", "defence", "life"]
 THRESHOLD_KEYS = [("thr_air", "air"), ("thr_earth", "earth"),
@@ -80,7 +80,6 @@ def build_snapshot(raw_cards):
                 set_number, _, _, _ = parse_slug(slug)
                 printing = {
                     "card_name": name,
-                    "set_code": set_code(set_name),
                     "set_name": set_name,
                     "released_at": released_date(set_entry.get("releasedAt")),
                     "set_number": set_number,

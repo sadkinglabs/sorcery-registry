@@ -58,16 +58,17 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
   "cards":        [ { "codex_id": "C000001", "name": "Apprentice Wizard", "type": "Minion", ...,
                       "errata": false,
                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
-  "printings":    [ { "printing_id": "P000001", "codex_id": "C000001", "slug": "001-apprentice_wizard-b-s",
-                      "set_code": "alpha", "set_number": "001", "product": "Booster",
-                      "finish": "Standard", ... } ],
+  "printings":    [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
+                      "slug": "001-apprentice_wizard-b-s", "set_name": "Alpha", "set_number": "001",
+                      "product": "Booster", "finish": "Standard", ... } ],
   "slug_history": [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ]
 }
 ```
 
 Practical notes:
 
-- **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `set_number` are conveniences that can change; `codex_id` and `printing_id` cannot. In particular: `set_number` is the official numbering parsed from the slug (001 = Alpha, 002 = Beta, ...) and it has already been renumbered once - that event is what this registry exists to absorb. `set_code` is a readable code the registry derives from the set's display name (`gothic`, `arthurian_legends`), since the official data provides no set code of its own.
+- **Key on the IDs, treat everything else as data.** `slug`, `set_number`, `set_name`, `card_name` are conveniences that can change; `codex_id` and `printing_id` cannot. Sets are identified by their two official facts: `set_number`, the numbering parsed from the slug (001 = Alpha, 002 = Beta, 006 = Gothic), and `set_name`, the official display name. Both are published exactly as upstream states them - the registry invents no codes of its own.
+- **Printings are readable on their own.** Each printing carries `card_name`, derived at export time from the card its `codex_id` points at, so a printing record never needs a join just to be understood. It's a convenience copy: the card record stays the source of truth for card-level data.
 - **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `codex_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
 - **`errata` marks officially updated cards.** The upstream convention is that an errata'd card's rules text begins with `UPDATED`; the registry publishes that as a boolean so you don't have to know the convention. The flag is derived from the rules text at export time - if upstream changes how it marks errata, the flag follows the data. The rules text itself is always published verbatim (canonicalised, never rewritten).
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.

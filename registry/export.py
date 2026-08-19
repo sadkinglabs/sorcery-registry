@@ -38,10 +38,16 @@ def build_export(con):
         record["printing_ids"] = printing_ids_by_card.get(row["card_id"], [])
         cards.append(record)
 
+    # card_name is derived from the cards table at export time, so a
+    # printing record is readable on its own without a join; it can never
+    # disagree with the card its codex_id points at.
+    name_by_card = {row["card_id"]: row["name"]
+                    for row in con.execute("SELECT card_id, name FROM cards")}
     printings = []
     for row in con.execute("SELECT * FROM printings ORDER BY printing_id"):
         record = {"printing_id": format_printing_id(row["printing_id"]),
-                  "codex_id": format_card_id(row["card_id"])}
+                  "codex_id": format_card_id(row["card_id"]),
+                  "card_name": name_by_card[row["card_id"]]}
         for field in PRINTING_FIELDS:
             record[field] = row[field]
         record["retired_at"] = row["retired_at"]
