@@ -11,12 +11,14 @@ Checks, in order:
  4. Every printing's current slug has exactly one open slug_history row,
     and that row agrees with the slug column.
  5. Regenerating the export from the database is byte-identical to the
-    committed export file: nobody edited one without the other.
+    committed export file (nobody edited one without the other), and each
+    card's derived printing_ids list agrees with the printings table.
  6. With --against REF: every card_id and printing_id present in that
     commit's export still exists, printings still point at the same
-    card_id, the counters have not decreased, and any slug that changed
-    is explained by slug_history. This is the append-only guarantee,
-    checked against history rather than promised.
+    card_id, no card's printing_ids list shrank, the counters have not
+    decreased, and any slug that changed is explained by slug_history.
+    This is the append-only guarantee, checked against history rather
+    than promised.
 
 Exit code 0 when every check passes, 1 with a list of violations otherwise.
 """
@@ -83,6 +85,20 @@ def check_export_matches(con, export_path, errors):
         errors.append(f"{export_path} is not what the database produces; "
                       f"regenerate it with python -m registry.export")
 
+    # Both directions of the card <-> printing link must tell the same story.
+    export = build_export(con)
+    forward = {}
+    for printing in export["printings"]:
+        forward.setdefault(printing["card_id"], set()).add(printing["printing_id"])
+    for card in export["cards"]:
+        listed = set(card["printing_ids"])
+        actual = forward.get(card["card_id"], set())
+        if listed != actual:
+            errors.append(f"card {card['card_id']}: printing_ids {sorted(listed)} "
+                          f"disagrees with the printings table {sorted(actual)}")
+        if card["printing_ids"] != sorted(card["printing_ids"]):
+            errors.append(f"card {card['card_id']}: printing_ids is not sorted")
+
 
 def check_against_ref(con, ref, export_path, errors):
     result = subprocess.run(
@@ -96,8 +112,16 @@ def check_against_ref(con, ref, export_path, errors):
 
     new_cards = {c["card_id"]: c for c in new["cards"]}
     for card in old["cards"]:
-        if card["card_id"] not in new_cards:
+        current = new_cards.get(card["card_id"])
+        if current is None:
             errors.append(f"card_id {card['card_id']} ({card['name']!r}) existed at {ref} and is gone")
+            continue
+        # printing_ids may only ever grow ("printing_ids" guard: exports
+        # from before the field existed have nothing to compare against).
+        lost = set(card.get("printing_ids", [])) - set(current["printing_ids"])
+        if lost:
+            errors.append(f"card_id {card['card_id']}: printings {sorted(lost)} "
+                          f"were listed at {ref} and are gone")
 
     new_printings = {p["printing_id"]: p for p in new["printings"]}
     history = {}

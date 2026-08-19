@@ -145,10 +145,17 @@ class EndToEndTest(unittest.TestCase):
         self.assertEqual(len(plan["new_printings"]), 3)
         apply_plan(con, plan, "2026-08-19")
         export_one = build_export(con)
-        wizard_id = next(c["card_id"] for c in export_one["cards"]
-                         if c["name"] == "Apprentice Wizard")
+        wizard = next(c for c in export_one["cards"]
+                      if c["name"] == "Apprentice Wizard")
+        wizard_id = wizard["card_id"]
         foil_id = next(p["printing_id"] for p in export_one["printings"]
                        if p["slug"] == "001-apprentice_wizard-b-f")
+        # Each card lists its printings, derived from the printings table.
+        self.assertEqual(
+            wizard["printing_ids"],
+            sorted(p["printing_id"] for p in export_one["printings"]
+                   if p["card_id"] == wizard_id))
+        self.assertIn(foil_id, wizard["printing_ids"])
 
         # Second run, same data: a no-op, and the export is byte-identical.
         plan = diff(load_registry_state(con), snapshot)

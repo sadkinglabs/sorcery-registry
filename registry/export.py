@@ -16,11 +16,18 @@ EXPORT_PATH = Path("export") / "registry.json"
 
 
 def build_export(con):
+    # Derived at export time from the printings table, never stored: the
+    # reverse card -> printings link cannot drift from the forward one.
+    printing_ids_by_card = {}
+    for row in con.execute("SELECT card_id, printing_id FROM printings ORDER BY printing_id"):
+        printing_ids_by_card.setdefault(row["card_id"], []).append(row["printing_id"])
+
     cards = []
     for row in con.execute("SELECT * FROM cards ORDER BY card_id"):
         record = {"card_id": row["card_id"]}
         for field in CARD_FIELDS:
             record[field] = row[field]
+        record["printing_ids"] = printing_ids_by_card.get(row["card_id"], [])
         cards.append(record)
 
     printings = []

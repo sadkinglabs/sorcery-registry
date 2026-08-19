@@ -36,7 +36,8 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 ```jsonc
 {
   "header":       { "schema_version": 1, "source": "...", "cards": 1100, ... },
-  "cards":        [ { "card_id": 1, "name": "Apprentice Wizard", "type": "Minion", ... } ],
+  "cards":        [ { "card_id": 1, "name": "Apprentice Wizard", "type": "Minion", ...,
+                      "printing_ids": [1, 2, 815, 816, 909, 910] } ],
   "printings":    [ { "printing_id": 1, "card_id": 1, "slug": "001-apprentice_wizard-b-s",
                       "set_code": "alpha", "card_number": 1, "product": "Booster",
                       "finish": "Standard", ... } ],
@@ -47,6 +48,7 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 Practical notes:
 
 - **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `card_number` are conveniences that can change; `card_id` and `printing_id` cannot.
+- **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `card_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.
