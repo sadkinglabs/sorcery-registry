@@ -1,1 +1,2 @@
 requests
+mcp  # only needed to run mcp_server.py; the data pipeline is requests-only

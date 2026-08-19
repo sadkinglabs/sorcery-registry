@@ -17,8 +17,24 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install dependencies
+        run: pip install mcp
+
       - name: Tests
         run: python -m unittest discover -s tests -v
+
+      - name: MCP server builds and registers its tools
+        run: |
+          python - <<'EOF'
+          import asyncio
+          from mcp_server import build_server
+          tools = asyncio.run(build_server().list_tools())
+          names = sorted(t.name for t in tools)
+          expected = ["get_card", "get_printing", "registry_stats",
+                      "resolve_slug", "search_cards", "set_contents"]
+          assert names == expected, names
+          print("ok:", ", ".join(names))
+          EOF
 
       - name: Invariants (including append-only vs base)
         run: |

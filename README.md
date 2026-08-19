@@ -25,7 +25,7 @@ Three guarantees, enforced by CI on every commit, not by promise:
 
 ## What this is not
 
-- Not a hosted service. There is no server and no endpoint; you consume a file.
+- Not a hosted service. There is no server and no endpoint; you consume a file (or run the bundled MCP server locally - see below).
 - No images, no prices, no rulings, no legality data.
 - Not a second opinion on card data. Attributes mirror the official API, with a short, public list of corrections for confirmed upstream errors (see [`data/overrides.json`](data/overrides.json)).
 
@@ -51,6 +51,38 @@ Practical notes:
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.
 - The SQLite database (`registry.sqlite`) is also committed, for anyone who prefers SQL. It and the JSON always agree - CI fails if they drift.
+
+## For AI agents (MCP)
+
+The registry ships an [MCP](https://modelcontextprotocol.io) server, so AI assistants (Claude, Cursor, and anything else that speaks MCP) can query it directly instead of guessing at slugs or parsing them with string logic. It runs locally on your machine - there is still no hosted service - and reads the published export, so answers always reflect the current registry.
+
+With [uv](https://docs.astral.sh/uv/) installed, add this to your MCP configuration (for Claude Desktop: `claude_desktop_config.json`; for Claude Code: `.mcp.json`) and you're done - no clone, no install:
+
+```json
+{
+  "mcpServers": {
+    "sorcery-registry": {
+      "command": "uv",
+      "args": ["run", "https://raw.githubusercontent.com/sadkinglabs/sorcery-registry/main/mcp_server.py"]
+    }
+  }
+}
+```
+
+Without uv: clone the repo, `pip install mcp requests`, and use `python mcp_server.py` as the command instead.
+
+Six tools, each returning a small, focused answer rather than the whole database:
+
+| Tool | What it answers |
+|---|---|
+| `resolve_slug` | Any slug - current **or from an older naming convention** - to its permanent `printing_id` and `card_id`. This is how a tool holding pre-rename slugs migrates itself. |
+| `get_card` | One card by `card_id`, with its gameplay data and every printing of it. |
+| `get_printing` | One physical print by `printing_id`, with its set, product, finish and current slug. |
+| `search_cards` | Cards by name, type, element, rarity, or set. |
+| `set_contents` | Every distinct card in a set, with collector numbers - the authoritative answer to "how many cards are in set X". |
+| `registry_stats` | Totals and per-set counts. |
+
+The server also teaches connected agents the ground rules (key on the IDs, never on slugs; only Avatars have life), so tools built with AI assistance inherit correct usage by default.
 
 ## Data corrections
 
