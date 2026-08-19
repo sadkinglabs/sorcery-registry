@@ -4,7 +4,9 @@ The invariants are enforced in the schema itself, not by convention:
 - triggers abort any UPDATE of card_id / printing_id and any DELETE,
   so no code path can move or remove an identifier;
 - id assignment reads high-water counters in the meta table that only
-  ever increase, so retired numbers are never handed out again.
+  ever increase, so retired numbers are never handed out again;
+- triggers abort any write that would make a slug refer to a printing
+  other than the one it has always referred to.
 """
 
 import sqlite3
@@ -108,6 +110,24 @@ BEGIN SELECT RAISE(ABORT, 'printing_id is immutable'); END;
 
 CREATE TRIGGER printings_card_immutable BEFORE UPDATE OF card_id ON printings
 BEGIN SELECT RAISE(ABORT, 'a printing never moves to a different card'); END;
+
+-- Slug ownership: once a slug has referred to a printing it may never
+-- refer to a different one. A slug may return to its original printing
+-- after an intervening rename (A -> B -> A), which these allow.
+CREATE TRIGGER slug_history_no_reassign BEFORE INSERT ON slug_history
+WHEN EXISTS (SELECT 1 FROM slug_history
+              WHERE slug = NEW.slug AND printing_id != NEW.printing_id)
+BEGIN SELECT RAISE(ABORT, 'slug already belongs to a different printing'); END;
+
+CREATE TRIGGER printings_slug_owned_insert BEFORE INSERT ON printings
+WHEN EXISTS (SELECT 1 FROM slug_history
+              WHERE slug = NEW.slug AND printing_id != NEW.printing_id)
+BEGIN SELECT RAISE(ABORT, 'slug already belongs to a different printing'); END;
+
+CREATE TRIGGER printings_slug_owned_update BEFORE UPDATE OF slug ON printings
+WHEN EXISTS (SELECT 1 FROM slug_history
+              WHERE slug = NEW.slug AND printing_id != NEW.printing_id)
+BEGIN SELECT RAISE(ABORT, 'slug already belongs to a different printing'); END;
 """
 
 
@@ -165,4 +185,13 @@ def load_registry_state(con):
         record["retired_at"] = row["retired_at"]
         printings[row["slug"]] = record
 
-    return {"cards": cards, "printings": printings}
+    # Every slug that has ever referred to a printing, and the printing it
+    # belongs to permanently. History first, current slugs overlaid: the two
+    # can never disagree while the ownership invariant holds.
+    slug_owners = {}
+    for row in con.execute("SELECT slug, printing_id FROM slug_history"):
+        slug_owners[row["slug"]] = row["printing_id"]
+    for row in con.execute("SELECT slug, printing_id FROM printings"):
+        slug_owners[row["slug"]] = row["printing_id"]
+
+    return {"cards": cards, "printings": printings, "slug_owners": slug_owners}

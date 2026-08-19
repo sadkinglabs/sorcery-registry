@@ -13,5 +13,7 @@ API slug demoted to an ordinary, mutable column.
 # v4: export gains a derived top-level "sets" catalogue and per-card
 # "set_numbers", a .sha256 checksum file, and a published JSON Schema
 # (schema/registry.schema.json). No database changes.
-SCHEMA_VERSION = 4
+# v5: slug ownership enforced - a slug can never move to a different
+# printing_id (engine triggers + planner + validator).
+SCHEMA_VERSION = 5
 API_URL = "https://api.sorcerytcg.com/api/cards"
