@@ -44,7 +44,8 @@ RAW_API = [
     {
         "name": "Broken Site",
         "guardian": {
-            "rarity": "Ordinary", "type": "Site", "rulesText": "",
+            "rarity": "Ordinary", "type": "Site",
+            "rulesText": "UPDATED: All sites are broken.",
             "cost": None, "attack": None, "defence": None, "life": 20,
             "thresholds": {"air": 0, "earth": 0, "fire": 0, "water": 0},
         },
@@ -54,7 +55,8 @@ RAW_API = [
             "name": "Gothic",
             "releasedAt": "2026-05-01T00:00:00.000Z",
             "metadata": {
-                "rarity": "Ordinary", "type": "Site", "rulesText": "",
+                "rarity": "Ordinary", "type": "Site",
+                "rulesText": "UPDATED: All sites are broken.",
                 "cost": None, "attack": None, "defence": None, "life": 20,
                 "thresholds": {"air": 0, "earth": 0, "fire": 0, "water": 0},
             },
@@ -156,6 +158,10 @@ class EndToEndTest(unittest.TestCase):
             sorted(p["printing_id"] for p in export_one["printings"]
                    if p["codex_id"] == wizard_id))
         self.assertIn(foil_id, wizard["printing_ids"])
+        # The errata flag reads the upstream "UPDATED" rules-text convention.
+        self.assertFalse(wizard["errata"])
+        broken = next(c for c in export_one["cards"] if c["name"] == "Broken Site")
+        self.assertTrue(broken["errata"])
 
         # Second run, same data: a no-op, and the export is byte-identical.
         plan = diff(load_registry_state(con), snapshot)

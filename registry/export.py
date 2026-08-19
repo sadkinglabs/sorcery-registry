@@ -31,6 +31,10 @@ def build_export(con):
         record = {"codex_id": format_card_id(row["card_id"])}
         for field in CARD_FIELDS:
             record[field] = row[field]
+        # Derived: upstream marks errata'd cards by starting the rules text
+        # with "UPDATED". The registry publishes that convention as a flag
+        # rather than expecting every consumer to rediscover it.
+        record["errata"] = (row["rules_text"] or "").startswith("UPDATED")
         record["printing_ids"] = printing_ids_by_card.get(row["card_id"], [])
         cards.append(record)
 

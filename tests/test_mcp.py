@@ -164,6 +164,16 @@ class SearchTest(unittest.TestCase):
         self.assertEqual(result["total_matches"], 2)
         self.assertEqual(result["returned"], 1)
 
+    def test_errata_filter_and_derivation(self):
+        # The flag is derived on load when an export predates it.
+        data = copy.deepcopy(DATA)
+        data["cards"][1]["rules_text"] = "UPDATED: Curse."
+        reg = Registry(data)
+        result = reg.search_cards(errata=True)
+        self.assertEqual([c["name"] for c in result["cards"]], ["Witch"])
+        self.assertTrue(result["cards"][0]["errata"])
+        self.assertEqual(reg.search_cards(errata=False)["total_matches"], 1)
+
 
 class SetContentsTest(unittest.TestCase):
     def test_distinct_cards_and_counts(self):

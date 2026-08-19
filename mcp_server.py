@@ -97,6 +97,7 @@ def _normalise_ids(data):
         card["codex_id"] = card_ref(card.pop("card_id", None) or card["codex_id"])
         if "printing_ids" in card:
             card["printing_ids"] = [printing_ref(p) for p in card["printing_ids"]]
+        card.setdefault("errata", (card.get("rules_text") or "").startswith("UPDATED"))
     for printing in data["printings"]:
         printing["printing_id"] = printing_ref(printing["printing_id"])
         printing["codex_id"] = card_ref(printing.pop("card_id", None) or printing["codex_id"])
@@ -176,7 +177,7 @@ class Registry:
         return {"found": True, **printing, "card_name": card["name"]}
 
     def search_cards(self, name=None, type=None, element=None, rarity=None,
-                     set_code=None, limit=20):
+                     set_code=None, errata=None, limit=20):
         results = []
         name_lower = name.lower() if name else None
         for card in self.cards.values():
@@ -188,13 +189,15 @@ class Registry:
                 continue
             if rarity and (card["rarity"] or "").lower() != rarity.lower():
                 continue
+            if errata is not None and card["errata"] != errata:
+                continue
             if set_code and not any(
                     p["set_code"] == set_code.lower()
                     for p in self.printings_by_card.get(card["codex_id"], [])):
                 continue
             results.append({k: card[k] for k in
                             ("codex_id", "name", "type", "rarity", "elements",
-                             "cost", "rules_text")})
+                             "cost", "errata", "rules_text")})
         results.sort(key=lambda c: c["codex_id"])
         return {"total_matches": len(results), "returned": min(len(results), limit),
                 "cards": results[:limit]}
@@ -283,13 +286,16 @@ def build_server():
         return registry.get_printing(printing_id)
 
     def search_cards(name: str = None, type: str = None, element: str = None,
-                     rarity: str = None, set_code: str = None, limit: int = 20) -> dict:
+                     rarity: str = None, set_code: str = None,
+                     errata: bool = None, limit: int = 20) -> dict:
         """Search cards. name is a case-insensitive substring; type (Minion,
         Magic, Site, Artifact, Aura, Avatar), element (Air, Earth, Fire, Water,
         None) and rarity (Ordinary, Elite, Exceptional, Unique) are exact;
         set_code restricts to cards printed in that set (e.g. 'alpha', 'beta',
-        'gothic', 'arthurian_legends')."""
-        return registry.search_cards(name, type, element, rarity, set_code, limit)
+        'gothic', 'arthurian_legends'); errata=true finds cards whose rules
+        text has been officially updated since printing."""
+        return registry.search_cards(name, type, element, rarity, set_code,
+                                     errata, limit)
 
     def set_contents(set_code: str) -> dict:
         """List every distinct card in a set with its collector number and

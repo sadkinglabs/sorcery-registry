@@ -56,6 +56,7 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 {
   "header":       { "schema_version": 1, "source": "...", "cards": 1100, ... },
   "cards":        [ { "codex_id": "C000001", "name": "Apprentice Wizard", "type": "Minion", ...,
+                      "errata": false,
                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
   "printings":    [ { "printing_id": "P000001", "codex_id": "C000001", "slug": "001-apprentice_wizard-b-s",
                       "set_code": "alpha", "card_number": 1, "product": "Booster",
@@ -68,6 +69,7 @@ Practical notes:
 
 - **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `card_number` are conveniences that can change; `codex_id` and `printing_id` cannot.
 - **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `codex_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
+- **`errata` marks officially updated cards.** The upstream convention is that an errata'd card's rules text begins with `UPDATED`; the registry publishes that as a boolean so you don't have to know the convention. The flag is derived from the rules text at export time - if upstream changes how it marks errata, the flag follows the data. The rules text itself is always published verbatim (canonicalised, never rewritten).
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.
