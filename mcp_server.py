@@ -67,10 +67,52 @@ def _fetch(url):
     return response.json()
 
 
+ID_WIDTH = 6
+
+
+def card_ref(value):
+    """Normalise any card-id spelling ('C000042', '000042', 42) to C000042."""
+    return f"C{_digits(value):0{ID_WIDTH}d}"
+
+
+def printing_ref(value):
+    """Normalise any printing-id spelling ('P000042', '000042', 42) to P000042."""
+    return f"P{_digits(value):0{ID_WIDTH}d}"
+
+
+def _digits(value):
+    if isinstance(value, int):
+        return value
+    text = str(value)
+    if text[:1].upper() in ("C", "P"):
+        text = text[1:]
+    return int(text)
+
+
+def _normalise_ids(data):
+    """Rewrite all ids in a loaded export to the prefixed form, in place.
+    A no-op on current exports; converts pre-C/P exports (bare integers)."""
+    for card in data["cards"]:
+        card["card_id"] = card_ref(card["card_id"])
+        if "printing_ids" in card:
+            card["printing_ids"] = [printing_ref(p) for p in card["printing_ids"]]
+    for printing in data["printings"]:
+        printing["printing_id"] = printing_ref(printing["printing_id"])
+        printing["card_id"] = card_ref(printing["card_id"])
+    for row in data["slug_history"]:
+        row["printing_id"] = printing_ref(row["printing_id"])
+    return data
+
+
 class Registry:
-    """Indexed view over the export. All lookups are O(1) dict hits."""
+    """Indexed view over the export. All lookups are O(1) dict hits.
+
+    Ids are handled in their published prefixed form (C000042 / P000042).
+    Loaded data is normalised first, so exports predating that form (bare
+    integers) still work."""
 
     def __init__(self, data):
+        data = _normalise_ids(data)
         self.header = data["header"]
         self.cards = {c["card_id"]: c for c in data["cards"]}
         self.printings = {p["printing_id"]: p for p in data["printings"]}
@@ -111,6 +153,7 @@ class Registry:
         }
 
     def get_card(self, card_id):
+        card_id = card_ref(card_id)
         card = self.cards.get(card_id)
         if card is None:
             return {"found": False, "card_id": card_id}
@@ -124,6 +167,7 @@ class Registry:
         return {"found": True, **card, "printings": printings}
 
     def get_printing(self, printing_id):
+        printing_id = printing_ref(printing_id)
         printing = self.printings.get(printing_id)
         if printing is None:
             return {"found": False, "printing_id": printing_id}
@@ -204,9 +248,11 @@ def build_server():
         "sorcery-registry",
         instructions=(
             "Stable identifiers for Sorcery: Contested Realm cards. "
-            "card_id identifies a card across all its reprints (like a Scryfall "
-            "oracle id); printing_id identifies one physical print (set + product "
-            "+ finish). These integers NEVER change and are the only safe keys to "
+            "card_id (C000042) identifies a card across all its reprints (like a "
+            "Scryfall oracle id); printing_id (P000042) identifies one physical "
+            "print (set + product + finish). The C/P prefix names the id space, "
+            "the digits are zero-padded to six, and these ids never change - "
+            "they are the only safe keys to "
             "store. The official API slug (e.g. 004-witch-b-s) is mutable and has "
             "changed for entire sets in the past: treat any slug as a lookup input "
             "for resolve_slug, never as an identifier. Set codes, collector "
@@ -223,14 +269,16 @@ def build_server():
         convention changes: old slugs keep resolving forever."""
         return registry.resolve_slug(slug)
 
-    def get_card(card_id: int) -> dict:
-        """Fetch one card by its permanent card_id, with its full gameplay data
-        and every printing of it (all sets, products and finishes)."""
+    def get_card(card_id: str) -> dict:
+        """Fetch one card by its permanent card_id (e.g. 'C000042'; a bare
+        number is accepted too), with its full gameplay data and every
+        printing of it (all sets, products and finishes)."""
         return registry.get_card(card_id)
 
-    def get_printing(printing_id: int) -> dict:
-        """Fetch one printing by its permanent printing_id: the exact physical
-        print (set, product, finish) with its per-set data and current slug."""
+    def get_printing(printing_id: str) -> dict:
+        """Fetch one printing by its permanent printing_id (e.g. 'P000042'; a
+        bare number is accepted too): the exact physical print (set, product,
+        finish) with its per-set data and current slug."""
         return registry.get_printing(printing_id)
 
     def search_cards(name: str = None, type: str = None, element: str = None,

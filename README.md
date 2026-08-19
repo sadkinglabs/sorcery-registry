@@ -1,6 +1,6 @@
 # Sorcery Card Registry
 
-Stable numeric identifiers for every card and printing in **Sorcery: Contested Realm**, published as a single JSON file anyone can build on.
+Stable identifiers for every card and printing in **Sorcery: Contested Realm** - `C000042` for cards, `P000042` for printings - published as a single JSON file anyone can build on.
 
 ## The problem
 
@@ -10,10 +10,12 @@ There is also nothing in the official data linking two printings of the same car
 
 ## The fix
 
-This registry follows the pattern that already works elsewhere - Konami's passcodes for Yu-Gi-Oh, Scryfall's oracle IDs for Magic. Two identifiers, both plain integers, both permanent:
+This registry follows the pattern that already works elsewhere - Konami's passcodes for Yu-Gi-Oh, Scryfall's oracle IDs for Magic. Two identifiers, both permanent, both in a fixed shape: a one-letter prefix naming the ID space, then six zero-padded digits.
 
-- **`card_id`** - one per card, shared by every printing of it. Alpha, Beta and promo Apprentice Wizard all carry the same `card_id`. Use it when you mean "this card as a game object": decklists, rulings, collection grouping.
-- **`printing_id`** - one per physical print (a specific set, product and finish). Use it when you mean "this exact piece of cardboard": inventories, pricing, scans.
+- **`card_id`** (`C000001`) - one per card, shared by every printing of it. Alpha, Beta and promo Apprentice Wizard all carry the same `card_id`. Use it when you mean "this card as a game object": decklists, rulings, collection grouping.
+- **`printing_id`** (`P000001`) - one per physical print (a specific set, product and finish). Use it when you mean "this exact piece of cardboard": inventories, pricing, scans.
+
+The prefix means a card ID can never be confused with a printing ID, and the fixed width keeps IDs intact in spreadsheets (no stripped leading zeros) and aligned in diffs. Treat the whole string as opaque; if you need a plain number, the digits after the prefix are one (`int("C000042"[1:]) == 42`). Six digits leaves room for a million of each, which will never run out.
 
 Set, collector number, product and finish sit in ordinary columns *next to* the IDs, not inside them. When the official naming convention changes again, the slug column updates, a row is added to `slug_history`, and **the IDs do not move**. Nothing downstream needs remapping, ever.
 
@@ -36,12 +38,12 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 ```jsonc
 {
   "header":       { "schema_version": 1, "source": "...", "cards": 1100, ... },
-  "cards":        [ { "card_id": 1, "name": "Apprentice Wizard", "type": "Minion", ...,
-                      "printing_ids": [1, 2, 815, 816, 909, 910] } ],
-  "printings":    [ { "printing_id": 1, "card_id": 1, "slug": "001-apprentice_wizard-b-s",
+  "cards":        [ { "card_id": "C000001", "name": "Apprentice Wizard", "type": "Minion", ...,
+                      "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
+  "printings":    [ { "printing_id": "P000001", "card_id": "C000001", "slug": "001-apprentice_wizard-b-s",
                       "set_code": "alpha", "card_number": 1, "product": "Booster",
                       "finish": "Standard", ... } ],
-  "slug_history": [ { "slug": "...", "printing_id": 1, "valid_from": "2026-08-19", "valid_to": null } ]
+  "slug_history": [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ]
 }
 ```
 

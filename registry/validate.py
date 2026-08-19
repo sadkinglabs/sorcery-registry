@@ -32,6 +32,7 @@ from pathlib import Path
 from . import SCHEMA_VERSION
 from .db import get_meta, open_db
 from .export import EXPORT_PATH, build_export, render
+from .ids import id_number
 
 REQUIRED_TRIGGERS = {
     "cards_no_delete", "cards_id_immutable",
@@ -110,30 +111,33 @@ def check_against_ref(con, ref, export_path, errors):
     old = json.loads(result.stdout)
     new = build_export(con)
 
-    new_cards = {c["card_id"]: c for c in new["cards"]}
+    # Ids are compared by their number so the check spans format changes
+    # (exports from before the C/P-prefixed form carry bare integers).
+    new_cards = {id_number(c["card_id"]): c for c in new["cards"]}
     for card in old["cards"]:
-        current = new_cards.get(card["card_id"])
+        current = new_cards.get(id_number(card["card_id"]))
         if current is None:
             errors.append(f"card_id {card['card_id']} ({card['name']!r}) existed at {ref} and is gone")
             continue
         # printing_ids may only ever grow ("printing_ids" guard: exports
         # from before the field existed have nothing to compare against).
-        lost = set(card.get("printing_ids", [])) - set(current["printing_ids"])
+        lost = ({id_number(p) for p in card.get("printing_ids", [])}
+                - {id_number(p) for p in current["printing_ids"]})
         if lost:
             errors.append(f"card_id {card['card_id']}: printings {sorted(lost)} "
                           f"were listed at {ref} and are gone")
 
-    new_printings = {p["printing_id"]: p for p in new["printings"]}
+    new_printings = {id_number(p["printing_id"]): p for p in new["printings"]}
     history = {}
     for row in new["slug_history"]:
-        history.setdefault(row["printing_id"], set()).add(row["slug"])
+        history.setdefault(id_number(row["printing_id"]), set()).add(row["slug"])
     for printing in old["printings"]:
-        pid = printing["printing_id"]
+        pid = id_number(printing["printing_id"])
         current = new_printings.get(pid)
         if current is None:
             errors.append(f"printing_id {pid} ({printing['slug']!r}) existed at {ref} and is gone")
             continue
-        if current["card_id"] != printing["card_id"]:
+        if id_number(current["card_id"]) != id_number(printing["card_id"]):
             errors.append(f"printing_id {pid} moved from card {printing['card_id']} "
                           f"to card {current['card_id']}")
         if current["slug"] != printing["slug"] and printing["slug"] not in history.get(pid, set()):
