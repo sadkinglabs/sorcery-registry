@@ -64,4 +64,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for running the pipeline yourself and for
 
 ## Licence
 
-The code in this repository is MIT licensed. The card data itself belongs to Erik's Curiositea; this project only republishes what the official public API already serves, restructured for stability.
+The code in this repository is MIT licensed. The card data itself belongs to Erik's Curiosa; this project only republishes what the official public API already serves, restructured for stability.
