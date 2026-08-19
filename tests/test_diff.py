@@ -14,7 +14,7 @@ CARD_DEFAULTS = {
 }
 
 PRINTING_DEFAULTS = {
-    "set_code": "alpha", "set_name": "Alpha", "released_at": "2023-04-19",
+    "set_name": "Alpha", "released_at": "2023-04-19",
     "set_number": "001", "product": "Booster", "finish": "Standard",
     "artist": "A. Artist", "flavour_text": "", "type_text": "",
     "rarity": "Ordinary", "type": "Minion", "rules_text": "Spellcaster",
@@ -73,7 +73,7 @@ class NewThingsTest(unittest.TestCase):
         api = api_of(
             [card("Witch")],
             [printing("004-witch-b-s", "Witch"),
-             printing("102-witch-b-s", "Witch", set_name="Beta", set_code="beta",
+             printing("102-witch-b-s", "Witch", set_name="Beta",
                       set_number="102")])
         plan = diff(reg, api)
         self.assertEqual([p["slug"] for p in plan["new_printings"]], ["102-witch-b-s"])
@@ -165,8 +165,7 @@ class SlugRenameTest(unittest.TestCase):
         # change? Not decidable from the data: quarantine.
         reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_number="004")])
         api = api_of([card("Witch")],
-                     [printing("099-witch-p-s", "Witch", set_name="Promotional",
-                               set_code="promotional", product="Organized_Play",
+                     [printing("099-witch-p-s", "Witch", set_name="Promotional", product="Organized_Play",
                                set_number="099")])
         plan = diff(reg, api)
         self.assertFalse(plan["printing_renames"])

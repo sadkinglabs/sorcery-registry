@@ -23,24 +23,21 @@ DATA = {
          "rules_text": "Curse.", "printing_ids": ["P000003"]},
     ],
     "printings": [
-        {"printing_id": "P000001", "codex_id": "C000001", "set_code": "alpha",
-         "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
+        {"printing_id": "P000001", "codex_id": "C000001", "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
          "product": "Booster", "finish": "Standard",
          "slug": "001-apprentice_wizard-b-s", "artist": "A", "flavour_text": "",
          "type_text": "", "rarity": "Ordinary", "type": "Minion",
          "rules_text": "Spellcaster", "cost": 3, "attack": 1, "defence": 1,
          "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
          "thr_water": 0, "image_hash": None, "retired_at": None},
-        {"printing_id": "P000002", "codex_id": "C000001", "set_code": "beta",
-         "set_name": "Beta", "released_at": "2023-11-10", "set_number": "002",
+        {"printing_id": "P000002", "codex_id": "C000001", "set_name": "Beta", "released_at": "2023-11-10", "set_number": "002",
          "product": "Booster", "finish": "Foil",
          "slug": "002-apprentice_wizard-b-f", "artist": "A", "flavour_text": "",
          "type_text": "", "rarity": "Ordinary", "type": "Minion",
          "rules_text": "Spellcaster", "cost": 3, "attack": 1, "defence": 1,
          "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
          "thr_water": 0, "image_hash": None, "retired_at": None},
-        {"printing_id": "P000003", "codex_id": "C000002", "set_code": "alpha",
-         "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
+        {"printing_id": "P000003", "codex_id": "C000002", "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
          "product": "Booster", "finish": "Standard", "slug": "004-witch_x-b-s",
          "artist": "B", "flavour_text": "", "type_text": "", "rarity": "Elite",
          "type": "Minion", "rules_text": "Curse.", "cost": 2, "attack": 1,
@@ -156,7 +153,7 @@ class SearchTest(unittest.TestCase):
     def test_filters_combine(self):
         result = self.reg.search_cards(type="Minion", element="Air")
         self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000001"])
-        result = self.reg.search_cards(set_code="beta")
+        result = self.reg.search_cards(card_set="Beta")
         self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000001"])
 
     def test_limit_reports_total(self):
@@ -177,7 +174,11 @@ class SearchTest(unittest.TestCase):
 
 class SetContentsTest(unittest.TestCase):
     def test_distinct_cards_and_counts(self):
-        result = Registry(copy.deepcopy(DATA)).set_contents("Alpha")
+        # A set is addressable by name or by its official number.
+        reg = Registry(copy.deepcopy(DATA))
+        self.assertEqual(reg.set_contents("1"), reg.set_contents("Alpha"))
+        result = reg.set_contents("Alpha")
+        self.assertEqual(result["set_name"], "Alpha")
         self.assertEqual(result["distinct_cards"], 2)
         self.assertEqual(result["total_printings"], 2)
         self.assertEqual(result["set_number"], "001")
@@ -190,10 +191,11 @@ class StatsTest(unittest.TestCase):
     def test_per_set_counts(self):
         stats = Registry(copy.deepcopy(DATA)).stats()
         self.assertEqual(stats["schema_version"], 1)
-        by_code = {s["set_code"]: s for s in stats["sets"]}
-        self.assertEqual(by_code["alpha"]["cards"], 2)
-        self.assertEqual(by_code["alpha"]["printings"], 2)
-        self.assertEqual(by_code["beta"]["printings"], 1)
+        by_number = {s["set_number"]: s for s in stats["sets"]}
+        self.assertEqual(by_number["001"]["set_name"], "Alpha")
+        self.assertEqual(by_number["001"]["cards"], 2)
+        self.assertEqual(by_number["001"]["printings"], 2)
+        self.assertEqual(by_number["002"]["printings"], 1)
 
 
 if __name__ == "__main__":

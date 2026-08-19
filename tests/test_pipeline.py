@@ -4,7 +4,7 @@ round trip through apply_plan proving ids survive a slug rename."""
 import copy
 import unittest
 
-from registry.canon import canon_text, parse_slug, set_code
+from registry.canon import canon_text, parse_slug
 from registry.db import init_db, load_registry_state, open_db
 from registry.diff import diff, is_noop
 from registry.export import build_export, render
@@ -75,10 +75,6 @@ class CanonTest(unittest.TestCase):
         self.assertEqual(canon_text("\n\n a\n"), "a")
         self.assertIsNone(canon_text(None))
 
-    def test_set_code(self):
-        self.assertEqual(set_code("Arthurian Legends"), "arthurian_legends")
-        self.assertEqual(set_code("Alpha"), "alpha")
-
     def test_parse_slug(self):
         # The leading digits are the SET's number, kept as a string.
         self.assertEqual(parse_slug("004-witch-b-s"), ("004", "witch", "b", "s"))
@@ -96,7 +92,6 @@ class SnapshotTest(unittest.TestCase):
         printing = snapshot["printings"]["001-apprentice_wizard-b-s"]
         self.assertEqual(printing["rules_text"], wizard["rules_text"])
         self.assertEqual(printing["set_number"], "001")
-        self.assertEqual(printing["set_code"], "alpha")
         self.assertEqual(printing["released_at"], "2023-04-19")
 
     def test_duplicate_slug_fails_loudly(self):
