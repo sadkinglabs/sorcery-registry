@@ -1,0 +1,155 @@
+[
+  {
+    "match": {
+      "card_name": "Aaj-kegon Ghost Crabs"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Abaddon Succubus"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Abyssal Assault"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Accursed Desert"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Accursed Tower"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Accusation"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Acid Rain"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Active Volcano"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Aethermoeba"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Aino"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Alabaster Box"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Algae Bloom"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Algor Omphalos"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "All Mortals Gone"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Altar of Malachai"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Angel Ascendant"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Angry Mob"
+    },
+    "set_fields": {
+      "life": null
+    },
+    "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  }
+]

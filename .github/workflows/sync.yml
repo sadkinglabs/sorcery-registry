@@ -1,0 +1,78 @@
+name: sync
+
+# Manually triggered: fetches the official API, applies unambiguous changes,
+# and opens a pull request with the result. Ambiguous cases fail the run and
+# upload review/pending.json as an artifact for human resolution.
+#
+# Note: PRs opened with the default GITHUB_TOKEN do not trigger the validate
+# workflow automatically; validation still runs via the explicit step below,
+# and again on merge to main.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Sync against the official API
+        id: sync
+        run: |
+          set +e
+          python -m registry.sync --yes
+          code=$?
+          set -e
+          if [ "$code" = "2" ]; then
+            echo "ambiguous=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" != "0" ]; then
+            exit "$code"
+          fi
+
+      - name: Upload pending review cases
+        if: steps.sync.outputs.ambiguous == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pending-review
+          path: review/pending.json
+
+      - name: Validate
+        run: python -m registry.validate --against HEAD
+
+      - name: Open a pull request if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "no changes"
+            exit 0
+          fi
+          BRANCH="sync/$(date -u +%Y-%m-%d-%H%M)"
+          git config user.name "registry-sync"
+          git config user.email "actions@github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "sync: $(date -u +%Y-%m-%d) against the official API"
+          git push origin "$BRANCH"
+          gh pr create --fill --title "Sync $(date -u +%Y-%m-%d)" \
+            --body "Automated sync against the official API. Review the export diff before merging."
+
+      - name: Fail loudly when human review is needed
+        if: steps.sync.outputs.ambiguous == 'true'
+        run: |
+          echo "::error::Ambiguous cases were quarantined. Download the pending-review artifact, write review/decisions.json, and run a local sync."
+          exit 1

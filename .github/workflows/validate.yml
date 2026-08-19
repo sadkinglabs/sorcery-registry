@@ -1,0 +1,36 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Invariants (including append-only vs base)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="origin/${{ github.base_ref }}"
+          elif git rev-parse --verify -q HEAD~1 > /dev/null; then
+            BASE="HEAD~1"
+          else
+            BASE=""
+          fi
+          if [ -n "$BASE" ]; then
+            python -m registry.validate --against "$BASE"
+          else
+            python -m registry.validate
+          fi
