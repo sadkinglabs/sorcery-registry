@@ -95,16 +95,17 @@ With [uv](https://docs.astral.sh/uv/) installed, add this to your MCP configurat
 
 Without uv: clone the repo, `pip install mcp requests`, and use `python mcp_server.py` as the command instead.
 
-Six tools, each returning a small, focused answer rather than the whole database:
+Seven tools, each returning a small, focused answer rather than the whole database:
 
 | Tool | What it answers |
 |---|---|
 | `resolve_slug` | Any slug - current **or from an older naming convention** - to its permanent `printing_id` and `codex_id`. This is how a tool holding pre-rename slugs migrates itself. |
 | `get_card` | One card by `codex_id`, with its gameplay data and every printing of it. |
 | `get_printing` | One physical print by `printing_id`, with its set, product, finish and current slug. |
-| `search_cards` | Cards by name, type, element, rarity, or set. |
+| `search_cards` | Cards by name, type, element, rarity, set, or errata status. |
+| `search_printings` | Physical printings by card name, set, product line (Booster, Box_Topper, Dust, ...) or finish - "what's in the Arthurian Legends box topper" is one call. |
 | `set_contents` | Every distinct card in a set - the authoritative answer to "how many cards are in set X", which the official data states nowhere. |
-| `registry_stats` | Totals and per-set counts. |
+| `registry_stats` | Totals, per-set counts, and the product lines with printing counts. |
 
 The server also teaches connected agents the ground rules (key on the IDs, never on slugs; only Avatars have life), so tools built with AI assistance inherit correct usage by default.
 
