@@ -158,6 +158,16 @@ class EndToEndTest(unittest.TestCase):
         self.assertFalse(wizard["errata"])
         broken = next(c for c in export_one["cards"] if c["name"] == "Broken Site")
         self.assertTrue(broken["errata"])
+        # Derived set data: per-card set membership and the set catalogue.
+        self.assertEqual(wizard["set_numbers"], ["001"])
+        self.assertEqual(broken["set_numbers"], ["010"])
+        self.assertEqual(export_one["header"]["sets"], 2)
+        self.assertEqual(export_one["sets"], [
+            {"set_number": "001", "set_name": "Alpha",
+             "released_at": "2023-04-19", "cards": 1, "printings": 2},
+            {"set_number": "010", "set_name": "Gothic",
+             "released_at": "2026-05-01", "cards": 1, "printings": 1},
+        ])
 
         # Second run, same data: a no-op, and the export is byte-identical.
         plan = diff(load_registry_state(con), snapshot)
@@ -200,6 +210,44 @@ class EndToEndTest(unittest.TestCase):
             con.execute("DELETE FROM printings WHERE printing_id = 1")
         with self.assertRaises(sqlite3.IntegrityError):
             con.execute("UPDATE printings SET card_id = 2 WHERE printing_id = 1")
+
+
+class ExportArtifactsTest(unittest.TestCase):
+    def test_write_export_emits_matching_checksum(self):
+        import hashlib
+        import tempfile
+        from pathlib import Path
+        from registry.export import checksum_path, write_export
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "registry.json"
+            write_export(con, out)
+            sha = checksum_path(out)
+            self.assertTrue(sha.exists())
+            stated = sha.read_text(encoding="utf-8").split()
+            self.assertEqual(stated[1], "registry.json")
+            actual = hashlib.sha256(out.read_bytes()).hexdigest()
+            self.assertEqual(stated[0], actual)
+
+    def test_export_conforms_to_published_schema(self):
+        import json
+        from pathlib import Path
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema not installed")
+        schema_file = Path(__file__).resolve().parent.parent / "schema" / "registry.schema.json"
+        schema = json.loads(schema_file.read_text(encoding="utf-8"))
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        export = json.loads(render(build_export(con)))
+        errors = list(jsonschema.Draft202012Validator(schema).iter_errors(export))
+        self.assertEqual(errors, [], [e.message for e in errors[:3]])
 
 
 if __name__ == "__main__":

@@ -10,5 +10,8 @@ API slug demoted to an ordinary, mutable column.
 # v3: printings.set_code removed - it was a registry-invented slugification
 # of the set name; sets are identified by their official facts, set_number
 # and set_name. The export gains derived card_name on each printing.
-SCHEMA_VERSION = 3
+# v4: export gains a derived top-level "sets" catalogue and per-card
+# "set_numbers", a .sha256 checksum file, and a published JSON Schema
+# (schema/registry.schema.json). No database changes.
+SCHEMA_VERSION = 4
 API_URL = "https://api.sorcerytcg.com/api/cards"

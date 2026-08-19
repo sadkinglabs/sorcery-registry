@@ -54,9 +54,11 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 
 ```jsonc
 {
-  "header":       { "schema_version": 1, "source": "...", "cards": 1100, ... },
+  "header":       { "schema_version": 4, "source": "...", "sets": 6, "cards": 1100, ... },
+  "sets":         [ { "set_number": "001", "set_name": "Alpha", "released_at": "2023-04-19",
+                      "cards": 407, "printings": 817 }, ... ],
   "cards":        [ { "codex_id": "C000001", "name": "Apprentice Wizard", "type": "Minion", ...,
-                      "errata": false,
+                      "errata": false, "set_numbers": ["001", "002", "999"],
                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
   "printings":    [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
                       "slug": "001-apprentice_wizard-b-s", "set_name": "Alpha", "set_number": "001",
@@ -65,16 +67,19 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 }
 ```
 
+The file's exact shape is formally described by [`schema/registry.schema.json`](schema/registry.schema.json) (JSON Schema, draft 2020-12) - CI validates every commit's export against it. A [`registry.json.sha256`](export/registry.json.sha256) checksum sits next to the export for integrity checks and cheap freshness polling (fetch the ~80 byte checksum; re-download only when it changed).
+
 Practical notes:
 
 - **Key on the IDs, treat everything else as data.** `slug`, `set_number`, `set_name`, `card_name` are conveniences that can change; `codex_id` and `printing_id` cannot. Sets are identified by their two official facts: `set_number`, the numbering parsed from the slug (001 = Alpha, 002 = Beta, 006 = Gothic), and `set_name`, the official display name. Both are published exactly as upstream states them - the registry invents no codes of its own.
 - **Printings are readable on their own.** Each printing carries `card_name`, derived at export time from the card its `codex_id` points at, so a printing record never needs a join just to be understood. It's a convenience copy: the card record stays the source of truth for card-level data.
 - **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `codex_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
+- **The `sets` section is the set catalogue.** One record per set with its official number, name, release date, and distinct-card and printing counts - the authoritative answer to "how many cards are in set X", which the official data states nowhere. Each card also lists its `set_numbers`; for products and finishes, follow its `printing_ids`.
 - **`errata` marks officially updated cards.** The upstream convention is that an errata'd card's rules text begins with `UPDATED`; the registry publishes that as a boolean so you don't have to know the convention. The flag is derived from the rules text at export time - if upstream changes how it marks errata, the flag follows the data. The rules text itself is always published verbatim (canonicalised, never rewritten).
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.
-- The SQLite database (`registry.sqlite`) is also committed, for anyone who prefers SQL. It and the JSON always agree - CI fails if they drift.
+- The committed SQLite database (`registry.sqlite`) is the **pipeline's internal working database**, not a second published artifact: it uses bare integer ids and internal column names, and lacks the derived fields. The JSON export is the only published contract; CI guarantees the JSON is exactly what the database produces.
 
 ## For AI agents (MCP)
 
