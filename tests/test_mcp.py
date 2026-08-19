@@ -11,19 +11,19 @@ DATA = {
     "header": {"schema_version": 1, "source": "test", "cards": 2,
                "printings": 3, "slug_history": 4},
     "cards": [
-        {"card_id": "C000001", "name": "Apprentice Wizard", "type": "Minion",
+        {"codex_id": "C000001", "name": "Apprentice Wizard", "type": "Minion",
          "rarity": "Ordinary", "subtypes": "Mortal", "elements": "Air",
          "cost": 3, "attack": 1, "defence": 1, "life": None,
          "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
          "rules_text": "Spellcaster", "printing_ids": ["P000001", "P000002"]},
-        {"card_id": "C000002", "name": "Witch", "type": "Minion",
+        {"codex_id": "C000002", "name": "Witch", "type": "Minion",
          "rarity": "Elite", "subtypes": "Mortal", "elements": "Water",
          "cost": 2, "attack": 1, "defence": 1, "life": None,
          "thr_air": 0, "thr_earth": 0, "thr_fire": 0, "thr_water": 1,
          "rules_text": "Curse.", "printing_ids": ["P000003"]},
     ],
     "printings": [
-        {"printing_id": "P000001", "card_id": "C000001", "set_code": "alpha",
+        {"printing_id": "P000001", "codex_id": "C000001", "set_code": "alpha",
          "set_name": "Alpha", "released_at": "2023-04-19", "card_number": 1,
          "product": "Booster", "finish": "Standard",
          "slug": "001-apprentice_wizard-b-s", "artist": "A", "flavour_text": "",
@@ -31,7 +31,7 @@ DATA = {
          "rules_text": "Spellcaster", "cost": 3, "attack": 1, "defence": 1,
          "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
          "thr_water": 0, "image_hash": None, "retired_at": None},
-        {"printing_id": "P000002", "card_id": "C000001", "set_code": "beta",
+        {"printing_id": "P000002", "codex_id": "C000001", "set_code": "beta",
          "set_name": "Beta", "released_at": "2023-11-10", "card_number": 2,
          "product": "Booster", "finish": "Foil",
          "slug": "002-apprentice_wizard-b-f", "artist": "A", "flavour_text": "",
@@ -39,7 +39,7 @@ DATA = {
          "rules_text": "Spellcaster", "cost": 3, "attack": 1, "defence": 1,
          "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
          "thr_water": 0, "image_hash": None, "retired_at": None},
-        {"printing_id": "P000003", "card_id": "C000002", "set_code": "alpha",
+        {"printing_id": "P000003", "codex_id": "C000002", "set_code": "alpha",
          "set_name": "Alpha", "released_at": "2023-04-19", "card_number": 4,
          "product": "Booster", "finish": "Standard", "slug": "004-witch_x-b-s",
          "artist": "B", "flavour_text": "", "type_text": "", "rarity": "Elite",
@@ -70,17 +70,27 @@ class IdFormatTest(unittest.TestCase):
     def test_legacy_integer_export_is_normalised_on_load(self):
         legacy = copy.deepcopy(DATA)
         for card in legacy["cards"]:
-            card["card_id"] = int(card["card_id"][1:])
+            card["codex_id"] = int(card["codex_id"][1:])
             del card["printing_ids"]
         for printing in legacy["printings"]:
             printing["printing_id"] = int(printing["printing_id"][1:])
-            printing["card_id"] = int(printing["card_id"][1:])
+            printing["codex_id"] = int(printing["codex_id"][1:])
         for row in legacy["slug_history"]:
             row["printing_id"] = int(row["printing_id"][1:])
         reg = Registry(legacy)
         result = reg.resolve_slug("004-witch-b-s")
         self.assertEqual(result["printing_id"], "P000003")
-        self.assertEqual(result["card_id"], "C000002")
+        self.assertEqual(result["codex_id"], "C000002")
+
+    def test_former_card_id_key_is_renamed_on_load(self):
+        legacy = copy.deepcopy(DATA)
+        for card in legacy["cards"]:
+            card["card_id"] = card.pop("codex_id")
+        for printing in legacy["printings"]:
+            printing["card_id"] = printing.pop("codex_id")
+        reg = Registry(legacy)
+        self.assertEqual(reg.resolve_slug("004-witch-b-s")["codex_id"], "C000002")
+        self.assertEqual(reg.get_card("C000002")["name"], "Witch")
 
 
 class ResolveSlugTest(unittest.TestCase):
@@ -91,7 +101,7 @@ class ResolveSlugTest(unittest.TestCase):
         result = self.reg.resolve_slug("001-apprentice_wizard-b-s")
         self.assertTrue(result["found"])
         self.assertEqual(result["printing_id"], "P000001")
-        self.assertEqual(result["card_id"], "C000001")
+        self.assertEqual(result["codex_id"], "C000001")
         self.assertTrue(result["queried_slug_is_current"])
 
     def test_historical_slug_resolves_to_same_printing(self):
@@ -145,9 +155,9 @@ class SearchTest(unittest.TestCase):
 
     def test_filters_combine(self):
         result = self.reg.search_cards(type="Minion", element="Air")
-        self.assertEqual([c["card_id"] for c in result["cards"]], ["C000001"])
+        self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000001"])
         result = self.reg.search_cards(set_code="beta")
-        self.assertEqual([c["card_id"] for c in result["cards"]], ["C000001"])
+        self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000001"])
 
     def test_limit_reports_total(self):
         result = self.reg.search_cards(limit=1)

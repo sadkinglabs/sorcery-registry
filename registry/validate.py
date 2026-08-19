@@ -13,9 +13,9 @@ Checks, in order:
  5. Regenerating the export from the database is byte-identical to the
     committed export file (nobody edited one without the other), and each
     card's derived printing_ids list agrees with the printings table.
- 6. With --against REF: every card_id and printing_id present in that
+ 6. With --against REF: every codex_id and printing_id present in that
     commit's export still exists, printings still point at the same
-    card_id, no card's printing_ids list shrank, the counters have not
+    card, no card's printing_ids list shrank, the counters have not
     decreased, and any slug that changed is explained by slug_history.
     This is the append-only guarantee, checked against history rather
     than promised.
@@ -90,15 +90,15 @@ def check_export_matches(con, export_path, errors):
     export = build_export(con)
     forward = {}
     for printing in export["printings"]:
-        forward.setdefault(printing["card_id"], set()).add(printing["printing_id"])
+        forward.setdefault(printing["codex_id"], set()).add(printing["printing_id"])
     for card in export["cards"]:
         listed = set(card["printing_ids"])
-        actual = forward.get(card["card_id"], set())
+        actual = forward.get(card["codex_id"], set())
         if listed != actual:
-            errors.append(f"card {card['card_id']}: printing_ids {sorted(listed)} "
+            errors.append(f"card {card['codex_id']}: printing_ids {sorted(listed)} "
                           f"disagrees with the printings table {sorted(actual)}")
         if card["printing_ids"] != sorted(card["printing_ids"]):
-            errors.append(f"card {card['card_id']}: printing_ids is not sorted")
+            errors.append(f"card {card['codex_id']}: printing_ids is not sorted")
 
 
 def check_against_ref(con, ref, export_path, errors):
@@ -112,19 +112,24 @@ def check_against_ref(con, ref, export_path, errors):
     new = build_export(con)
 
     # Ids are compared by their number so the check spans format changes
-    # (exports from before the C/P-prefixed form carry bare integers).
-    new_cards = {id_number(c["card_id"]): c for c in new["cards"]}
+    # (exports from before the C/P-prefixed form carry bare integers), and
+    # the card-level id is read under both its old name (card_id) and its
+    # current one (codex_id).
+    def codex_id_of(record):
+        return record["codex_id"] if "codex_id" in record else record["card_id"]
+
+    new_cards = {id_number(codex_id_of(c)): c for c in new["cards"]}
     for card in old["cards"]:
-        current = new_cards.get(id_number(card["card_id"]))
+        current = new_cards.get(id_number(codex_id_of(card)))
         if current is None:
-            errors.append(f"card_id {card['card_id']} ({card['name']!r}) existed at {ref} and is gone")
+            errors.append(f"codex_id {codex_id_of(card)} ({card['name']!r}) existed at {ref} and is gone")
             continue
         # printing_ids may only ever grow ("printing_ids" guard: exports
         # from before the field existed have nothing to compare against).
         lost = ({id_number(p) for p in card.get("printing_ids", [])}
                 - {id_number(p) for p in current["printing_ids"]})
         if lost:
-            errors.append(f"card_id {card['card_id']}: printings {sorted(lost)} "
+            errors.append(f"codex_id {codex_id_of(card)}: printings {sorted(lost)} "
                           f"were listed at {ref} and are gone")
 
     new_printings = {id_number(p["printing_id"]): p for p in new["printings"]}
@@ -137,9 +142,9 @@ def check_against_ref(con, ref, export_path, errors):
         if current is None:
             errors.append(f"printing_id {pid} ({printing['slug']!r}) existed at {ref} and is gone")
             continue
-        if id_number(current["card_id"]) != id_number(printing["card_id"]):
-            errors.append(f"printing_id {pid} moved from card {printing['card_id']} "
-                          f"to card {current['card_id']}")
+        if id_number(codex_id_of(current)) != id_number(codex_id_of(printing)):
+            errors.append(f"printing_id {pid} moved from card {codex_id_of(printing)} "
+                          f"to card {codex_id_of(current)}")
         if current["slug"] != printing["slug"] and printing["slug"] not in history.get(pid, set()):
             errors.append(f"printing_id {pid} slug changed {printing['slug']!r} -> "
                           f"{current['slug']!r} without a slug_history record")

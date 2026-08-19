@@ -90,15 +90,16 @@ def _digits(value):
 
 
 def _normalise_ids(data):
-    """Rewrite all ids in a loaded export to the prefixed form, in place.
-    A no-op on current exports; converts pre-C/P exports (bare integers)."""
+    """Rewrite all ids in a loaded export to the current published form, in
+    place. A no-op on current exports; converts older ones (bare-integer ids,
+    and the card-level id under its former name card_id)."""
     for card in data["cards"]:
-        card["card_id"] = card_ref(card["card_id"])
+        card["codex_id"] = card_ref(card.pop("card_id", None) or card["codex_id"])
         if "printing_ids" in card:
             card["printing_ids"] = [printing_ref(p) for p in card["printing_ids"]]
     for printing in data["printings"]:
         printing["printing_id"] = printing_ref(printing["printing_id"])
-        printing["card_id"] = card_ref(printing["card_id"])
+        printing["codex_id"] = card_ref(printing.pop("card_id", None) or printing["codex_id"])
     for row in data["slug_history"]:
         row["printing_id"] = printing_ref(row["printing_id"])
     return data
@@ -114,11 +115,11 @@ class Registry:
     def __init__(self, data):
         data = _normalise_ids(data)
         self.header = data["header"]
-        self.cards = {c["card_id"]: c for c in data["cards"]}
+        self.cards = {c["codex_id"]: c for c in data["cards"]}
         self.printings = {p["printing_id"]: p for p in data["printings"]}
         self.printings_by_card = {}
         for p in data["printings"]:
-            self.printings_by_card.setdefault(p["card_id"], []).append(p)
+            self.printings_by_card.setdefault(p["codex_id"], []).append(p)
         # Every slug that has ever existed resolves to its printing.
         # Current slugs are included in slug_history by construction, but
         # index them explicitly so a lookup never depends on that.
@@ -137,11 +138,11 @@ class Registry:
                     "note": "This slug has never existed in the registry, "
                             "under any naming convention it has seen."}
         printing = self.printings[printing_id]
-        card = self.cards[printing["card_id"]]
+        card = self.cards[printing["codex_id"]]
         return {
             "found": True,
             "printing_id": printing_id,
-            "card_id": card["card_id"],
+            "codex_id": card["codex_id"],
             "card_name": card["name"],
             "current_slug": printing["slug"],
             "queried_slug_is_current": printing["slug"] == slug,
@@ -156,7 +157,7 @@ class Registry:
         card_id = card_ref(card_id)
         card = self.cards.get(card_id)
         if card is None:
-            return {"found": False, "card_id": card_id}
+            return {"found": False, "codex_id": card_id}
         printings = [
             {k: p[k] for k in ("printing_id", "slug", "set_code", "set_name",
                                "card_number", "product", "finish", "artist",
@@ -171,7 +172,7 @@ class Registry:
         printing = self.printings.get(printing_id)
         if printing is None:
             return {"found": False, "printing_id": printing_id}
-        card = self.cards[printing["card_id"]]
+        card = self.cards[printing["codex_id"]]
         return {"found": True, **printing, "card_name": card["name"]}
 
     def search_cards(self, name=None, type=None, element=None, rarity=None,
@@ -189,12 +190,12 @@ class Registry:
                 continue
             if set_code and not any(
                     p["set_code"] == set_code.lower()
-                    for p in self.printings_by_card.get(card["card_id"], [])):
+                    for p in self.printings_by_card.get(card["codex_id"], [])):
                 continue
             results.append({k: card[k] for k in
-                            ("card_id", "name", "type", "rarity", "elements",
+                            ("codex_id", "name", "type", "rarity", "elements",
                              "cost", "rules_text")})
-        results.sort(key=lambda c: c["card_id"])
+        results.sort(key=lambda c: c["codex_id"])
         return {"total_matches": len(results), "returned": min(len(results), limit),
                 "cards": results[:limit]}
 
@@ -203,9 +204,9 @@ class Registry:
         for p in self.printings.values():
             if p["set_code"] != set_code.lower():
                 continue
-            key = p["card_id"]
+            key = p["codex_id"]
             entry = entries.setdefault(key, {
-                "card_id": key,
+                "codex_id": key,
                 "name": self.cards[key]["name"],
                 "card_number": p["card_number"],
                 "printing_ids": [],
@@ -226,7 +227,7 @@ class Registry:
             entry = sets.setdefault(p["set_code"], {
                 "set_code": p["set_code"], "set_name": p["set_name"],
                 "released_at": p["released_at"], "cards": set(), "printings": 0})
-            entry["cards"].add(p["card_id"])
+            entry["cards"].add(p["codex_id"])
             entry["printings"] += 1
         set_list = [{**s, "cards": len(s["cards"])}
                     for s in sorted(sets.values(),
@@ -248,7 +249,7 @@ def build_server():
         "sorcery-registry",
         instructions=(
             "Stable identifiers for Sorcery: Contested Realm cards. "
-            "card_id (C000042) identifies a card across all its reprints (like a "
+            "codex_id (C000042) identifies a card across all its reprints (like a "
             "Scryfall oracle id); printing_id (P000042) identifies one physical "
             "print (set + product + finish). The C/P prefix names the id space, "
             "the digits are zero-padded to six, and these ids never change - "
@@ -265,15 +266,15 @@ def build_server():
 
     def resolve_slug(slug: str) -> dict:
         """Resolve any official-API slug, current or historical, to its permanent
-        printing_id and card_id. This is how data keyed on slugs survives naming
+        printing_id and codex_id. This is how data keyed on slugs survives naming
         convention changes: old slugs keep resolving forever."""
         return registry.resolve_slug(slug)
 
-    def get_card(card_id: str) -> dict:
-        """Fetch one card by its permanent card_id (e.g. 'C000042'; a bare
+    def get_card(codex_id: str) -> dict:
+        """Fetch one card by its permanent codex_id (e.g. 'C000042'; a bare
         number is accepted too), with its full gameplay data and every
         printing of it (all sets, products and finishes)."""
-        return registry.get_card(card_id)
+        return registry.get_card(codex_id)
 
     def get_printing(printing_id: str) -> dict:
         """Fetch one printing by its permanent printing_id (e.g. 'P000042'; a

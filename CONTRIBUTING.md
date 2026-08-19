@@ -2,7 +2,7 @@
 
 Thanks for helping keep the registry accurate. Two ground rules before anything else:
 
-1. **Never edit an ID.** Not in the database, not in the JSON. The whole value of this project is that `card_id` and `printing_id` never move. The database schema physically refuses ID updates and deletions, and CI checks every commit against the previous export.
+1. **Never edit an ID.** Not in the database, not in the JSON. The whole value of this project is that `codex_id` and `printing_id` never move. The database schema physically refuses ID updates and deletions, and CI checks every commit against the previous export.
 2. **Never hand-edit `export/registry.json` or `registry.sqlite`.** Both are produced by the pipeline. Change the inputs (API data arrives via sync, corrections via `data/overrides.json`) and let the scripts regenerate the outputs. CI fails if the two files disagree.
 
 ## Reporting a data error

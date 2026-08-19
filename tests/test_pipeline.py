@@ -147,14 +147,14 @@ class EndToEndTest(unittest.TestCase):
         export_one = build_export(con)
         wizard = next(c for c in export_one["cards"]
                       if c["name"] == "Apprentice Wizard")
-        wizard_id = wizard["card_id"]
+        wizard_id = wizard["codex_id"]
         foil_id = next(p["printing_id"] for p in export_one["printings"]
                        if p["slug"] == "001-apprentice_wizard-b-f")
         # Each card lists its printings, derived from the printings table.
         self.assertEqual(
             wizard["printing_ids"],
             sorted(p["printing_id"] for p in export_one["printings"]
-                   if p["card_id"] == wizard_id))
+                   if p["codex_id"] == wizard_id))
         self.assertIn(foil_id, wizard["printing_ids"])
 
         # Second run, same data: a no-op, and the export is byte-identical.
@@ -177,7 +177,7 @@ class EndToEndTest(unittest.TestCase):
                  if p["slug"] == "001-apprentice-wizard-b-f"),
             foil_id)
         self.assertEqual(
-            next(c["card_id"] for c in export_two["cards"]
+            next(c["codex_id"] for c in export_two["cards"]
                  if c["name"] == "Apprentice Wizard"),
             wizard_id)
         # The old slug is recoverable from history.

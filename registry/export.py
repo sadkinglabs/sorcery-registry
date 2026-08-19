@@ -24,9 +24,11 @@ def build_export(con):
         printing_ids_by_card.setdefault(row["card_id"], []).append(
             format_printing_id(row["printing_id"]))
 
+    # The card-level id is published as "codex_id", after Codex, the game's
+    # official rules authority - the same move as Scryfall's oracle_id.
     cards = []
     for row in con.execute("SELECT * FROM cards ORDER BY card_id"):
-        record = {"card_id": format_card_id(row["card_id"])}
+        record = {"codex_id": format_card_id(row["card_id"])}
         for field in CARD_FIELDS:
             record[field] = row[field]
         record["printing_ids"] = printing_ids_by_card.get(row["card_id"], [])
@@ -35,7 +37,7 @@ def build_export(con):
     printings = []
     for row in con.execute("SELECT * FROM printings ORDER BY printing_id"):
         record = {"printing_id": format_printing_id(row["printing_id"]),
-                  "card_id": format_card_id(row["card_id"])}
+                  "codex_id": format_card_id(row["card_id"])}
         for field in PRINTING_FIELDS:
             record[field] = row[field]
         record["retired_at"] = row["retired_at"]

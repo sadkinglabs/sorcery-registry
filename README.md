@@ -12,7 +12,7 @@ There is also nothing in the official data linking two printings of the same car
 
 This registry follows the pattern that already works elsewhere - Konami's passcodes for Yu-Gi-Oh, Scryfall's oracle IDs for Magic. Two identifiers, both permanent, both in a fixed shape: a one-letter prefix naming the ID space, then six zero-padded digits.
 
-- **`card_id`** (`C000001`) - one per card, shared by every printing of it. Alpha, Beta and promo Apprentice Wizard all carry the same `card_id`. Use it when you mean "this card as a game object": decklists, rulings, collection grouping.
+- **`codex_id`** (`C000001`) - one per card, shared by every printing of it. Alpha, Beta and promo Apprentice Wizard all carry the same `codex_id`. Use it when you mean "this card as a game object": decklists, rulings, collection grouping.
 - **`printing_id`** (`P000001`) - one per physical print (a specific set, product and finish). Use it when you mean "this exact piece of cardboard": inventories, pricing, scans.
 
 The prefix means a card ID can never be confused with a printing ID, and the fixed width keeps IDs intact in spreadsheets (no stripped leading zeros) and aligned in diffs. Treat the whole string as opaque; if you need a plain number, the digits after the prefix are one (`int("C000042"[1:]) == 42`). Six digits leaves room for a million of each, which will never run out.
@@ -27,10 +27,10 @@ If yes - the copy matters - you want the **printing**. If any copy of the card w
 |---|---|---|
 | A collection tracker or inventory | `printing_id` | People own specific printings: an Alpha Foil is not a Beta Standard. |
 | Pricing, trades, scans, condition tracking | `printing_id` | Value and identity are per physical print. |
-| A decklist format | `card_id` | A deck runs "4x Apprentice Wizard"; any printing fills the slot. |
-| Deck buildability ("can I build this from my collection?") | Both | The deck wants `card_id`s; you own `printing_id`s; every printing carries its `card_id`, so the join is one lookup. |
-| Rulings, errata, card search, game databases | `card_id` | Rules apply to the card, all printings at once. |
-| "Show all versions of this card" | `card_id` → `printing_ids` | Each card record lists its printings. |
+| A decklist format | `codex_id` | A deck runs "4x Apprentice Wizard"; any printing fills the slot. |
+| Deck buildability ("can I build this from my collection?") | Both | The deck wants `codex_id`s; you own `printing_id`s; every printing carries its `codex_id`, so the join is one lookup. |
+| Rulings, errata, card search, game databases | `codex_id` | Rules apply to the card, all printings at once. |
+| "Show all versions of this card" | `codex_id` → `printing_ids` | Each card record lists its printings. |
 
 If you know Yu-Gi-Oh or Magic tooling, this is the same two-level split you already use. Konami's printed passcode is a *card*-level ID (every reprint of a card shares it), while the printing level in Yu-Gi-Oh is the set number (`LOB-001`) - a composite of set code and collector number, which is precisely the kind of derived key that breaks when naming changes. Scryfall gives Magic stable IDs at both levels (`oracle_id` for the card, a per-printing id for the print). This registry does what Scryfall did: both levels, both stable, so nobody has to reconstruct either one by string-matching.
 
@@ -55,9 +55,9 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 ```jsonc
 {
   "header":       { "schema_version": 1, "source": "...", "cards": 1100, ... },
-  "cards":        [ { "card_id": "C000001", "name": "Apprentice Wizard", "type": "Minion", ...,
+  "cards":        [ { "codex_id": "C000001", "name": "Apprentice Wizard", "type": "Minion", ...,
                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
-  "printings":    [ { "printing_id": "P000001", "card_id": "C000001", "slug": "001-apprentice_wizard-b-s",
+  "printings":    [ { "printing_id": "P000001", "codex_id": "C000001", "slug": "001-apprentice_wizard-b-s",
                       "set_code": "alpha", "card_number": 1, "product": "Booster",
                       "finish": "Standard", ... } ],
   "slug_history": [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ]
@@ -66,8 +66,8 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 
 Practical notes:
 
-- **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `card_number` are conveniences that can change; `card_id` and `printing_id` cannot.
-- **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `card_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
+- **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `card_number` are conveniences that can change; `codex_id` and `printing_id` cannot.
+- **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `codex_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.
@@ -96,8 +96,8 @@ Six tools, each returning a small, focused answer rather than the whole database
 
 | Tool | What it answers |
 |---|---|
-| `resolve_slug` | Any slug - current **or from an older naming convention** - to its permanent `printing_id` and `card_id`. This is how a tool holding pre-rename slugs migrates itself. |
-| `get_card` | One card by `card_id`, with its gameplay data and every printing of it. |
+| `resolve_slug` | Any slug - current **or from an older naming convention** - to its permanent `printing_id` and `codex_id`. This is how a tool holding pre-rename slugs migrates itself. |
+| `get_card` | One card by `codex_id`, with its gameplay data and every printing of it. |
 | `get_printing` | One physical print by `printing_id`, with its set, product, finish and current slug. |
 | `search_cards` | Cards by name, type, element, rarity, or set. |
 | `set_contents` | Every distinct card in a set, with collector numbers - the authoritative answer to "how many cards are in set X". |
