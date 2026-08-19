@@ -101,6 +101,10 @@ def _normalise_ids(data):
     for printing in data["printings"]:
         printing["printing_id"] = printing_ref(printing["printing_id"])
         printing["codex_id"] = card_ref(printing.pop("card_id", None) or printing["codex_id"])
+        # Older exports called the slug's set number "card_number" (a
+        # mislabel: the digits are the set's number, e.g. 006 = Gothic).
+        printing.pop("card_number", None)
+        printing.setdefault("set_number", printing["slug"].split("-")[0])
     for row in data["slug_history"]:
         row["printing_id"] = printing_ref(row["printing_id"])
     return data
@@ -148,7 +152,7 @@ class Registry:
             "current_slug": printing["slug"],
             "queried_slug_is_current": printing["slug"] == slug,
             "set_code": printing["set_code"],
-            "card_number": printing["card_number"],
+            "set_number": printing["set_number"],
             "product": printing["product"],
             "finish": printing["finish"],
             "retired_at": printing["retired_at"],
@@ -161,7 +165,7 @@ class Registry:
             return {"found": False, "codex_id": card_id}
         printings = [
             {k: p[k] for k in ("printing_id", "slug", "set_code", "set_name",
-                               "card_number", "product", "finish", "artist",
+                               "set_number", "product", "finish", "artist",
                                "retired_at")}
             for p in sorted(self.printings_by_card.get(card_id, []),
                             key=lambda p: p["printing_id"])
@@ -203,24 +207,24 @@ class Registry:
                 "cards": results[:limit]}
 
     def set_contents(self, set_code):
+        # Ordered by name: the official data has no collector numbers, so
+        # there is no official ordering of cards within a set to follow.
         entries = {}
+        set_number = None
         for p in self.printings.values():
             if p["set_code"] != set_code.lower():
                 continue
+            set_number = set_number or p["set_number"]
             key = p["codex_id"]
             entry = entries.setdefault(key, {
                 "codex_id": key,
                 "name": self.cards[key]["name"],
-                "card_number": p["card_number"],
                 "printing_ids": [],
             })
             entry["printing_ids"].append(p["printing_id"])
-            if p["card_number"] is not None and (
-                    entry["card_number"] is None or p["card_number"] < entry["card_number"]):
-                entry["card_number"] = p["card_number"]
-        cards = sorted(entries.values(),
-                       key=lambda e: (e["card_number"] is None, e["card_number"], e["name"]))
-        return {"set_code": set_code.lower(), "distinct_cards": len(cards),
+        cards = sorted(entries.values(), key=lambda e: e["name"])
+        return {"set_code": set_code.lower(), "set_number": set_number,
+                "distinct_cards": len(cards),
                 "total_printings": sum(len(c["printing_ids"]) for c in cards),
                 "cards": cards}
 
@@ -298,9 +302,11 @@ def build_server():
                                      errata, limit)
 
     def set_contents(set_code: str) -> dict:
-        """List every distinct card in a set with its collector number and
-        printing_ids. This is the authoritative answer to 'how many cards are
-        in set X', which the official data does not state anywhere."""
+        """List every distinct card in a set with its printing_ids, ordered by
+        name (the official data has no collector numbers, so cards have no
+        official order within a set). This is the authoritative answer to
+        'how many cards are in set X', which the official data states
+        nowhere."""
         return registry.set_contents(set_code)
 
     def registry_stats() -> dict:

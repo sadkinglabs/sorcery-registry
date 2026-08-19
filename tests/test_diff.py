@@ -15,7 +15,7 @@ CARD_DEFAULTS = {
 
 PRINTING_DEFAULTS = {
     "set_code": "alpha", "set_name": "Alpha", "released_at": "2023-04-19",
-    "card_number": 1, "product": "Booster", "finish": "Standard",
+    "set_number": "001", "product": "Booster", "finish": "Standard",
     "artist": "A. Artist", "flavour_text": "", "type_text": "",
     "rarity": "Ordinary", "type": "Minion", "rules_text": "Spellcaster",
     "cost": 3, "attack": 1, "defence": 1, "life": None,
@@ -62,7 +62,7 @@ class NewThingsTest(unittest.TestCase):
         api = api_of(
             [card("Witch"), card("Wizard", rules_text="Genesis: draw.")],
             [printing("004-witch-b-s", "Witch"),
-             printing("005-wizard-b-s", "Wizard", card_number=5)])
+             printing("005-wizard-b-s", "Wizard", set_number="005")])
         plan = diff(reg, api)
         self.assertEqual([c["name"] for c in plan["new_cards"]], ["Wizard"])
         self.assertEqual([p["slug"] for p in plan["new_printings"]], ["005-wizard-b-s"])
@@ -74,7 +74,7 @@ class NewThingsTest(unittest.TestCase):
             [card("Witch")],
             [printing("004-witch-b-s", "Witch"),
              printing("102-witch-b-s", "Witch", set_name="Beta", set_code="beta",
-                      card_number=102)])
+                      set_number="102")])
         plan = diff(reg, api)
         self.assertEqual([p["slug"] for p in plan["new_printings"]], ["102-witch-b-s"])
         self.assertFalse(plan["printing_renames"])
@@ -96,55 +96,63 @@ class AttributeUpdateTest(unittest.TestCase):
 class SlugRenameTest(unittest.TestCase):
     def test_clean_slug_rename_matches_and_keeps_id(self):
         reg = registry_of([card("Apprentice Wizard")],
-                          [printing("004-apprentice-wizard-b-s", "Apprentice Wizard", card_number=4)])
+                          [printing("004-apprentice-wizard-b-s", "Apprentice Wizard", set_number="004")])
         api = api_of([card("Apprentice Wizard")],
-                     [printing("004-apprentice_wizard-b-s", "Apprentice Wizard", card_number=4)])
+                     [printing("004-apprentice_wizard-b-s", "Apprentice Wizard", set_number="004")])
         plan = diff(reg, api)
         self.assertEqual(plan["printing_renames"], [{
             "printing_id": 1, "old_slug": "004-apprentice-wizard-b-s",
             "new_slug": "004-apprentice_wizard-b-s",
-            "decided_by": "set+product+finish+number"}])
+            "decided_by": "set+product+finish"}])
         self.assertFalse(plan["new_printings"] or plan["retire_printings"] or plan["ambiguous"])
 
     def test_whole_set_convention_flip_renames_every_slug(self):
         names = [f"Card {i}" for i in range(20)]
         reg = registry_of(
             [card(n, rules_text=f"unique text {n}") for n in names],
-            [printing(f"{i:03d}-card-{i}-b-s", f"Card {i}", card_number=i) for i in range(20)])
+            [printing(f"{i:03d}-card-{i}-b-s", f"Card {i}", set_name=f"Set {i}",
+                      set_number=f"{i:03d}") for i in range(20)])
         api = api_of(
             [card(n, rules_text=f"unique text {n}") for n in names],
-            [printing(f"{i:03d}-card_{i}-b-s", f"Card {i}", card_number=i) for i in range(20)])
+            [printing(f"{i:03d}-card_{i}-b-s", f"Card {i}", set_name=f"Set {i}",
+                      set_number=f"{i:03d}") for i in range(20)])
         plan = diff(reg, api)
         self.assertEqual(len(plan["printing_renames"]), 20)
         self.assertFalse(plan["new_printings"] or plan["retire_printings"] or plan["ambiguous"])
 
     def test_rename_with_attribute_change_still_pairs_on_key(self):
-        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", card_number=4)])
+        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_number="004")])
         api = api_of([card("Witch")],
-                     [printing("004-witch_x-b-s", "Witch", card_number=4, artist="New Artist")])
+                     [printing("004-witch_x-b-s", "Witch", set_number="004", artist="New Artist")])
         plan = diff(reg, api)
         self.assertEqual(len(plan["printing_renames"]), 1)
         self.assertEqual(plan["printing_updates"][0]["changes"]["artist"]["new"], "New Artist")
 
-    def test_renumbered_set_pairs_on_loose_key(self):
-        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", card_number=4)])
-        api = api_of([card("Witch")], [printing("017-witch-b-s", "Witch", card_number=17)])
+    def test_set_renumbering_pairs_and_updates_set_number(self):
+        # The actual incident shape: EC renumbers the sets, so the slug's
+        # leading digits change while the set itself is the same. The pair
+        # key deliberately excludes set_number, so this is a clean rename
+        # plus a set_number attribute update.
+        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_number="004")])
+        api = api_of([card("Witch")], [printing("017-witch-b-s", "Witch", set_number="017")])
         plan = diff(reg, api)
         self.assertEqual(plan["printing_renames"][0]["decided_by"], "set+product+finish")
+        self.assertEqual(plan["printing_updates"][0]["changes"]["set_number"],
+                         {"old": "004", "new": "017"})
         self.assertFalse(plan["ambiguous"])
 
     def test_two_vanished_printings_sharing_a_key_quarantine(self):
-        # Same card, same set/product/finish, both renumbered: pass 1 fails
-        # (numbers moved), pass 2 groups two olds with two news. Guessing the
-        # pairing 50/50 is exactly the forbidden move.
+        # Same card, same set/product/finish, two olds and two news land in
+        # one pairing group. Guessing the pairing 50/50 is exactly the
+        # forbidden move.
         reg = registry_of(
             [card("Witch")],
-            [printing("004-witch-b-s", "Witch", card_number=4),
-             printing("005-witch-b-s", "Witch", card_number=5)])
+            [printing("004-witch-b-s", "Witch", set_number="004"),
+             printing("005-witch-b-s", "Witch", set_number="005")])
         api = api_of(
             [card("Witch")],
-            [printing("021-witch-b-s", "Witch", card_number=21),
-             printing("022-witch-b-s", "Witch", card_number=22)])
+            [printing("021-witch-b-s", "Witch", set_number="021"),
+             printing("022-witch-b-s", "Witch", set_number="022")])
         plan = diff(reg, api)
         self.assertFalse(plan["printing_renames"])
         self.assertEqual(len(plan["ambiguous"]), 1)
@@ -155,11 +163,11 @@ class SlugRenameTest(unittest.TestCase):
         # A printing vanished while a different-looking one appeared for the
         # same card in another set. Retire + add, or a rename with a set
         # change? Not decidable from the data: quarantine.
-        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", card_number=4)])
+        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_number="004")])
         api = api_of([card("Witch")],
                      [printing("099-witch-p-s", "Witch", set_name="Promotional",
                                set_code="promotional", product="Organized_Play",
-                               card_number=99)])
+                               set_number="099")])
         plan = diff(reg, api)
         self.assertFalse(plan["printing_renames"])
         self.assertEqual(len(plan["ambiguous"]), 1)
@@ -199,7 +207,7 @@ class RemovalTest(unittest.TestCase):
         reg = registry_of([card("Witch")],
                           [printing("004-witch-b-s", "Witch"),
                            printing("old-witch-b-s", "Witch", retired_at="2026-01-01",
-                                    card_number=None)])
+                                    set_number=None)])
         api = api_of([card("Witch")], [printing("004-witch-b-s", "Witch")])
         plan = diff(reg, api)
         self.assertTrue(is_noop(plan), plan)
@@ -243,7 +251,7 @@ class CardRenameTest(unittest.TestCase):
                           [printing("004-gone-b-s", "Gone", rules_text="Old ability.")])
         api = api_of([card("Fresh", rules_text="New ability.", cost=9)],
                      [printing("009-fresh-b-s", "Fresh", rules_text="New ability.",
-                               cost=9, card_number=9)])
+                               cost=9, set_number="009")])
         plan = diff(reg, api)
         self.assertFalse(plan["card_renames"])
         self.assertEqual([c["name"] for c in plan["new_cards"]], ["Fresh"])
@@ -254,12 +262,12 @@ class DecisionsTest(unittest.TestCase):
     def ambiguous_fixture(self):
         reg = registry_of(
             [card("Witch")],
-            [printing("004-witch-b-s", "Witch", card_number=4),
-             printing("005-witch-b-s", "Witch", card_number=5)])
+            [printing("004-witch-b-s", "Witch", set_number="004"),
+             printing("005-witch-b-s", "Witch", set_number="005")])
         api = api_of(
             [card("Witch")],
-            [printing("021-witch-b-s", "Witch", card_number=21),
-             printing("022-witch-b-s", "Witch", card_number=22)])
+            [printing("021-witch-b-s", "Witch", set_number="021"),
+             printing("022-witch-b-s", "Witch", set_number="022")])
         return reg, api
 
     def test_decisions_resolve_a_quarantined_case(self):

@@ -4,7 +4,7 @@ Stable identifiers for every card and printing in **Sorcery: Contested Realm** -
 
 ## The problem
 
-The identifier most tools work from is the official API slug, e.g. `004-witch-b-s`. That slug is a composite key: set, collector number and printing are all packed into one string, in a format that was never publicly specified. Worse, the slug is derived from data that shifts - when the naming convention changed, every slug in a set changed with it, and every database keyed on those slugs broke at once.
+The identifier most tools work from is the official API slug, e.g. `004-witch-b-s`. That slug is a composite key: set number, card name, product and finish all packed into one string, in a format that was never publicly specified. Worse, the slug is derived from data that shifts - when the sets were renumbered, every slug changed with it, and every database keyed on those slugs broke at once. (And note what the slug does *not* contain: a collector number. Cards have no official serialisation within a set at all.)
 
 There is also nothing in the official data linking two printings of the same card to each other except the card's name, so every tool reconstructs that link by name-matching, which breaks at the first inconsistency.
 
@@ -34,7 +34,7 @@ If yes - the copy matters - you want the **printing**. If any copy of the card w
 
 If you know Yu-Gi-Oh or Magic tooling, this is the same two-level split you already use. Konami's printed passcode is a *card*-level ID (every reprint of a card shares it), while the printing level in Yu-Gi-Oh is the set number (`LOB-001`) - a composite of set code and collector number, which is precisely the kind of derived key that breaks when naming changes. Scryfall gives Magic stable IDs at both levels (`oracle_id` for the card, a per-printing id for the print). This registry does what Scryfall did: both levels, both stable, so nobody has to reconstruct either one by string-matching.
 
-Set, collector number, product and finish sit in ordinary columns *next to* the IDs, not inside them. When the official naming convention changes again, the slug column updates, a row is added to `slug_history`, and **the IDs do not move**. Nothing downstream needs remapping, ever.
+Set, set number, product and finish sit in ordinary columns *next to* the IDs, not inside them. When the official naming convention changes again, the slug column updates, a row is added to `slug_history`, and **the IDs do not move**. Nothing downstream needs remapping, ever.
 
 Three guarantees, enforced by CI on every commit, not by promise:
 
@@ -59,7 +59,7 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
                       "errata": false,
                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
   "printings":    [ { "printing_id": "P000001", "codex_id": "C000001", "slug": "001-apprentice_wizard-b-s",
-                      "set_code": "alpha", "card_number": 1, "product": "Booster",
+                      "set_code": "alpha", "set_number": "001", "product": "Booster",
                       "finish": "Standard", ... } ],
   "slug_history": [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ]
 }
@@ -67,7 +67,7 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 
 Practical notes:
 
-- **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `card_number` are conveniences that can change; `codex_id` and `printing_id` cannot.
+- **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `set_number` are conveniences that can change; `codex_id` and `printing_id` cannot. In particular: `set_number` is the official numbering parsed from the slug (001 = Alpha, 002 = Beta, ...) and it has already been renumbered once - that event is what this registry exists to absorb. `set_code` is a readable code the registry derives from the set's display name (`gothic`, `arthurian_legends`), since the official data provides no set code of its own.
 - **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `codex_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
 - **`errata` marks officially updated cards.** The upstream convention is that an errata'd card's rules text begins with `UPDATED`; the registry publishes that as a boolean so you don't have to know the convention. The flag is derived from the rules text at export time - if upstream changes how it marks errata, the flag follows the data. The rules text itself is always published verbatim (canonicalised, never rewritten).
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
@@ -102,7 +102,7 @@ Six tools, each returning a small, focused answer rather than the whole database
 | `get_card` | One card by `codex_id`, with its gameplay data and every printing of it. |
 | `get_printing` | One physical print by `printing_id`, with its set, product, finish and current slug. |
 | `search_cards` | Cards by name, type, element, rarity, or set. |
-| `set_contents` | Every distinct card in a set, with collector numbers - the authoritative answer to "how many cards are in set X". |
+| `set_contents` | Every distinct card in a set - the authoritative answer to "how many cards are in set X", which the official data states nowhere. |
 | `registry_stats` | Totals and per-set counts. |
 
 The server also teaches connected agents the ground rules (key on the IDs, never on slugs; only Avatars have life), so tools built with AI assistance inherit correct usage by default.
@@ -113,7 +113,7 @@ The official API occasionally ships errors (at the time of writing, 17 Gothic ca
 
 ## How updates happen
 
-A sync script fetches the official API, diffs it against the registry, and classifies every difference. New cards get new IDs. Attribute changes update in place. Slug renames are matched conservatively (name, rules text, set, product, finish, collector number) - and anything that does not resolve to an unambiguous one-to-one match is quarantined for human review instead of guessed at, because a wrong guess would silently fork one card into two IDs. Syncs are run manually (or via the manually-triggered GitHub Action) and land as pull requests, never as direct pushes.
+A sync script fetches the official API, diffs it against the registry, and classifies every difference. New cards get new IDs. Attribute changes update in place. Slug renames are matched conservatively (name, rules text, set, product, finish) - and anything that does not resolve to an unambiguous one-to-one match is quarantined for human review instead of guessed at, because a wrong guess would silently fork one card into two IDs. Syncs are run manually (or via the manually-triggered GitHub Action) and land as pull requests, never as direct pushes.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for running the pipeline yourself and for how ambiguous cases are resolved.
 

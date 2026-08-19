@@ -37,15 +37,17 @@ SLUG_RE = re.compile(r"^(\d+)-(.+)-([a-z_]+)-([a-z]+)$")
 
 
 def parse_slug(slug):
-    """Split a slug like '004-witch-b-s' into (card_number, name_segment,
-    product_code, finish_code). Returns (None, None, None, None) if the slug
-    does not match the known shape; the slug is stored regardless, parsing
-    only feeds the convenience columns."""
+    """Split a slug like '004-witch-b-s' into (set_number, name_segment,
+    product_code, finish_code). The leading digits are the SET's number
+    (001 = Alpha, 002 = Beta, ...), not a collector number - the official
+    data has no within-set serialisation at all. Kept as a string to
+    preserve its official spelling ('006', '999'). Returns four Nones if
+    the slug does not match the known shape; the slug is stored regardless,
+    parsing only feeds the convenience columns."""
     match = SLUG_RE.match(slug)
     if not match:
         return None, None, None, None
-    number, name_seg, product_code, finish_code = match.groups()
-    return int(number), name_seg, product_code, finish_code
+    return match.groups()
 
 
 def released_date(released_at):
