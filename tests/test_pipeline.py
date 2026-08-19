@@ -80,9 +80,10 @@ class CanonTest(unittest.TestCase):
         self.assertEqual(set_code("Alpha"), "alpha")
 
     def test_parse_slug(self):
-        self.assertEqual(parse_slug("004-witch-b-s"), (4, "witch", "b", "s"))
+        # The leading digits are the SET's number, kept as a string.
+        self.assertEqual(parse_slug("004-witch-b-s"), ("004", "witch", "b", "s"))
         self.assertEqual(parse_slug("999-apprentice_wizard-wk-f"),
-                         (999, "apprentice_wizard", "wk", "f"))
+                         ("999", "apprentice_wizard", "wk", "f"))
         self.assertEqual(parse_slug("unparseable"), (None, None, None, None))
 
 
@@ -94,7 +95,7 @@ class SnapshotTest(unittest.TestCase):
         self.assertEqual(wizard["rules_text"], "Spellcaster\nGenesis → Draw a spell.")
         printing = snapshot["printings"]["001-apprentice_wizard-b-s"]
         self.assertEqual(printing["rules_text"], wizard["rules_text"])
-        self.assertEqual(printing["card_number"], 1)
+        self.assertEqual(printing["set_number"], "001")
         self.assertEqual(printing["set_code"], "alpha")
         self.assertEqual(printing["released_at"], "2023-04-19")
 

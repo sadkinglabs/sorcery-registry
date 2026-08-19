@@ -7,7 +7,7 @@ what would change. sync.py applies plans; this module only decides.
 The rule that matters most: a rename is only recognised when the pairing
 is unambiguous. Cards pair on their full gameplay fingerprint (rules text,
 type, stats, thresholds). Printings pair within a card on set, product and
-finish, with collector number as a tiebreaker. Anything that does not
+finish. Anything that does not
 resolve to exactly one-to-one is quarantined for human review, because a
 wrong guess silently forks one card into two identities, which is the exact
 failure this registry exists to prevent.
@@ -210,28 +210,17 @@ def diff(registry, api, decisions=None):
     forced_new = set(decisions["new_printings"])
     pairable_added = [p for p in added if p["slug"] not in forced_new]
 
-    # Pass 1: strict key, collector number included.
-    def strict_key_old(p):
-        return (effective_card(p), p["set_name"], p["product"], p["finish"], p["card_number"])
-
-    def strict_key_new(p):
-        return (p["card_name"], p["set_name"], p["product"], p["finish"], p["card_number"])
-
-    groups = _group(missing, pairable_added, strict_key_old, strict_key_new)
-    for old, new in _one_to_one(groups):
-        missing.remove(old)
-        pairable_added.remove(new)
-        added.remove(new)
-        _record_rename(plan, old, new, "set+product+finish+number")
-
-    # Pass 2: same key without the collector number, for renumbered sets.
-    def loose_key_old(p):
+    # Pairing key: card + set + product + finish. Deliberately NOT the
+    # slug's set_number - that changes when the sets are renumbered, which
+    # is exactly the event a rename has to be matched across. (There is no
+    # collector number in the official data to tiebreak on.)
+    def pair_key_old(p):
         return (effective_card(p), p["set_name"], p["product"], p["finish"])
 
-    def loose_key_new(p):
+    def pair_key_new(p):
         return (p["card_name"], p["set_name"], p["product"], p["finish"])
 
-    groups = _group(missing, pairable_added, loose_key_old, loose_key_new)
+    groups = _group(missing, pairable_added, pair_key_old, pair_key_new)
     for old, new in _one_to_one(groups):
         missing.remove(old)
         pairable_added.remove(new)
@@ -257,11 +246,11 @@ def diff(registry, api, decisions=None):
                 "card": card_name,
                 "missing": [{"printing_id": p["printing_id"], "slug": p["slug"],
                              "set_name": p["set_name"], "product": p["product"],
-                             "finish": p["finish"], "card_number": p["card_number"]}
+                             "finish": p["finish"]}
                             for p in olds],
                 "candidates": [{"slug": p["slug"], "set_name": p["set_name"],
-                                "product": p["product"], "finish": p["finish"],
-                                "card_number": p["card_number"]} for p in news],
+                                "product": p["product"], "finish": p["finish"]}
+                               for p in news],
             })
             for p in news:
                 added.remove(p)

@@ -24,7 +24,7 @@ DATA = {
     ],
     "printings": [
         {"printing_id": "P000001", "codex_id": "C000001", "set_code": "alpha",
-         "set_name": "Alpha", "released_at": "2023-04-19", "card_number": 1,
+         "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
          "product": "Booster", "finish": "Standard",
          "slug": "001-apprentice_wizard-b-s", "artist": "A", "flavour_text": "",
          "type_text": "", "rarity": "Ordinary", "type": "Minion",
@@ -32,7 +32,7 @@ DATA = {
          "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
          "thr_water": 0, "image_hash": None, "retired_at": None},
         {"printing_id": "P000002", "codex_id": "C000001", "set_code": "beta",
-         "set_name": "Beta", "released_at": "2023-11-10", "card_number": 2,
+         "set_name": "Beta", "released_at": "2023-11-10", "set_number": "002",
          "product": "Booster", "finish": "Foil",
          "slug": "002-apprentice_wizard-b-f", "artist": "A", "flavour_text": "",
          "type_text": "", "rarity": "Ordinary", "type": "Minion",
@@ -40,7 +40,7 @@ DATA = {
          "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
          "thr_water": 0, "image_hash": None, "retired_at": None},
         {"printing_id": "P000003", "codex_id": "C000002", "set_code": "alpha",
-         "set_name": "Alpha", "released_at": "2023-04-19", "card_number": 4,
+         "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
          "product": "Booster", "finish": "Standard", "slug": "004-witch_x-b-s",
          "artist": "B", "flavour_text": "", "type_text": "", "rarity": "Elite",
          "type": "Minion", "rules_text": "Curse.", "cost": 2, "attack": 1,
@@ -180,7 +180,10 @@ class SetContentsTest(unittest.TestCase):
         result = Registry(copy.deepcopy(DATA)).set_contents("Alpha")
         self.assertEqual(result["distinct_cards"], 2)
         self.assertEqual(result["total_printings"], 2)
-        self.assertEqual([c["card_number"] for c in result["cards"]], [1, 4])
+        self.assertEqual(result["set_number"], "001")
+        # Ordered by name: the official data has no within-set serialisation.
+        self.assertEqual([c["name"] for c in result["cards"]],
+                         ["Apprentice Wizard", "Witch"])
 
 
 class StatsTest(unittest.TestCase):

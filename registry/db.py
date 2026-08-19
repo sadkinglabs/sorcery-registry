@@ -21,7 +21,7 @@ CARD_FIELDS = [
 ]
 
 PRINTING_FIELDS = [
-    "set_code", "set_name", "released_at", "card_number",
+    "set_code", "set_name", "released_at", "set_number",
     "product", "finish", "slug",
     "artist", "flavour_text", "type_text",
     "rarity", "type", "rules_text",
@@ -60,7 +60,7 @@ CREATE TABLE printings (
     set_code     TEXT NOT NULL,
     set_name     TEXT NOT NULL,
     released_at  TEXT,
-    card_number  INTEGER,
+    set_number   TEXT,
     product      TEXT,
     finish       TEXT,
     slug         TEXT NOT NULL UNIQUE,
