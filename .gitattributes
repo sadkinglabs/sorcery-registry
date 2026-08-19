@@ -1,0 +1,4 @@
+# The export is validated byte-for-byte against the database, so git must
+# never rewrite its line endings. Keep every text file LF on all platforms.
+* text=auto eol=lf
+*.sqlite binary
