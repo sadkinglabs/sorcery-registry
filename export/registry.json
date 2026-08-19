@@ -1,11 +1,12 @@
 {
   "header": {
-    "schema_version": 5,
+    "schema_version": 6,
     "source": "https://api.sorcerytcg.com/api/cards",
     "sets": 6,
     "cards": 1100,
     "printings": 3088,
-    "slug_history": 3088
+    "slug_history": 3088,
+    "name_history": 1100
   },
   "sets": [
     {
@@ -130811,6 +130812,6608 @@
     {
       "slug": "006-frog-bt-s",
       "printing_id": "P003088",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    }
+  ],
+  "name_history": [
+    {
+      "name": "Apprentice Wizard",
+      "codex_id": "C000001",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blood Ravens",
+      "codex_id": "C000002",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Candlemas Monks",
+      "codex_id": "C000003",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cloud Spirit",
+      "codex_id": "C000004",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Daperyll Vampire",
+      "codex_id": "C000005",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dead of Night Demon",
+      "codex_id": "C000006",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "East-West Dragon",
+      "codex_id": "C000007",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grandmaster Wizard",
+      "codex_id": "C000008",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grim Reaper",
+      "codex_id": "C000009",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gyre Hippogriffs",
+      "codex_id": "C000010",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Haast Eagle",
+      "codex_id": "C000011",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Headless Haunt",
+      "codex_id": "C000012",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Highland Clansmen",
+      "codex_id": "C000013",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Highland Falconer",
+      "codex_id": "C000014",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Highland Princess",
+      "codex_id": "C000015",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hounds of Ondaros",
+      "codex_id": "C000016",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kite Archer",
+      "codex_id": "C000017",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lord of the Void",
+      "codex_id": "C000018",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Men of Leng",
+      "codex_id": "C000019",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Midnight Rogue",
+      "codex_id": "C000020",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Moon Clan Werewolf",
+      "codex_id": "C000021",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Nightmare",
+      "codex_id": "C000022",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Nimbus Jinn",
+      "codex_id": "C000023",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Palliburrie Bats",
+      "codex_id": "C000024",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Peregrine Apparition",
+      "codex_id": "C000025",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Phantasmal Shade",
+      "codex_id": "C000026",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Phantom Steed",
+      "codex_id": "C000027",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Phase Assassin",
+      "codex_id": "C000028",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Plumed Pegasus",
+      "codex_id": "C000029",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Puppet Master",
+      "codex_id": "C000030",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Recurring Specter",
+      "codex_id": "C000031",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Riddle Sphinx",
+      "codex_id": "C000032",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Roaming Monster",
+      "codex_id": "C000033",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Skirmishers of Mu",
+      "codex_id": "C000034",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sky Baron",
+      "codex_id": "C000035",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sling Pixies",
+      "codex_id": "C000036",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Snow Leopard",
+      "codex_id": "C000037",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spectral Stalker",
+      "codex_id": "C000038",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spire Lich",
+      "codex_id": "C000039",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ultimate Horror",
+      "codex_id": "C000040",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vril Revenant",
+      "codex_id": "C000041",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wind Sylph",
+      "codex_id": "C000042",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Witherwing Hero",
+      "codex_id": "C000043",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Zephyranne Airship",
+      "codex_id": "C000044",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blink",
+      "codex_id": "C000045",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Browse",
+      "codex_id": "C000046",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Chain Lightning",
+      "codex_id": "C000047",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Chaos Twister",
+      "codex_id": "C000048",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Disenchant",
+      "codex_id": "C000049",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dream-Quest",
+      "codex_id": "C000050",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fade",
+      "codex_id": "C000051",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flanking Maneuver",
+      "codex_id": "C000052",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grapple Shot",
+      "codex_id": "C000053",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lightning Bolt",
+      "codex_id": "C000054",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mortality",
+      "codex_id": "C000055",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Occult Ritual",
+      "codex_id": "C000056",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Psionic Blast",
+      "codex_id": "C000057",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rain of Arrows",
+      "codex_id": "C000058",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Raise Dead",
+      "codex_id": "C000059",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Recall",
+      "codex_id": "C000060",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Telekinesis",
+      "codex_id": "C000061",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Teleport",
+      "codex_id": "C000062",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Unlikely Alliance",
+      "codex_id": "C000063",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Waypoint Portal",
+      "codex_id": "C000064",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Whirling Blades",
+      "codex_id": "C000065",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Windblast",
+      "codex_id": "C000066",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Evil Presence",
+      "codex_id": "C000067",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Summoning Sphere",
+      "codex_id": "C000068",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Thunderstorm",
+      "codex_id": "C000069",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wall of Air",
+      "codex_id": "C000070",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Albespine Pikemen",
+      "codex_id": "C000071",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Älvalinne Dryads",
+      "codex_id": "C000072",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Amazon Warriors",
+      "codex_id": "C000073",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Atlas Wanderers",
+      "codex_id": "C000074",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Autumn Unicorn",
+      "codex_id": "C000075",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Belmotte Longbowmen",
+      "codex_id": "C000076",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bone Rabble",
+      "codex_id": "C000077",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bosk Troll",
+      "codex_id": "C000078",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cave Trolls",
+      "codex_id": "C000079",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Conqueror Worm",
+      "codex_id": "C000080",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crown Prince",
+      "codex_id": "C000081",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dalcean Phalanx",
+      "codex_id": "C000082",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dwarven Digging Team",
+      "codex_id": "C000083",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Frontier Settlers",
+      "codex_id": "C000084",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gneissgnath Gnomes",
+      "codex_id": "C000085",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grey Wolves",
+      "codex_id": "C000086",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "House Arn Bannerman",
+      "codex_id": "C000087",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "King of the Realm",
+      "codex_id": "C000088",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Land Surveyor",
+      "codex_id": "C000089",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mage Slayer",
+      "codex_id": "C000090",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Master Tracker",
+      "codex_id": "C000091",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Midland Army",
+      "codex_id": "C000092",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Miracle Workers",
+      "codex_id": "C000093",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Monastery Gargoyle",
+      "codex_id": "C000094",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Monster Hunter",
+      "codex_id": "C000095",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mordric Druids",
+      "codex_id": "C000096",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mountain Giant",
+      "codex_id": "C000097",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pudge Butcher",
+      "codex_id": "C000098",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Queen of Midland",
+      "codex_id": "C000099",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Root Spider",
+      "codex_id": "C000100",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Royal Bodyguard",
+      "codex_id": "C000101",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Scent Hounds",
+      "codex_id": "C000102",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Scourge Zombies",
+      "codex_id": "C000103",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shield Maidens",
+      "codex_id": "C000104",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Silver Valkyries",
+      "codex_id": "C000105",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sirian Templar",
+      "codex_id": "C000106",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sisters of Silence",
+      "codex_id": "C000107",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Slumbering Giantess",
+      "codex_id": "C000108",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Squirming Mass",
+      "codex_id": "C000109",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stone-gaze Gorgons",
+      "codex_id": "C000110",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tragedy Worrywart",
+      "codex_id": "C000111",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vanguard Knights",
+      "codex_id": "C000112",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wicked Witch",
+      "codex_id": "C000113",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wild Boars",
+      "codex_id": "C000114",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wraetannis Titan",
+      "codex_id": "C000115",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Yourke Crossbowmen",
+      "codex_id": "C000116",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Assorted Animals",
+      "codex_id": "C000117",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Border Militia",
+      "codex_id": "C000118",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bury",
+      "codex_id": "C000119",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Call to War",
+      "codex_id": "C000120",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cave-In",
+      "codex_id": "C000121",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Common Sense",
+      "codex_id": "C000122",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Craterize",
+      "codex_id": "C000123",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dispel",
+      "codex_id": "C000124",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Divine Healing",
+      "codex_id": "C000125",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Earthquake",
+      "codex_id": "C000126",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Exorcism",
+      "codex_id": "C000127",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gigantism",
+      "codex_id": "C000128",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Minecart Madness",
+      "codex_id": "C000129",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Overpower",
+      "codex_id": "C000130",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shield Wall",
+      "codex_id": "C000131",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Star-seeds of Uhr",
+      "codex_id": "C000132",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Unravel",
+      "codex_id": "C000133",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crusade",
+      "codex_id": "C000134",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Entangle Terrain",
+      "codex_id": "C000135",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rest in Peace",
+      "codex_id": "C000136",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ancient Dragon",
+      "codex_id": "C000137",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Aramos Mercenaries",
+      "codex_id": "C000138",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Askelon Phoenix",
+      "codex_id": "C000139",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Awakened Mummies",
+      "codex_id": "C000140",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Azuridge Caravan",
+      "codex_id": "C000141",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bane Widow",
+      "codex_id": "C000142",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Beast of Burden",
+      "codex_id": "C000143",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bull Demons of Adum",
+      "codex_id": "C000144",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cauldron Crones",
+      "codex_id": "C000145",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cerberus in Chains",
+      "codex_id": "C000146",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Clamor of Harpies",
+      "codex_id": "C000147",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Colicky Dragonettes",
+      "codex_id": "C000148",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Courtesan Thaïs",
+      "codex_id": "C000149",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Death Dealer",
+      "codex_id": "C000150",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Doomsday Prophet",
+      "codex_id": "C000151",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Escyllion Cyclops",
+      "codex_id": "C000152",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Far East Assassin",
+      "codex_id": "C000153",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grösse Poltergeist",
+      "codex_id": "C000154",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hillock Basilisk",
+      "codex_id": "C000155",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Infernal Legion",
+      "codex_id": "C000156",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Karkemish Chimera",
+      "codex_id": "C000157",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lava Salamander",
+      "codex_id": "C000158",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Maze Minotaur",
+      "codex_id": "C000159",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ogre Goons",
+      "codex_id": "C000160",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Outback Strider",
+      "codex_id": "C000161",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Panorama Manticore",
+      "codex_id": "C000162",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Petrosian Cavalry",
+      "codex_id": "C000163",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pit Vipers",
+      "codex_id": "C000164",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Quarrelsome Kobolds",
+      "codex_id": "C000165",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Raal Dromedary",
+      "codex_id": "C000166",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rimland Nomads",
+      "codex_id": "C000167",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sacred Scarabs",
+      "codex_id": "C000168",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sand Worm",
+      "codex_id": "C000169",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Scavenging Fiend",
+      "codex_id": "C000170",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Seasoned Sellsword",
+      "codex_id": "C000171",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sirocco Scorpions",
+      "codex_id": "C000172",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Swiven Scout",
+      "codex_id": "C000173",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tvinnax Berserker",
+      "codex_id": "C000174",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vile Imp",
+      "codex_id": "C000175",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wayfaring Pilgrim",
+      "codex_id": "C000176",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wills-o'-the-Wisp",
+      "codex_id": "C000177",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Backstab",
+      "codex_id": "C000178",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blaze",
+      "codex_id": "C000179",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Boil",
+      "codex_id": "C000180",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cone of Flame",
+      "codex_id": "C000181",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Critical Strike",
+      "codex_id": "C000182",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Disintegrate",
+      "codex_id": "C000183",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fireball",
+      "codex_id": "C000184",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Firebolts",
+      "codex_id": "C000185",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flame Wave",
+      "codex_id": "C000186",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Heat Ray",
+      "codex_id": "C000187",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Immolation",
+      "codex_id": "C000188",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Incinerate",
+      "codex_id": "C000189",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Infiltrate",
+      "codex_id": "C000190",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Leap Attack",
+      "codex_id": "C000191",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mad Dash",
+      "codex_id": "C000192",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Major Explosion",
+      "codex_id": "C000193",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Meteor Shower",
+      "codex_id": "C000194",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Minor Explosion",
+      "codex_id": "C000195",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pact with the Devil",
+      "codex_id": "C000196",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Poison Nova",
+      "codex_id": "C000197",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Scorched Earth",
+      "codex_id": "C000198",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spin Attack",
+      "codex_id": "C000199",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Warp Spasm",
+      "codex_id": "C000200",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Drought",
+      "codex_id": "C000201",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Jihad",
+      "codex_id": "C000202",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sandstorm",
+      "codex_id": "C000203",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wall of Fire",
+      "codex_id": "C000204",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wildfire",
+      "codex_id": "C000205",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Accursed Albatross",
+      "codex_id": "C000206",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Adept Illusionist",
+      "codex_id": "C000207",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Anui Undine",
+      "codex_id": "C000208",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bridge Troll",
+      "codex_id": "C000209",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Brobdingnag Bullfrog",
+      "codex_id": "C000210",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Captain Baldassare",
+      "codex_id": "C000211",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Coral-Reef Kelpie",
+      "codex_id": "C000212",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Court Jester",
+      "codex_id": "C000213",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Deep-Sea Mermaids",
+      "codex_id": "C000214",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Diluvian Kraken",
+      "codex_id": "C000215",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Felbog Frog Men",
+      "codex_id": "C000216",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fenvale Muse",
+      "codex_id": "C000217",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fey Changeling",
+      "codex_id": "C000218",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ghost Ship",
+      "codex_id": "C000219",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Giant Shark",
+      "codex_id": "C000220",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Great Old One",
+      "codex_id": "C000221",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Guile Sirens",
+      "codex_id": "C000222",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lord of Unland",
+      "codex_id": "C000223",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Megamoeba",
+      "codex_id": "C000224",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mother Nature",
+      "codex_id": "C000225",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Muck Lampreys",
+      "codex_id": "C000226",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Old Salt Anchorman",
+      "codex_id": "C000227",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ormund Harpooneers",
+      "codex_id": "C000228",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pirate Ship",
+      "codex_id": "C000229",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Polar Bears",
+      "codex_id": "C000230",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Polar Explorers",
+      "codex_id": "C000231",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Porcupine Pufferfish",
+      "codex_id": "C000232",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ruler of Thul",
+      "codex_id": "C000233",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sea Raider",
+      "codex_id": "C000234",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sea Serpent",
+      "codex_id": "C000235",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sedge Crabs",
+      "codex_id": "C000236",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Seirawan Hydra",
+      "codex_id": "C000237",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Selfsame Simulacrum",
+      "codex_id": "C000238",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sneak Thief",
+      "codex_id": "C000239",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Swamp Buffalo",
+      "codex_id": "C000240",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Swan Maidens",
+      "codex_id": "C000241",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tide Naiads",
+      "codex_id": "C000242",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tringh Constrictor",
+      "codex_id": "C000243",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tufted Turtles",
+      "codex_id": "C000244",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Unland Angler",
+      "codex_id": "C000245",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Unland Eel",
+      "codex_id": "C000246",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Yokai Kappas",
+      "codex_id": "C000247",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dodge Roll",
+      "codex_id": "C000248",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Drown",
+      "codex_id": "C000249",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Extinguish",
+      "codex_id": "C000250",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fire Harpoons!",
+      "codex_id": "C000251",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Font of Life",
+      "codex_id": "C000252",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Frost Nova",
+      "codex_id": "C000253",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Geyser",
+      "codex_id": "C000254",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ice Lance",
+      "codex_id": "C000255",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Marine Voyage",
+      "codex_id": "C000256",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Plague of Frogs",
+      "codex_id": "C000257",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pollimorph",
+      "codex_id": "C000258",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Replication",
+      "codex_id": "C000259",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Riptide",
+      "codex_id": "C000260",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shrink",
+      "codex_id": "C000261",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sleep",
+      "codex_id": "C000262",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stormy Seas",
+      "codex_id": "C000263",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Twist of Fate",
+      "codex_id": "C000264",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Upwelling",
+      "codex_id": "C000265",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wrath of the Sea",
+      "codex_id": "C000266",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Abundance",
+      "codex_id": "C000267",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Atlantean Fate",
+      "codex_id": "C000268",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blizzard",
+      "codex_id": "C000269",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flood",
+      "codex_id": "C000270",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mariner's Curse",
+      "codex_id": "C000271",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Silence",
+      "codex_id": "C000272",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wall of Ice",
+      "codex_id": "C000273",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "All-terrain Vestments",
+      "codex_id": "C000274",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Amethyst Core",
+      "codex_id": "C000275",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Angel's Egg",
+      "codex_id": "C000276",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Aquamarine Core",
+      "codex_id": "C000277",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Battering Ram",
+      "codex_id": "C000278",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Belfry",
+      "codex_id": "C000279",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Black Obelisk",
+      "codex_id": "C000280",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blasted Oak",
+      "codex_id": "C000281",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Buried Treasure",
+      "codex_id": "C000282",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Chains of Prometheus",
+      "codex_id": "C000283",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crave Golem",
+      "codex_id": "C000284",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crown of the Victor",
+      "codex_id": "C000285",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Devil's Egg",
+      "codex_id": "C000286",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Doomsday Device",
+      "codex_id": "C000287",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Drums of Doom",
+      "codex_id": "C000288",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Erik's Curiosa",
+      "codex_id": "C000289",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flaming Sword",
+      "codex_id": "C000290",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gilded Aegis",
+      "codex_id": "C000291",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Iron Shackles",
+      "codex_id": "C000292",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kythera Mechanism",
+      "codex_id": "C000293",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Land Deed",
+      "codex_id": "C000294",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lucky Charm",
+      "codex_id": "C000295",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Maddening Bells",
+      "codex_id": "C000296",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Magellan Globe",
+      "codex_id": "C000297",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Magnetic Muzzle",
+      "codex_id": "C000298",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mask of Mayhem",
+      "codex_id": "C000299",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mix Aer",
+      "codex_id": "C000300",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mix Aqua",
+      "codex_id": "C000301",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mix Ignis",
+      "codex_id": "C000302",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mix Terra",
+      "codex_id": "C000303",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Onyx Core",
+      "codex_id": "C000304",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Orb of Ba'al Berith",
+      "codex_id": "C000305",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Payload Trebuchet",
+      "codex_id": "C000306",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pendulum of Peril",
+      "codex_id": "C000307",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Philosopher's Stone",
+      "codex_id": "C000308",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pnakotic Manuscript",
+      "codex_id": "C000309",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Poisonous Dagger",
+      "codex_id": "C000310",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Purge Juggernaut",
+      "codex_id": "C000311",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rolling Boulder",
+      "codex_id": "C000312",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ruby Core",
+      "codex_id": "C000313",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Scarecrow",
+      "codex_id": "C000314",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Screaming Skull",
+      "codex_id": "C000315",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Seven-League Boots",
+      "codex_id": "C000316",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Siege Ballista",
+      "codex_id": "C000317",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spear of Destiny",
+      "codex_id": "C000318",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sunken Treasure",
+      "codex_id": "C000319",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Immortal Throne",
+      "codex_id": "C000320",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Torshammar Trinket",
+      "codex_id": "C000321",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Truesight Crossbow",
+      "codex_id": "C000322",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Undertaker Engine",
+      "codex_id": "C000323",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wicker Manikin",
+      "codex_id": "C000324",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wings of Invention",
+      "codex_id": "C000325",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cloud City",
+      "codex_id": "C000326",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dark Tower",
+      "codex_id": "C000327",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gothic Tower",
+      "codex_id": "C000328",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lone Tower",
+      "codex_id": "C000329",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mountain Pass",
+      "codex_id": "C000330",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Observatory",
+      "codex_id": "C000331",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Updraft Ridge",
+      "codex_id": "C000332",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Watchtower",
+      "codex_id": "C000333",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bedrock",
+      "codex_id": "C000334",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gnome Hollows",
+      "codex_id": "C000335",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Holy Ground",
+      "codex_id": "C000336",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Humble Village",
+      "codex_id": "C000337",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kingdom of Agartha",
+      "codex_id": "C000338",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pillar of Zeiros",
+      "codex_id": "C000339",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Quagmire",
+      "codex_id": "C000340",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rift Valley",
+      "codex_id": "C000341",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rustic Village",
+      "codex_id": "C000342",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Secret Tunnel",
+      "codex_id": "C000343",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Simple Village",
+      "codex_id": "C000344",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vantage Hills",
+      "codex_id": "C000345",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Arid Desert",
+      "codex_id": "C000346",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dwarven Forge",
+      "codex_id": "C000347",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mirage",
+      "codex_id": "C000348",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Red Desert",
+      "codex_id": "C000349",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Remote Desert",
+      "codex_id": "C000350",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "River of Flame",
+      "codex_id": "C000351",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shifting Sands",
+      "codex_id": "C000352",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Smokestacks of Gnaak",
+      "codex_id": "C000353",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vesuvius",
+      "codex_id": "C000354",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Autumn River",
+      "codex_id": "C000355",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Floodplain",
+      "codex_id": "C000356",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Iceberg",
+      "codex_id": "C000357",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Island Leviathan",
+      "codex_id": "C000358",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Maelström",
+      "codex_id": "C000359",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spring River",
+      "codex_id": "C000360",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Summer River",
+      "codex_id": "C000361",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tadpole Pool",
+      "codex_id": "C000362",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Undertow",
+      "codex_id": "C000363",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Aqueduct",
+      "codex_id": "C000364",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lighthouse",
+      "codex_id": "C000365",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Oasis",
+      "codex_id": "C000366",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pristine Paradise",
+      "codex_id": "C000367",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ruins",
+      "codex_id": "C000368",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Steppe",
+      "codex_id": "C000369",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Colour Out of Space",
+      "codex_id": "C000370",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Windmill",
+      "codex_id": "C000371",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Astral Alcazar",
+      "codex_id": "C000372",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Battlefield",
+      "codex_id": "C000373",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Boneyard",
+      "codex_id": "C000374",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bottomless Pit",
+      "codex_id": "C000375",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cornerstone",
+      "codex_id": "C000376",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crossroads",
+      "codex_id": "C000377",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dome of Osiros",
+      "codex_id": "C000378",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Donnybrook Inn",
+      "codex_id": "C000379",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Edge of the World",
+      "codex_id": "C000380",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Free City",
+      "codex_id": "C000381",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Great Wall",
+      "codex_id": "C000382",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Imperial Road",
+      "codex_id": "C000383",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mirror Realm",
+      "codex_id": "C000384",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mudflow",
+      "codex_id": "C000385",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Planar Gate",
+      "codex_id": "C000386",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Primordial Spring",
+      "codex_id": "C000387",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Roots of Yggdrasil",
+      "codex_id": "C000388",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sinkhole",
+      "codex_id": "C000389",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Standing Stones",
+      "codex_id": "C000390",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Geistwood",
+      "codex_id": "C000391",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vaults of Zul",
+      "codex_id": "C000392",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Avatar of Air",
+      "codex_id": "C000393",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Avatar of Earth",
+      "codex_id": "C000394",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Avatar of Fire",
+      "codex_id": "C000395",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Avatar of Water",
+      "codex_id": "C000396",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Battlemage",
+      "codex_id": "C000397",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Deathspeaker",
+      "codex_id": "C000398",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Elementalist",
+      "codex_id": "C000399",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Enchantress",
+      "codex_id": "C000400",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pathfinder",
+      "codex_id": "C000401",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Seer",
+      "codex_id": "C000402",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sorcerer",
+      "codex_id": "C000403",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Relentless Crowd",
+      "codex_id": "C000404",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Winter River",
+      "codex_id": "C000405",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sparkmage",
+      "codex_id": "C000406",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Geomancer",
+      "codex_id": "C000407",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flamecaller",
+      "codex_id": "C000408",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Waveshaper",
+      "codex_id": "C000409",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spellslinger",
+      "codex_id": "C000410",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spire",
+      "codex_id": "C000411",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stream",
+      "codex_id": "C000412",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Valley",
+      "codex_id": "C000413",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wasteland",
+      "codex_id": "C000414",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "13 Treasures of Britain",
+      "codex_id": "C000415",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "A Midsummer Night's Dream",
+      "codex_id": "C000416",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Amulet of Niniane",
+      "codex_id": "C000417",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Annual Fair",
+      "codex_id": "C000418",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Arcane Barrage",
+      "codex_id": "C000419",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Archimago",
+      "codex_id": "C000420",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Arc Lightning",
+      "codex_id": "C000421",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Attack by Night",
+      "codex_id": "C000422",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Avalon",
+      "codex_id": "C000423",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Babbling Brook",
+      "codex_id": "C000424",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bailey",
+      "codex_id": "C000425",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ball Lightning",
+      "codex_id": "C000426",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Band of Thieves",
+      "codex_id": "C000427",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Beacon",
+      "codex_id": "C000428",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Black Knight",
+      "codex_id": "C000429",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blacksmith Family",
+      "codex_id": "C000430",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bluecap Knockers",
+      "codex_id": "C000431",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blue Knight",
+      "codex_id": "C000432",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blunderbore",
+      "codex_id": "C000433",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bog",
+      "codex_id": "C000434",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bonfire",
+      "codex_id": "C000435",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Boudicca",
+      "codex_id": "C000436",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bower of Bliss",
+      "codex_id": "C000437",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Briar Patch",
+      "codex_id": "C000438",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Brocéliande",
+      "codex_id": "C000439",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Brother Knight",
+      "codex_id": "C000440",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Brown Bears",
+      "codex_id": "C000441",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Burning Hands",
+      "codex_id": "C000442",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Caerleon-Upon-Usk",
+      "codex_id": "C000443",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Camelot",
+      "codex_id": "C000444",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cast into Exile",
+      "codex_id": "C000445",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Castle Haunt",
+      "codex_id": "C000446",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Castle's Ablaze!",
+      "codex_id": "C000447",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Castle Servants",
+      "codex_id": "C000448",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Charge",
+      "codex_id": "C000449",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cold Iron Rod",
+      "codex_id": "C000450",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Common Cottagers",
+      "codex_id": "C000451",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Common Village",
+      "codex_id": "C000452",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Coy Nixie",
+      "codex_id": "C000453",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cursed Land",
+      "codex_id": "C000454",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dame Britomart",
+      "codex_id": "C000455",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Degradation",
+      "codex_id": "C000456",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dirium Fomorians",
+      "codex_id": "C000457",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dozmary Pool",
+      "codex_id": "C000458",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Druid",
+      "codex_id": "C000459",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Duel",
+      "codex_id": "C000460",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Excalibur",
+      "codex_id": "C000461",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fae City",
+      "codex_id": "C000462",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fail-not Bow",
+      "codex_id": "C000463",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Feast for Crows",
+      "codex_id": "C000464",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Field Laborers",
+      "codex_id": "C000465",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fields of Camlann",
+      "codex_id": "C000466",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fine Courser",
+      "codex_id": "C000467",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Finwife",
+      "codex_id": "C000468",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Firebreathing",
+      "codex_id": "C000469",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fisherman's Family",
+      "codex_id": "C000470",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Forge",
+      "codex_id": "C000471",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fourberie Knot",
+      "codex_id": "C000472",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Four Waters of Paradise",
+      "codex_id": "C000473",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Frisky Red Squirrel",
+      "codex_id": "C000474",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Funeral Pyre",
+      "codex_id": "C000475",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Giant Killer",
+      "codex_id": "C000476",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Glastonbury Tor",
+      "codex_id": "C000477",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Golden Harp",
+      "codex_id": "C000478",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Goswhit Helmet",
+      "codex_id": "C000479",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grain Sparrow",
+      "codex_id": "C000480",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grand Old Boar",
+      "codex_id": "C000481",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grievous Insult",
+      "codex_id": "C000482",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grim Guisarme",
+      "codex_id": "C000483",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Guards!",
+      "codex_id": "C000484",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hamlet",
+      "codex_id": "C000485",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hamlet's Ablaze!",
+      "codex_id": "C000486",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Harassing Ruffians",
+      "codex_id": "C000487",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Helpful Hob",
+      "codex_id": "C000488",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Horn of Caerleon",
+      "codex_id": "C000489",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hunter's Lodge",
+      "codex_id": "C000490",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hunting Party",
+      "codex_id": "C000491",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hyter Sprites",
+      "codex_id": "C000492",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Impenetrable Copse",
+      "codex_id": "C000493",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Invasion",
+      "codex_id": "C000494",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Iron Man Talus",
+      "codex_id": "C000495",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Joust!",
+      "codex_id": "C000496",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Joyous Garde",
+      "codex_id": "C000497",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Just a Rock",
+      "codex_id": "C000498",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Keening Banshee",
+      "codex_id": "C000499",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kelp Cavern",
+      "codex_id": "C000500",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kettletop Leprechaun",
+      "codex_id": "C000501",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "King Arthur",
+      "codex_id": "C000502",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "King's Council",
+      "codex_id": "C000503",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kingswood Poachers",
+      "codex_id": "C000504",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Knighthood",
+      "codex_id": "C000505",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lady Iseult",
+      "codex_id": "C000506",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lake Afanc",
+      "codex_id": "C000507",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lava Flow",
+      "codex_id": "C000508",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Led Astray",
+      "codex_id": "C000509",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Leyline Henge",
+      "codex_id": "C000510",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lookout",
+      "codex_id": "C000511",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Love Potion",
+      "codex_id": "C000512",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lugbog Cat",
+      "codex_id": "C000513",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lumbering Giant",
+      "codex_id": "C000514",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Magic Missiles",
+      "codex_id": "C000515",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Major City",
+      "codex_id": "C000516",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Merlin",
+      "codex_id": "C000517",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Merlin's Staff",
+      "codex_id": "C000518",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Merlin's Tower",
+      "codex_id": "C000519",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mesmerism",
+      "codex_id": "C000520",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mester Stoor Worm",
+      "codex_id": "C000521",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Monstrous Lion",
+      "codex_id": "C000522",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Morgana le Fay",
+      "codex_id": "C000523",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Muirid Fomorians",
+      "codex_id": "C000524",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Nelly Longarms",
+      "codex_id": "C000525",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ominous Owl",
+      "codex_id": "C000526",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Overbearing Bailiff",
+      "codex_id": "C000527",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Peasant Revolt",
+      "codex_id": "C000528",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pebbled Paths",
+      "codex_id": "C000529",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pendragon Banner",
+      "codex_id": "C000530",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pendragon Legacy",
+      "codex_id": "C000531",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Perilous Bridge",
+      "codex_id": "C000532",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pigs of the Sounder",
+      "codex_id": "C000533",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Poisoned Well",
+      "codex_id": "C000534",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pond",
+      "codex_id": "C000535",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pookas",
+      "codex_id": "C000536",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Postern Gate",
+      "codex_id": "C000537",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Power of Flight",
+      "codex_id": "C000538",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Purple Knight",
+      "codex_id": "C000539",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Queen Guinevere",
+      "codex_id": "C000540",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Questing Beast",
+      "codex_id": "C000541",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rebecks",
+      "codex_id": "C000542",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Reckless Squire",
+      "codex_id": "C000543",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Redbreast Robin",
+      "codex_id": "C000544",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Redcap Powries",
+      "codex_id": "C000545",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rescue",
+      "codex_id": "C000546",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rhitta Gawr of Snowdonia",
+      "codex_id": "C000547",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rhongomyniad",
+      "codex_id": "C000548",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ribble Boggart",
+      "codex_id": "C000549",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ring of Morrigan",
+      "codex_id": "C000550",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Salmon of Knowledge",
+      "codex_id": "C000551",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Saracen Raiders",
+      "codex_id": "C000552",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Saracen Scout",
+      "codex_id": "C000553",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Seelie Court",
+      "codex_id": "C000554",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shameless Squire",
+      "codex_id": "C000555",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shapeshift",
+      "codex_id": "C000556",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shatter Strike",
+      "codex_id": "C000557",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shellycoat",
+      "codex_id": "C000558",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sherwood Huntress",
+      "codex_id": "C000559",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Siege Giant",
+      "codex_id": "C000560",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Agravaine",
+      "codex_id": "C000561",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Balin",
+      "codex_id": "C000562",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Bedivere",
+      "codex_id": "C000563",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Bors the Younger",
+      "codex_id": "C000564",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Gaheris",
+      "codex_id": "C000565",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Galahad",
+      "codex_id": "C000566",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Gareth",
+      "codex_id": "C000567",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Gawain",
+      "codex_id": "C000568",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Ironside",
+      "codex_id": "C000569",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Kay",
+      "codex_id": "C000570",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Lamorak",
+      "codex_id": "C000571",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Lancelot",
+      "codex_id": "C000572",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Mordred",
+      "codex_id": "C000573",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Morien",
+      "codex_id": "C000574",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Pelleas",
+      "codex_id": "C000575",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Pellinore",
+      "codex_id": "C000576",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Perceval",
+      "codex_id": "C000577",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Priamus",
+      "codex_id": "C000578",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Tom Thumb",
+      "codex_id": "C000579",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Tristan",
+      "codex_id": "C000580",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sir Yvain",
+      "codex_id": "C000581",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sisters of Avalon",
+      "codex_id": "C000582",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sly Fox",
+      "codex_id": "C000583",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Snowball",
+      "codex_id": "C000584",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spearmarshal",
+      "codex_id": "C000585",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Squeakers",
+      "codex_id": "C000586",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stone Rain",
+      "codex_id": "C000587",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sugarplum Pixies",
+      "codex_id": "C000588",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Swindler Troupe",
+      "codex_id": "C000589",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sword and Shield",
+      "codex_id": "C000590",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sylvan Splendor",
+      "codex_id": "C000591",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tactical Move",
+      "codex_id": "C000592",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tax Collector",
+      "codex_id": "C000593",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Templar",
+      "codex_id": "C000594",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Thankless Squire",
+      "codex_id": "C000595",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Black Plague",
+      "codex_id": "C000596",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Faerie Queene",
+      "codex_id": "C000597",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Great Drowning of Men",
+      "codex_id": "C000598",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Great Famine",
+      "codex_id": "C000599",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Green Knight",
+      "codex_id": "C000600",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Lady of the Lake",
+      "codex_id": "C000601",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Ninth Legion",
+      "codex_id": "C000602",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Round Table",
+      "codex_id": "C000603",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Wild Hunt",
+      "codex_id": "C000604",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Thieving Magpie",
+      "codex_id": "C000605",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Thundering Giant",
+      "codex_id": "C000606",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tintagel",
+      "codex_id": "C000607",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tithe",
+      "codex_id": "C000608",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tooth Faeries",
+      "codex_id": "C000609",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tournament Grounds",
+      "codex_id": "C000610",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Town",
+      "codex_id": "C000611",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Treetop Hideout",
+      "codex_id": "C000612",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Troll Bridge",
+      "codex_id": "C000613",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Unseelie Court",
+      "codex_id": "C000614",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Valley of Delight",
+      "codex_id": "C000615",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Valor",
+      "codex_id": "C000616",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vanishment",
+      "codex_id": "C000617",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Varmint Warrens",
+      "codex_id": "C000618",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vengeful Heir",
+      "codex_id": "C000619",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Verdant Knight",
+      "codex_id": "C000620",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vikings",
+      "codex_id": "C000621",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vivien the Enchantress",
+      "codex_id": "C000622",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wall of Brambles",
+      "codex_id": "C000623",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "War Horse",
+      "codex_id": "C000624",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wedding Hall",
+      "codex_id": "C000625",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Weightless Squire",
+      "codex_id": "C000626",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Whirlwind",
+      "codex_id": "C000627",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "White Hart",
+      "codex_id": "C000628",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "White Knight",
+      "codex_id": "C000629",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Witch",
+      "codex_id": "C000630",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wizard's Den",
+      "codex_id": "C000631",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wolpertinger",
+      "codex_id": "C000632",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wormelow Tump",
+      "codex_id": "C000633",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wyvern",
+      "codex_id": "C000634",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Year of the Blaze",
+      "codex_id": "C000635",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Yellow Knight",
+      "codex_id": "C000636",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dragonlord",
+      "codex_id": "C000637",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kairos the Archivist",
+      "codex_id": "C000638",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Caelestis",
+      "codex_id": "C000639",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Xeraphine Konrul",
+      "codex_id": "C000640",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Draco Corvus",
+      "codex_id": "C000641",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Moonsong Talagelum",
+      "codex_id": "C000642",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Adtonitum",
+      "codex_id": "C000643",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Talamh Dreig",
+      "codex_id": "C000644",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ignis Rex",
+      "codex_id": "C000645",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vatn Draconis",
+      "codex_id": "C000646",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cradle of Etherrum",
+      "codex_id": "C000647",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shrine of the Dragonlord",
+      "codex_id": "C000648",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dragonlord's Lair",
+      "codex_id": "C000649",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rubble",
+      "codex_id": "C000650",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bruin",
+      "codex_id": "C000651",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tawny",
+      "codex_id": "C000652",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Day of Judgment",
+      "codex_id": "C000653",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Swap",
+      "codex_id": "C000654",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "River of Blood",
+      "codex_id": "C000655",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Haystack",
+      "codex_id": "C000656",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fields of Phyxis",
+      "codex_id": "C000657",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lance",
+      "codex_id": "C000658",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Aaj-kegon Ghost Crabs",
+      "codex_id": "C000659",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Abaddon Succubus",
+      "codex_id": "C000660",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Abyssal Assault",
+      "codex_id": "C000661",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Accursed Desert",
+      "codex_id": "C000662",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Accursed Tower",
+      "codex_id": "C000663",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Accusation",
+      "codex_id": "C000664",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Acid Rain",
+      "codex_id": "C000665",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Active Volcano",
+      "codex_id": "C000666",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Aethermoeba",
+      "codex_id": "C000667",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Aino",
+      "codex_id": "C000668",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Alabaster Box",
+      "codex_id": "C000669",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Algae Bloom",
+      "codex_id": "C000670",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Algor Omphalos",
+      "codex_id": "C000671",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "All Mortals Gone",
+      "codex_id": "C000672",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Altar of Malachai",
+      "codex_id": "C000673",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Angel Ascendant",
+      "codex_id": "C000674",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Angry Mob",
+      "codex_id": "C000675",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Animist",
+      "codex_id": "C000676",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Apostles of Thamariel",
+      "codex_id": "C000677",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Apply Alkahest",
+      "codex_id": "C000678",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Arcade of Bones",
+      "codex_id": "C000679",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Archangel Gabriel",
+      "codex_id": "C000680",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Archangel Michael",
+      "codex_id": "C000681",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Archangel Raphael",
+      "codex_id": "C000682",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Archangel Samael",
+      "codex_id": "C000683",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Arjaro Exorcist",
+      "codex_id": "C000684",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Armageddon",
+      "codex_id": "C000685",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Army of the Dead",
+      "codex_id": "C000686",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Asmodeus",
+      "codex_id": "C000687",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Assimilator Snail",
+      "codex_id": "C000688",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Autumn Bloom",
+      "codex_id": "C000689",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Avenging Angel",
+      "codex_id": "C000690",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Baba Yaga's Hut",
+      "codex_id": "C000691",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Balor of the Evil Eye",
+      "codex_id": "C000692",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bane of Aventis",
+      "codex_id": "C000693",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Baptize",
+      "codex_id": "C000694",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Barging Barghest",
+      "codex_id": "C000695",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Barrow Wight",
+      "codex_id": "C000696",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Begone!",
+      "codex_id": "C000697",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Betrayal",
+      "codex_id": "C000698",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bind Evil",
+      "codex_id": "C000699",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bitten",
+      "codex_id": "C000700",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bitter Departed",
+      "codex_id": "C000701",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Black Cat",
+      "codex_id": "C000702",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Black Mass",
+      "codex_id": "C000703",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bladderblimp",
+      "codex_id": "C000704",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bladedancer",
+      "codex_id": "C000705",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blade of Thorns",
+      "codex_id": "C000706",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blasphemy",
+      "codex_id": "C000707",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blaze of Glory",
+      "codex_id": "C000708",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bleeding Skull",
+      "codex_id": "C000709",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bless",
+      "codex_id": "C000710",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blessed Village",
+      "codex_id": "C000711",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blessed Well",
+      "codex_id": "C000712",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blightstone",
+      "codex_id": "C000713",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Blood Mana",
+      "codex_id": "C000714",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bodach Bogeyman",
+      "codex_id": "C000715",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bone Jumble",
+      "codex_id": "C000716",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bone Spear",
+      "codex_id": "C000717",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Book Burners",
+      "codex_id": "C000718",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Book of Blessings",
+      "codex_id": "C000719",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Book of the Dead",
+      "codex_id": "C000720",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Boulevard of Bones",
+      "codex_id": "C000721",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bound Spirit",
+      "codex_id": "C000722",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Broomstick Witch",
+      "codex_id": "C000723",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bull Whip",
+      "codex_id": "C000724",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Bureau of Occult Control",
+      "codex_id": "C000725",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Buried Alive",
+      "codex_id": "C000726",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cage of Sidrak",
+      "codex_id": "C000727",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Call of the Sea",
+      "codex_id": "C000728",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Carrion Beetles",
+      "codex_id": "C000729",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Carrionette",
+      "codex_id": "C000730",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cemetery Rats",
+      "codex_id": "C000731",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Chaoswish",
+      "codex_id": "C000732",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Char Omphalos",
+      "codex_id": "C000733",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cherubim",
+      "codex_id": "C000734",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Chorus of Condemnation",
+      "codex_id": "C000735",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "City of Glass",
+      "codex_id": "C000736",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "City of Plenty",
+      "codex_id": "C000737",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "City of Souls",
+      "codex_id": "C000738",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "City of Traitors",
+      "codex_id": "C000739",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Clairvoyant",
+      "codex_id": "C000740",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Clay Golem",
+      "codex_id": "C000741",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Consecrate",
+      "codex_id": "C000742",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Consecrated Ground",
+      "codex_id": "C000743",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Corpse Catapult",
+      "codex_id": "C000744",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Corpse Explosion",
+      "codex_id": "C000745",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Corruptor",
+      "codex_id": "C000746",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Corruptor Freak",
+      "codex_id": "C000747",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cranky Overseer",
+      "codex_id": "C000748",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crawler",
+      "codex_id": "C000749",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crawling Congregation",
+      "codex_id": "C000750",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Croaking Swamp",
+      "codex_id": "C000751",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Croll Morlocks",
+      "codex_id": "C000752",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Crucifix",
+      "codex_id": "C000753",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Cursed Iron",
+      "codex_id": "C000754",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dank Omphalos",
+      "codex_id": "C000755",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dark Alley",
+      "codex_id": "C000756",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Darkest Dungeon",
+      "codex_id": "C000757",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Death Knight",
+      "codex_id": "C000758",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Deathwish",
+      "codex_id": "C000759",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Deep Sea",
+      "codex_id": "C000760",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Defiler Spire",
+      "codex_id": "C000761",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Deliverance",
+      "codex_id": "C000762",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Demon Hunter",
+      "codex_id": "C000763",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Demonic Contract",
+      "codex_id": "C000764",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Den of Evil",
+      "codex_id": "C000765",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Desecrate",
+      "codex_id": "C000766",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Desecrated Ground",
+      "codex_id": "C000767",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Desecrator Kite",
+      "codex_id": "C000768",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Desert Bloom",
+      "codex_id": "C000769",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Detonate",
+      "codex_id": "C000770",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "De Vermis Mysteriis",
+      "codex_id": "C000771",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dhol Chants",
+      "codex_id": "C000772",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Displace",
+      "codex_id": "C000773",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Divine Intervention",
+      "codex_id": "C000774",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Divine Lance",
+      "codex_id": "C000775",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Doctor Demetrius",
+      "codex_id": "C000776",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Doomsday Cult",
+      "codex_id": "C000777",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dormant Monstrosity",
+      "codex_id": "C000778",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Draconian Bonekite",
+      "codex_id": "C000779",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dread Thicket",
+      "codex_id": "C000780",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dreadwing",
+      "codex_id": "C000781",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Dredge",
+      "codex_id": "C000782",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Driftwood Marrows",
+      "codex_id": "C000783",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Drowned",
+      "codex_id": "C000784",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Duplicator",
+      "codex_id": "C000785",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Earl of the Ivory Towers",
+      "codex_id": "C000786",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Eclipse",
+      "codex_id": "C000787",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Eerie Coral",
+      "codex_id": "C000788",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Elder Ruins",
+      "codex_id": "C000789",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Eltham Townsfolk",
+      "codex_id": "C000790",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Endless Fence",
+      "codex_id": "C000791",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Enduring Faith",
+      "codex_id": "C000792",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Enraged Familiar",
+      "codex_id": "C000793",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Entombed",
+      "codex_id": "C000794",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ersatz Platz",
+      "codex_id": "C000795",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Estranged Loner",
+      "codex_id": "C000796",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ether Core",
+      "codex_id": "C000797",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Evil Twin",
+      "codex_id": "C000798",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Exhume",
+      "codex_id": "C000799",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Failed Mutation",
+      "codex_id": "C000800",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Faith Incarnate",
+      "codex_id": "C000801",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fallen Angel",
+      "codex_id": "C000802",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Falling Star",
+      "codex_id": "C000803",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "False Idol",
+      "codex_id": "C000804",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fatality",
+      "codex_id": "C000805",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Feign Death",
+      "codex_id": "C000806",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ferryman's Coin",
+      "codex_id": "C000807",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fertile Earth",
+      "codex_id": "C000808",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flagellant",
+      "codex_id": "C000809",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flame of the First Ones",
+      "codex_id": "C000810",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flame Strike",
+      "codex_id": "C000811",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flaming Skull",
+      "codex_id": "C000812",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Flayer",
+      "codex_id": "C000813",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Forgotten Tomb",
+      "codex_id": "C000814",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Forlorn Keep",
+      "codex_id": "C000815",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Forsaken",
+      "codex_id": "C000816",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Forsaken Crypt",
+      "codex_id": "C000817",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Four Fat Frogs",
+      "codex_id": "C000818",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Fowl Bones",
+      "codex_id": "C000819",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Freeze",
+      "codex_id": "C000820",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Frozen Horror",
+      "codex_id": "C000821",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Garden of Eden",
+      "codex_id": "C000822",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gargantula",
+      "codex_id": "C000823",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ghostfire",
+      "codex_id": "C000824",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ghost Town",
+      "codex_id": "C000825",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ghoul",
+      "codex_id": "C000826",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gibbous Nightgaunts",
+      "codex_id": "C000827",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gift of the Frog",
+      "codex_id": "C000828",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gift of the Raven",
+      "codex_id": "C000829",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gift of the Serpent",
+      "codex_id": "C000830",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gift of the Wolf",
+      "codex_id": "C000831",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gilman House",
+      "codex_id": "C000832",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gloam Toads",
+      "codex_id": "C000833",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gnarled Wendigo",
+      "codex_id": "C000834",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Goat for Azazel",
+      "codex_id": "C000835",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Golden Dawn",
+      "codex_id": "C000836",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Golgor",
+      "codex_id": "C000837",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gossamer Ghost",
+      "codex_id": "C000838",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Granary Rats",
+      "codex_id": "C000839",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grasping Ground",
+      "codex_id": "C000840",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Gravedigger",
+      "codex_id": "C000841",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Greater Blood Demon",
+      "codex_id": "C000842",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grief Larvae",
+      "codex_id": "C000843",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Grigori Rasputin",
+      "codex_id": "C000844",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Guardian Angel",
+      "codex_id": "C000845",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hand of Glory",
+      "codex_id": "C000846",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Harbinger",
+      "codex_id": "C000847",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Harpyon Urge",
+      "codex_id": "C000848",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Harvest Festival",
+      "codex_id": "C000849",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hauntless Head",
+      "codex_id": "C000850",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hearkening Kraken",
+      "codex_id": "C000851",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Heirloom Lost",
+      "codex_id": "C000852",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hellfire",
+      "codex_id": "C000853",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hellhounds",
+      "codex_id": "C000854",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hellmouth",
+      "codex_id": "C000855",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hellstar",
+      "codex_id": "C000856",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hemogoblet",
+      "codex_id": "C000857",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hemogoblin",
+      "codex_id": "C000858",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hemogolem",
+      "codex_id": "C000859",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Heretics of Seth",
+      "codex_id": "C000860",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hillside Chapel",
+      "codex_id": "C000861",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hollow One",
+      "codex_id": "C000862",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Holy Nova",
+      "codex_id": "C000863",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Holy Warrior",
+      "codex_id": "C000864",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Holy Water",
+      "codex_id": "C000865",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Homecoming",
+      "codex_id": "C000866",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Horns of Behemoth",
+      "codex_id": "C000867",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Horrible Hybrids",
+      "codex_id": "C000868",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hotwheel",
+      "codex_id": "C000869",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Howl from Beyond",
+      "codex_id": "C000870",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Hyperparasite",
+      "codex_id": "C000871",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "I Am Colossus!",
+      "codex_id": "C000872",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ice Shards",
+      "codex_id": "C000873",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ignited",
+      "codex_id": "C000874",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Imposter",
+      "codex_id": "C000875",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Infusion Factory",
+      "codex_id": "C000876",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Innsmouth Dock",
+      "codex_id": "C000877",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Instigator Imp",
+      "codex_id": "C000878",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Interrogator",
+      "codex_id": "C000879",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Into the Abyss",
+      "codex_id": "C000880",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Intrepid Hero",
+      "codex_id": "C000881",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Invigorate",
+      "codex_id": "C000882",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ironclad",
+      "codex_id": "C000883",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Iron Maiden",
+      "codex_id": "C000884",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Jack the Ripper",
+      "codex_id": "C000885",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Key to the City",
+      "codex_id": "C000886",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Khamaseen Mummy",
+      "codex_id": "C000887",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kissers of Wounds",
+      "codex_id": "C000888",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kiss of Death",
+      "codex_id": "C000889",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kiss of Judas",
+      "codex_id": "C000890",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Kor Crematory",
+      "codex_id": "C000891",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Koschei's Egg",
+      "codex_id": "C000892",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lacuna Entity",
+      "codex_id": "C000893",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Landmass",
+      "codex_id": "C000894",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lash",
+      "codex_id": "C000895",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Leadworks",
+      "codex_id": "C000896",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Legion of Gall",
+      "codex_id": "C000897",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lesser Blood Demon",
+      "codex_id": "C000898",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lifewish",
+      "codex_id": "C000899",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lilith",
+      "codex_id": "C000900",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Locusts of Illyria",
+      "codex_id": "C000901",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lord of Destruction",
+      "codex_id": "C000902",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lord of Fear",
+      "codex_id": "C000903",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lord of Greed",
+      "codex_id": "C000904",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lord of Lies",
+      "codex_id": "C000905",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lucid Dreamers",
+      "codex_id": "C000906",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Lure",
+      "codex_id": "C000907",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Magician",
+      "codex_id": "C000908",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Maiden, Mother, Crone",
+      "codex_id": "C000909",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Makeshift Barricade",
+      "codex_id": "C000910",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Malakhim",
+      "codex_id": "C000911",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mandrake Jars",
+      "codex_id": "C000912",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Martyrs of Tomorrow",
+      "codex_id": "C000913",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Master Necromancer",
+      "codex_id": "C000914",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mayor of Milborne",
+      "codex_id": "C000915",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Màzuj Ifrit",
+      "codex_id": "C000916",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Meat Hook",
+      "codex_id": "C000917",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Megalurker",
+      "codex_id": "C000918",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mephistopheles",
+      "codex_id": "C000919",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mesmer Demon",
+      "codex_id": "C000920",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mimic",
+      "codex_id": "C000921",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mismanaged Mortuary",
+      "codex_id": "C000922",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Molten Maar",
+      "codex_id": "C000923",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Monks of Kobalsa",
+      "codex_id": "C000924",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Monstermorphosis",
+      "codex_id": "C000925",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mortal Soil",
+      "codex_id": "C000926",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Moss Troll",
+      "codex_id": "C000927",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mountain Peaks",
+      "codex_id": "C000928",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mount Ussar Sanctuary",
+      "codex_id": "C000929",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mover of Mountains",
+      "codex_id": "C000930",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Muddy Pigs",
+      "codex_id": "C000931",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mudslide",
+      "codex_id": "C000932",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Murder of Crows",
+      "codex_id": "C000933",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Myrrh's Trophy Room",
+      "codex_id": "C000934",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Nadir Seed",
+      "codex_id": "C000935",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Necromancer",
+      "codex_id": "C000936",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Necronomiconcert",
+      "codex_id": "C000937",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Necropotence",
+      "codex_id": "C000938",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Nightwatchmen",
+      "codex_id": "C000939",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Noisome Twosome",
+      "codex_id": "C000940",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "No Man's Land",
+      "codex_id": "C000941",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Nommo Monitor",
+      "codex_id": "C000942",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Nosferatu",
+      "codex_id": "C000943",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Novice Necromancer",
+      "codex_id": "C000944",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Noxious Corpse",
+      "codex_id": "C000945",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Old Mortimer's Den",
+      "codex_id": "C000946",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "One-shot Wizard",
+      "codex_id": "C000947",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Onslaught",
+      "codex_id": "C000948",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Open Grave",
+      "codex_id": "C000949",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Open Mausoleum",
+      "codex_id": "C000950",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ophanim",
+      "codex_id": "C000951",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Order of the Pale Worm",
+      "codex_id": "C000952",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Order of the Sacred Oak",
+      "codex_id": "C000953",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Order of the White Wing",
+      "codex_id": "C000954",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Orm Infestor",
+      "codex_id": "C000955",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Orpheus' Crossing",
+      "codex_id": "C000956",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Overflow",
+      "codex_id": "C000957",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Paladins of Bazia",
+      "codex_id": "C000958",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Panpipes of Pnom",
+      "codex_id": "C000959",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Peacemaker Arbalest",
+      "codex_id": "C000960",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Peace Offering",
+      "codex_id": "C000961",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Peculiar Port",
+      "codex_id": "C000962",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Penitent Knight",
+      "codex_id": "C000963",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Persecutor",
+      "codex_id": "C000964",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pied Piper of Hameln",
+      "codex_id": "C000965",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pile of Skulls",
+      "codex_id": "C000966",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pilgrim's Shrine",
+      "codex_id": "C000967",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Pith Imp",
+      "codex_id": "C000968",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Plague Pits",
+      "codex_id": "C000969",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Plague Rat",
+      "codex_id": "C000970",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Plate of the Whale",
+      "codex_id": "C000971",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Powerwish",
+      "codex_id": "C000972",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Profane Revenant",
+      "codex_id": "C000973",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Purgatory",
+      "codex_id": "C000974",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Putrid Presence",
+      "codex_id": "C000975",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Raise Militia",
+      "codex_id": "C000976",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rat King",
+      "codex_id": "C000977",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ravenous Werewolf",
+      "codex_id": "C000978",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Raze",
+      "codex_id": "C000979",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Realm-Eater",
+      "codex_id": "C000980",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Redmane Hyena",
+      "codex_id": "C000981",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Red Rock of Ravannis",
+      "codex_id": "C000982",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Regurgitator",
+      "codex_id": "C000983",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Release the Hounds",
+      "codex_id": "C000984",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Renatus Trueblood",
+      "codex_id": "C000985",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Returned King",
+      "codex_id": "C000986",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Return to Nature",
+      "codex_id": "C000987",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Revered Revenant",
+      "codex_id": "C000988",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "River Rapids",
+      "codex_id": "C000989",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Road to Perdition",
+      "codex_id": "C000990",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Rowdy Boys",
+      "codex_id": "C000991",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sacred Stag",
+      "codex_id": "C000992",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Saint of Redemption",
+      "codex_id": "C000993",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Saintweald",
+      "codex_id": "C000994",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Salt the Earth",
+      "codex_id": "C000995",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Satanic Panic",
+      "codex_id": "C000996",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Savior",
+      "codex_id": "C000997",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sawbones",
+      "codex_id": "C000998",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Scatter",
+      "codex_id": "C000999",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Screamer",
+      "codex_id": "C001000",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sea of Ash",
+      "codex_id": "C001001",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Search Party",
+      "codex_id": "C001002",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Searing Truth",
+      "codex_id": "C001003",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sea Witch",
+      "codex_id": "C001004",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Second Wind",
+      "codex_id": "C001005",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sensu of the Fang",
+      "codex_id": "C001006",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sentinel Trap",
+      "codex_id": "C001007",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Seraphim",
+      "codex_id": "C001008",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Serava Townsfolk",
+      "codex_id": "C001009",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sewer Rats",
+      "codex_id": "C001010",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shackled Demon",
+      "codex_id": "C001011",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shallow Grave",
+      "codex_id": "C001012",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shoggoth",
+      "codex_id": "C001013",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Shrike Orchard",
+      "codex_id": "C001014",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Silent Hills",
+      "codex_id": "C001015",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Silver Bullet",
+      "codex_id": "C001016",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sinister Pond",
+      "codex_id": "C001017",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sinterfee",
+      "codex_id": "C001018",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sister Stefánia",
+      "codex_id": "C001019",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sjaelström",
+      "codex_id": "C001020",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Skeleton Mage",
+      "codex_id": "C001021",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Slimy Mutants",
+      "codex_id": "C001022",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Slobbermaw",
+      "codex_id": "C001023",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Smite",
+      "codex_id": "C001024",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Snallygaster",
+      "codex_id": "C001025",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sold-out Cemetery",
+      "codex_id": "C001026",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sow the Earth",
+      "codex_id": "C001027",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sphere of Animosity",
+      "codex_id": "C001028",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sphinx Sarcophagus",
+      "codex_id": "C001029",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Spore Spouts",
+      "codex_id": "C001030",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stagecoach",
+      "codex_id": "C001031",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stargazer",
+      "codex_id": "C001032",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Static Servant",
+      "codex_id": "C001033",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stinging Kelp",
+      "codex_id": "C001034",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stitched Abomination",
+      "codex_id": "C001035",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Sturmgeist",
+      "codex_id": "C001036",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Stygian Archers",
+      "codex_id": "C001037",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Survivors of Serava",
+      "codex_id": "C001038",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Symmetric Suffering",
+      "codex_id": "C001039",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tabula Rasa",
+      "codex_id": "C001040",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Temple of Moloch",
+      "codex_id": "C001041",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Ten-tonne Slug",
+      "codex_id": "C001042",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Apex of Babel",
+      "codex_id": "C001043",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Base of Babel",
+      "codex_id": "C001044",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Doom of Dilmun",
+      "codex_id": "C001045",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Empyrean",
+      "codex_id": "C001046",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Flood",
+      "codex_id": "C001047",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Hexham Haunts",
+      "codex_id": "C001048",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Inquisition",
+      "codex_id": "C001049",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Malleus Maleficarum",
+      "codex_id": "C001050",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Manor at Daperyll Hill",
+      "codex_id": "C001051",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Pallid Bust",
+      "codex_id": "C001052",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Rack",
+      "codex_id": "C001053",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "The Void",
+      "codex_id": "C001054",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Thing in the Ice",
+      "codex_id": "C001055",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Thin Ice",
+      "codex_id": "C001056",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Those Who Linger",
+      "codex_id": "C001057",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Thumb Screws",
+      "codex_id": "C001058",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Tombstone Wardens",
+      "codex_id": "C001059",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Toolbox",
+      "codex_id": "C001060",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Torch and Pitchfork",
+      "codex_id": "C001061",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Torrid Omphalos",
+      "codex_id": "C001062",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Town Priest",
+      "codex_id": "C001063",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Trade Encampment",
+      "codex_id": "C001064",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Trial by Fire",
+      "codex_id": "C001065",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Trial by Water",
+      "codex_id": "C001066",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Troubled Town",
+      "codex_id": "C001067",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Twilight Bloom",
+      "codex_id": "C001068",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Undead Ambush",
+      "codex_id": "C001069",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Undesirables",
+      "codex_id": "C001070",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vampire Bats",
+      "codex_id": "C001071",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vandal Imp",
+      "codex_id": "C001072",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Varistus the Evictor",
+      "codex_id": "C001073",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vast Desert",
+      "codex_id": "C001074",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vesper Swarm",
+      "codex_id": "C001075",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Vindictive Nation",
+      "codex_id": "C001076",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Virgin in Prayer",
+      "codex_id": "C001077",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Watery Grave",
+      "codex_id": "C001078",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wave of Eviction",
+      "codex_id": "C001079",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Weathered Trunks",
+      "codex_id": "C001080",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wiccan Tools",
+      "codex_id": "C001081",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wild Fanatic",
+      "codex_id": "C001082",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Willing Tribute",
+      "codex_id": "C001083",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Winter Nymph",
+      "codex_id": "C001084",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Witching Hour",
+      "codex_id": "C001085",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wreathed in Righteousness",
+      "codex_id": "C001086",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Wuthering Heights",
+      "codex_id": "C001087",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Yog-Sothoth",
+      "codex_id": "C001088",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Young Master Damion",
+      "codex_id": "C001089",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Zap!",
+      "codex_id": "C001090",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Zeppelin of Zealots",
+      "codex_id": "C001091",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Zombie Bruiser",
+      "codex_id": "C001092",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Zombie Horde",
+      "codex_id": "C001093",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Skeleton",
+      "codex_id": "C001094",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Overflowing Court",
+      "codex_id": "C001095",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Court of Equity",
+      "codex_id": "C001096",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mobbed Court",
+      "codex_id": "C001097",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Mock Court",
+      "codex_id": "C001098",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Foot Soldier",
+      "codex_id": "C001099",
+      "valid_from": "2026-08-19",
+      "valid_to": null
+    },
+    {
+      "name": "Frog",
+      "codex_id": "C001100",
       "valid_from": "2026-08-19",
       "valid_to": null
     }

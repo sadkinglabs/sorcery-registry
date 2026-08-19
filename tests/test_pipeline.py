@@ -169,6 +169,15 @@ class EndToEndTest(unittest.TestCase):
              "released_at": "2026-05-01", "cards": 1, "printings": 1},
         ])
 
+        # Every card starts with one open name_history row carrying its name.
+        self.assertEqual(export_one["header"]["name_history"], 2)
+        by_name = {h["name"]: h for h in export_one["name_history"]}
+        self.assertEqual(sorted(by_name), ["Apprentice Wizard", "Broken Site"])
+        self.assertEqual(by_name["Apprentice Wizard"]["codex_id"], wizard_id)
+        for row in export_one["name_history"]:
+            self.assertEqual(row["valid_from"], "2026-08-19")
+            self.assertIsNone(row["valid_to"])
+
         # Second run, same data: a no-op, and the export is byte-identical.
         plan = diff(load_registry_state(con), snapshot)
         self.assertTrue(is_noop(plan))
@@ -235,6 +244,22 @@ class EndToEndTest(unittest.TestCase):
         self.assertEqual(state["cards"]["Apprentice Sorcerer"]["card_id"], wizard_id)
         self.assertEqual(len(state["cards"]), 2)
 
+        # The old name stays resolvable: its row is closed, a new one opens.
+        export = build_export(con)
+        codex_id = next(c["codex_id"] for c in export["cards"]
+                        if c["name"] == "Apprentice Sorcerer")
+        old_rows = [h for h in export["name_history"]
+                    if h["name"] == "Apprentice Wizard"]
+        self.assertEqual(len(old_rows), 1)
+        self.assertEqual(old_rows[0]["codex_id"], codex_id)
+        self.assertEqual(old_rows[0]["valid_to"], "2026-08-20")
+        new_rows = [h for h in export["name_history"]
+                    if h["name"] == "Apprentice Sorcerer"]
+        self.assertEqual(len(new_rows), 1)
+        self.assertEqual(new_rows[0]["codex_id"], codex_id)
+        self.assertEqual(new_rows[0]["valid_from"], "2026-08-20")
+        self.assertIsNone(new_rows[0]["valid_to"])
+
         # And the same snapshot now diffs to nothing at all.
         self.assertTrue(is_noop(diff(state, modified_snapshot)))
 
@@ -287,6 +312,57 @@ class ExportArtifactsTest(unittest.TestCase):
         export = json.loads(render(build_export(con)))
         errors = list(jsonschema.Draft202012Validator(schema).iter_errors(export))
         self.assertEqual(errors, [], [e.message for e in errors[:3]])
+
+
+class NameHistoryValidationTest(unittest.TestCase):
+    def test_missing_open_name_row_is_reported(self):
+        from registry.validate import check_internal
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+
+        errors = []
+        check_internal(con, errors)
+        self.assertEqual(errors, [])
+
+        con.execute("UPDATE name_history SET valid_to = '2026-01-01' "
+                    "WHERE card_id = 1 AND valid_to IS NULL")
+        errors = []
+        check_internal(con, errors)
+        self.assertTrue(any("open name_history rows" in e for e in errors), errors)
+
+
+class ManifestTest(unittest.TestCase):
+    def test_manifest_reports_counts_and_digests(self):
+        import tempfile
+        from pathlib import Path
+        from registry.export import checksum_path, write_export
+        from registry.manifest import build_manifest
+
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        header = build_export(con)["header"]
+
+        schema_path = Path(__file__).resolve().parent.parent / "schema" / "registry.schema.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            export_path = Path(tmp) / "registry.json"
+            write_export(con, export_path)
+            db_path = Path(tmp) / "registry.sqlite"
+            db_path.write_bytes(b"only the bytes of this file matter to the manifest")
+
+            manifest = build_manifest("v0.0.0-test", export_path, db_path, schema_path)
+            stated = checksum_path(export_path).read_text(encoding="utf-8").split()[0]
+
+        self.assertEqual(manifest["dataset_version"], "v0.0.0-test")
+        self.assertEqual(manifest["schema_version"], header["schema_version"])
+        for key in ("sets", "cards", "printings", "slug_history", "name_history"):
+            self.assertEqual(manifest["counts"][key], header[key])
+        self.assertEqual([a["name"] for a in manifest["artifacts"]],
+                         ["registry.json", "registry.sqlite", "registry.schema.json"])
+        self.assertEqual(manifest["artifacts"][0]["sha256"], stated)
 
 
 if __name__ == "__main__":

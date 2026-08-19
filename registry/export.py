@@ -96,6 +96,17 @@ def build_export(con):
             "valid_to": row["valid_to"],
         })
 
+    name_history = []
+    for row in con.execute(
+            "SELECT name, card_id, valid_from, valid_to FROM name_history "
+            "ORDER BY card_id, valid_from, name"):
+        name_history.append({
+            "name": row["name"],
+            "codex_id": format_card_id(row["card_id"]),
+            "valid_from": row["valid_from"],
+            "valid_to": row["valid_to"],
+        })
+
     return {
         "header": {
             "schema_version": SCHEMA_VERSION,
@@ -104,11 +115,13 @@ def build_export(con):
             "cards": len(cards),
             "printings": len(printings),
             "slug_history": len(slug_history),
+            "name_history": len(name_history),
         },
         "sets": sets,
         "cards": cards,
         "printings": printings,
         "slug_history": slug_history,
+        "name_history": name_history,
     }
 
 

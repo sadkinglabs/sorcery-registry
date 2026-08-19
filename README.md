@@ -44,6 +44,12 @@ Five guarantees, enforced by CI on every commit, not by promise:
 4. A card that vanishes upstream while new names appear is never automatically issued a new ID. Unmatched disappearances and newcomers stop the sync for human review.
 5. Once a slug has referred to a printing, it can never refer to a different one. The database engine itself rejects such a write, the sync quarantines it, and the resolver refuses to guess if it ever meets corrupt data.
 
+## Tokens and play pieces
+
+The registry covers every game piece the official API publishes - which already includes most tokens, since they exist as physical printings (the box-topper tokens, for instance). Game pieces that have never appeared in the official data - app-local token definitions - are deliberately out of scope: the registry never invents records.
+
+If you need local play pieces, mint IDs in your own namespace and **do not use the `C` or `P` prefixes**, so a local ID can never collide with a registry ID. If such a piece later appears officially, resolve it by name and attributes once, then store the registry ID alongside your local one.
+
 ## What this is not
 
 - Not a hosted service. There is no server and no endpoint; you consume a file (or run the bundled MCP server locally - see below).

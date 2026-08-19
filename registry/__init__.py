@@ -15,5 +15,7 @@ API slug demoted to an ordinary, mutable column.
 # (schema/registry.schema.json). No database changes.
 # v5: slug ownership enforced - a slug can never move to a different
 # printing_id (engine triggers + planner + validator).
-SCHEMA_VERSION = 5
+# v6: name_history - card renames tracked like slug renames, seeded with
+# current names; export gains the section; release manifest tooling added.
+SCHEMA_VERSION = 6
 API_URL = "https://api.sorcerytcg.com/api/cards"
