@@ -6,6 +6,11 @@
     python -m registry.sync --interactive    # resolve ambiguities at the prompt
     python -m registry.sync --from-file X    # use a saved API response
 
+Every run that goes to the network saves the raw payload to
+review/upstream-snapshot.json before doing anything with it, so a later
+--from-file run can act on the exact same bytes. Runs that already read
+--from-file leave the snapshot alone.
+
 Exit codes: 0 clean (applied, or nothing to do), 2 ambiguous cases were
 quarantined to review/pending.json, 1 error.
 
@@ -32,6 +37,7 @@ from .fetch import apply_overrides, build_snapshot, fetch_api, load_api_file, lo
 PENDING_PATH = Path("review") / "pending.json"
 DECISIONS_PATH = Path("review") / "decisions.json"
 ARCHIVE_DIR = Path("review") / "archive"
+SNAPSHOT_PATH = Path("review") / "upstream-snapshot.json"
 OVERRIDES_PATH = Path("data") / "overrides.json"
 
 
@@ -127,6 +133,15 @@ def _apply_plan(con, plan, as_of):
     con.commit()
 
 
+def save_snapshot(raw, path=SNAPSHOT_PATH):
+    """Keep the raw payload of a network fetch on disk, so the same run can
+    be repeated exactly with --from-file. It is a working artifact, not a
+    committed one: .gitignore excludes it."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(raw, ensure_ascii=False) + "\n")
+
+
 def resolve_interactively(plan):
     """Walk each quarantined case at the prompt and build a decisions dict."""
     decisions = {"card_renames": [], "new_cards": [], "printing_renames": [],
@@ -181,7 +196,13 @@ def main():
         sys.exit(f"database schema version does not match code ({SCHEMA_VERSION}); refusing to run")
 
     print("fetching API data..." if not args.from_file else f"reading {args.from_file}...")
-    raw = load_api_file(args.from_file) if args.from_file else fetch_api()
+    if args.from_file:
+        raw = load_api_file(args.from_file)
+    else:
+        raw = fetch_api()
+        save_snapshot(raw)
+        print(f"snapshot saved to {SNAPSHOT_PATH.as_posix()} "
+              f"(re-run with --from-file to act on these exact bytes)")
     snapshot = build_snapshot(raw)
     if OVERRIDES_PATH.exists():
         unmatched = apply_overrides(snapshot, load_overrides(OVERRIDES_PATH))
