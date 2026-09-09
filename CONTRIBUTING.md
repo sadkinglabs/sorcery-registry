@@ -19,7 +19,7 @@ Found a card whose registry data is wrong?
 }
 ```
 
-  Every entry needs a `reason` - it is the audit trail. A field is written wherever the record has that column: `life` is a card fact, `artist` a printing fact. Add `"set_name"` inside `match` to restrict the fix to one set's printings; without it the fix applies to the card and all its printings. When upstream later fixes the error, the sync flags the entry as matching nothing and it gets removed.
+  Every entry needs a `reason` - it is the audit trail. A field is written wherever the record has that column: `life` is a card fact, `artist` a printing fact. The registry-owned `errata` flag is corrected the same way (`"set_fields": { "errata": true }`), since upstream has no value for it. Add `"set_name"` inside `match` to restrict the fix to one set's printings; without it the fix applies to the card and all its printings. When upstream later fixes the error, the sync flags the entry as matching nothing and it gets removed.
 
 - If the registry disagrees with the API for no documented reason: that is a bug in the pipeline. Open an issue with both values.
 

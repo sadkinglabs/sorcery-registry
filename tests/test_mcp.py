@@ -26,7 +26,7 @@ DATA = {
          "keywords": ["Spellcaster", "Genesis"], "umbrellas": [],
          "cost": 3, "attack": 1, "defense": 1, "life": None,
          "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
-         "rules_text": "Spellcaster", "back": None,
+         "rules_text": "Spellcaster", "back": None, "errata": False,
          "set_codes": ["001", "002"], "printing_ids": ["P000001", "P000002"]},
         {"codex_id": "C000002", "name": "Witch", "type": "Minion",
          "category": "Spell", "rarity": "Elite", "slot": "Elite",
@@ -34,7 +34,7 @@ DATA = {
          "keywords": ["Spellcaster"], "umbrellas": ["Evil"],
          "cost": 2, "attack": 1, "defense": 1, "life": None,
          "thr_air": 0, "thr_earth": 0, "thr_fire": 0, "thr_water": 1,
-         "rules_text": "Curse.", "back": None,
+         "rules_text": "Curse.", "back": None, "errata": True,
          "set_codes": ["001"], "printing_ids": ["P000003"]},
     ],
     "printings": [
@@ -184,6 +184,12 @@ class SearchTest(unittest.TestCase):
         self.assertEqual(result["cards"][0]["keywords"], ["Spellcaster", "Genesis"])
         self.assertEqual(self.reg.search_cards(category="Spell")["total_matches"], 2)
         self.assertEqual(self.reg.search_cards(category="Site")["total_matches"], 0)
+
+    def test_errata_filter(self):
+        result = self.reg.search_cards(errata=True)
+        self.assertEqual([c["name"] for c in result["cards"]], ["Witch"])
+        self.assertTrue(result["cards"][0]["errata"])
+        self.assertEqual(self.reg.search_cards(errata=False)["total_matches"], 1)
 
     def test_limit_reports_total(self):
         result = self.reg.search_cards(limit=1)

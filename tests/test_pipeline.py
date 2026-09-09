@@ -201,6 +201,8 @@ class EndToEndTest(unittest.TestCase):
         self.assertEqual(wizard["keywords"], ["Spellcaster", "Genesis"])
         self.assertEqual(wizard["elements"], ["Air"])
         self.assertIsNone(wizard["back"])
+        # New cards have never been updated: the registry-owned flag is off.
+        self.assertFalse(wizard["errata"])
         broken = next(c for c in export_one["cards"] if c["name"] == "Broken Site")
         # Derived set data: per-card set membership and the set catalogue,
         # whose release date is the earliest printing date in the set.
@@ -347,6 +349,9 @@ class RulesHistoryTest(unittest.TestCase):
         export = build_export(con)
         wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
         self.assertEqual(wizard["rules_text"], "Spellcaster\nGenesis → Draw two spells.")
+        # An observed rewording is what errata means now that upstream no
+        # longer marks it; the flag is set alongside the history row.
+        self.assertTrue(wizard["errata"])
         rows = [h for h in export["rules_history"] if h["codex_id"] == wizard["codex_id"]]
         self.assertEqual(rows, [
             {"rules_text": "Spellcaster\nGenesis → Draw a spell.",
@@ -360,6 +365,28 @@ class RulesHistoryTest(unittest.TestCase):
         broken = next(c for c in export["cards"] if c["name"] == "Broken Site")
         self.assertEqual(len([h for h in export["rules_history"]
                               if h["codex_id"] == broken["codex_id"]]), 1)
+        self.assertFalse(broken["errata"])
+        # The same snapshot diffs to nothing: the flag is not compared
+        # against upstream, which has no value for it.
+        self.assertTrue(is_noop(diff(load_registry_state(con), build_snapshot(reworded))))
+
+    def test_override_can_correct_the_flag(self):
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        snapshot = build_snapshot(copy.deepcopy(RAW_API))
+        apply_overrides(snapshot, [{
+            "match": {"card_name": "Broken Site"}, "set_fields": {"errata": True},
+            "reason": "reworded before the registry existed"}])
+        plan = diff(load_registry_state(con), snapshot)
+        self.assertEqual(plan["card_updates"][0]["changes"],
+                         {"errata": {"old": False, "new": True}})
+        apply_plan(con, plan, "2026-09-01")
+        export = build_export(con)
+        self.assertTrue(next(c for c in export["cards"] if c["name"] == "Broken Site")["errata"])
+        # No text changed, so no history row was touched.
+        self.assertEqual(export["header"]["rules_history"], 2)
 
 
 class FrozenFlavourTextTest(unittest.TestCase):
@@ -409,7 +436,7 @@ class BackFaceRoundTripTest(unittest.TestCase):
 
         export = build_export(con)
         wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
-        front_keys = [k for k in wizard if k not in ("codex_id", "name", "back",
+        front_keys = [k for k in wizard if k not in ("codex_id", "name", "back", "errata",
                                                      "set_codes", "printing_ids")]
         self.assertEqual(list(wizard["back"]), front_keys)
         self.assertEqual(wizard["back"]["life"], 20)
@@ -472,6 +499,8 @@ class MigrationTest(unittest.TestCase):
         self.assertEqual(card["subtypes"], ["Undead", "Beast"])
         self.assertEqual(card["elements"], ["Earth", "Water"])
         self.assertEqual(card["rules_text"], "Airborne\nStrike damage heals you.")
+        # The old marker seeds the registry-owned flag before it is stripped.
+        self.assertTrue(card["errata"])
         self.assertIsNone(card["category"])
         printing = state["printings"]["001-daperyll_vampire-b-s"]
         self.assertEqual(printing["printing_id"], 11)

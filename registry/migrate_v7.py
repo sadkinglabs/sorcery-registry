@@ -15,7 +15,8 @@ data: "defence" is spelled "defense" and comma-joined subtypes/elements
 become lists (both are pure re-encodings); and the "UPDATED: " prefix on
 rules text is removed - it was the old API's errata marker, dropped by
 the rebuild, and leaving it would seed rules_history with text no card
-has ever carried.
+has ever carried. The marker seeds the registry-owned errata flag before
+it goes, so the 28 cards it marked stay marked.
 
 rules_history is seeded with each card's current text, valid from the
 migration date, mirroring how name_history was seeded at v6.
@@ -49,18 +50,19 @@ def migrate(old, new, as_of):
 
     for row in old.execute("SELECT * FROM cards ORDER BY card_id"):
         rules = row["rules_text"] or ""
-        if rules.startswith(UPDATED_PREFIX):
+        errata = rules.startswith(UPDATED_PREFIX)
+        if errata:
             rules = rules[len(UPDATED_PREFIX):]
         new.execute(
             "INSERT INTO cards (card_id, name, type, rarity, subtypes, elements, "
             "cost, attack, defense, life, thr_air, thr_earth, thr_fire, thr_water, "
-            "rules_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "rules_text, errata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (row["card_id"], row["name"], row["type"], row["rarity"],
              encode_field("subtypes", _split(row["subtypes"])),
              encode_field("elements", _split(row["elements"])),
              row["cost"], row["attack"], row["defence"], row["life"],
              row["thr_air"], row["thr_earth"], row["thr_fire"], row["thr_water"],
-             rules))
+             rules, int(errata)))
         new.execute(
             "INSERT INTO rules_history (rules_text, card_id, valid_from, valid_to) "
             "VALUES (?, ?, ?, NULL)", (rules, row["card_id"], as_of))

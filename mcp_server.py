@@ -230,7 +230,8 @@ class Registry:
         return (printing["set_name"] or "").lower() == text.lower()
 
     def search_cards(self, name=None, type=None, element=None, rarity=None,
-                     card_set=None, keyword=None, category=None, limit=20):
+                     card_set=None, keyword=None, category=None, errata=None,
+                     limit=20):
         def has(values, wanted):
             return wanted.lower() in [v.lower() for v in (values or [])]
 
@@ -249,13 +250,15 @@ class Registry:
                 continue
             if keyword and not has(card.get("keywords"), keyword):
                 continue
+            if errata is not None and bool(card.get("errata")) != errata:
+                continue
             if card_set and not any(
                     self._in_set(p, card_set)
                     for p in self.printings_by_card.get(card["codex_id"], [])):
                 continue
             results.append({k: card.get(k) for k in
                             ("codex_id", "name", "type", "category", "rarity",
-                             "elements", "keywords", "cost", "rules_text")})
+                             "elements", "keywords", "cost", "errata", "rules_text")})
         results.sort(key=lambda c: c["codex_id"])
         return {"total_matches": len(results), "returned": min(len(results), limit),
                 "cards": results[:limit]}
@@ -360,7 +363,8 @@ def build_server():
             "applies to every printing; a printing carries physical facts only. "
             "Only Avatars have a life value; the registry corrects known upstream "
             "data errors, with every correction documented in the repo. A card "
-            "whose wording changed has a closed row in the export's rules_history."
+            "whose wording changed carries errata=true and a closed row in the "
+            "export's rules_history."
         ),
     )
     registry = Registry(load_registry())
@@ -386,16 +390,18 @@ def build_server():
     def search_cards(name: str = None, type: str = None, element: str = None,
                      rarity: str = None, card_set: str = None,
                      keyword: str = None, category: str = None,
-                     limit: int = 20) -> dict:
+                     errata: bool = None, limit: int = 20) -> dict:
         """Search cards. name is a case-insensitive substring; type (Minion,
         Magic, Site, Artifact, Aura, Avatar), category (Spell, Site, Avatar,
         Token), rarity (Ordinary, Elite, Exceptional, Unique), element (Air,
         Earth, Fire, Water, None - a card with several elements matches each)
         and keyword (Airborne, Genesis, Spellcaster, Submerge, ...) are exact;
         card_set restricts to cards printed in a set, given as its official
-        code ('006') or name ('Gothic')."""
+        code ('006') or name ('Gothic'); errata=true finds cards whose rules
+        text has been updated since they were printed (the registry tracks
+        this itself; see rules_history in the export for the wording)."""
         return registry.search_cards(name, type, element, rarity, card_set,
-                                     keyword, category, limit)
+                                     keyword, category, errata, limit)
 
     def set_contents(card_set: str) -> dict:
         """List every distinct card in a set with its printing_ids, ordered by

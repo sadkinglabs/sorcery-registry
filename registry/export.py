@@ -77,6 +77,7 @@ def build_export(con):
         for field in CARD_FIELDS:
             record[field] = decode_field(field, row[field])
         record["back"] = _face(record["back"], FACE_FIELDS)
+        record["errata"] = bool(row["errata"])
         record["set_codes"] = sorted(set_codes_by_card.get(row["card_id"], set()))
         record["printing_ids"] = printing_ids_by_card.get(row["card_id"], [])
         cards.append(record)

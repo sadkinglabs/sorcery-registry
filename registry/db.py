@@ -24,6 +24,10 @@ CARD_FIELDS = [
     "rules_text", "back",
 ]
 
+# Registry-owned card columns: stored on the card, published with it, but
+# never read from upstream and never compared against it.
+CARD_OWNED_FIELDS = ["errata"]
+
 # The gameplay fields a back face carries: the card fields minus name and
 # minus the face itself.
 FACE_FIELDS = [f for f in CARD_FIELDS if f not in ("name", "back")]
@@ -68,7 +72,11 @@ CREATE TABLE cards (
     thr_fire   INTEGER NOT NULL DEFAULT 0,
     thr_water  INTEGER NOT NULL DEFAULT 0,
     rules_text TEXT NOT NULL DEFAULT '',
-    back       TEXT
+    back       TEXT,
+    -- Registry-owned: true once the card's text has been updated since it
+    -- was printed. Seeded from the old upstream UPDATED: marker, set by
+    -- every observed rules_text change, corrected only through overrides.
+    errata     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE printings (
@@ -223,6 +231,7 @@ def load_registry_state(con):
     for row in con.execute("SELECT * FROM cards"):
         record = {field: decode_field(field, row[field]) for field in CARD_FIELDS}
         record["card_id"] = row["card_id"]
+        record["errata"] = bool(row["errata"])
         cards[row["name"]] = record
         card_names[row["card_id"]] = row["name"]
 

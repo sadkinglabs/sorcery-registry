@@ -22,7 +22,7 @@ import json
 
 from . import API_URL
 from .canon import canon_text, released_date
-from .db import CARD_FIELDS, FACE_FIELDS, PRINTING_FIELDS
+from .db import CARD_FIELDS, CARD_OWNED_FIELDS, FACE_FIELDS, PRINTING_FIELDS
 
 CARD_NUMERIC = ["cost", "attack", "defense", "life"]
 THRESHOLD_KEYS = [("thr_air", "air"), ("thr_earth", "earth"),
@@ -148,7 +148,8 @@ def apply_overrides(snapshot, overrides):
         card_name = canon_text(entry["match"]["card_name"])
         set_name = canon_text(entry["match"].get("set_name"))
         fields = entry["set_fields"]
-        card_fields = {k: v for k, v in fields.items() if k in CARD_FIELDS}
+        card_fields = {k: v for k, v in fields.items()
+                       if k in CARD_FIELDS or k in CARD_OWNED_FIELDS}
         printing_fields = {k: v for k, v in fields.items() if k in PRINTING_FIELDS}
         hit = False
         if set_name is None and card_fields and card_name in snapshot["cards"]:

@@ -402,6 +402,10 @@
             ],
             "description": "The back face of a double-faced card; null for every other card. The card's own fields are its front."
           },
+          "errata": {
+            "type": "boolean",
+            "description": "Registry-owned: true once the card's text has been updated since it was printed. Seeded from the old upstream UPDATED: marker; set whenever a sync observes rules_text change (see rules_history); corrected only through data/overrides.json. Upstream itself does not publish this."
+          },
           "set_codes": {
             "type": "array",
             "items": {
@@ -438,6 +442,7 @@
           "thr_water",
           "rules_text",
           "back",
+          "errata",
           "set_codes",
           "printing_ids"
         ],

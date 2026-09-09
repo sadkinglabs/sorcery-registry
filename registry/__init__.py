@@ -23,7 +23,9 @@ API slug demoted to an ordinary, mutable column.
 # carry physical facts only (gameplay columns removed - the current rules
 # belong to the card), set_number is set_code (it is a code, not a number),
 # type_text is typeline, artist gains artist_slug, and released_at is the
-# printing's own date. errata is gone (upstream no longer marks it);
-# rules_history records every observed change to a card's text instead.
+# printing's own date. Upstream no longer marks errata (the UPDATED: text
+# prefix is gone), so errata is now a registry-owned stored flag: seeded
+# from the old marker, set whenever a sync observes a card's text change,
+# and rules_history records every such change alongside it.
 SCHEMA_VERSION = 7
 API_URL = "https://api.sorcerytcg.com/api/cards"

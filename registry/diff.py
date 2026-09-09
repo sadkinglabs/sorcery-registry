@@ -31,9 +31,12 @@ from .db import CARD_FIELDS, PRINTING_FIELDS
 
 # Fields compared for "attributes changed" on matched records.
 # image_hash is registry-owned, never sourced from the API, so it is
-# excluded from printing comparison.
+# excluded from printing comparison. errata is registry-owned too: an API
+# snapshot carries no value for it, so it only ever changes through an
+# override, which sets it on the snapshot explicitly.
 CARD_COMPARE = [f for f in CARD_FIELDS if f != "name"]
 PRINTING_COMPARE = [f for f in PRINTING_FIELDS if f not in ("slug", "image_hash")]
+OWNED_COMPARE = ["errata"]
 
 # Fields that upstream may serve as null without meaning "there is none":
 # a null here leaves the registry's value alone rather than erasing it.
@@ -221,6 +224,10 @@ def diff(registry, api, decisions=None):
         if api_name not in api_cards or old_name in ambiguous_card_names:
             continue
         changes = field_changes(card, api_cards[api_name], CARD_COMPARE)
+        api_card = api_cards[api_name]
+        for field in OWNED_COMPARE:
+            if field in api_card and api_card[field] != card.get(field):
+                changes[field] = {"old": card.get(field), "new": api_card[field]}
         if changes:
             plan["card_updates"].append(
                 {"card_id": card["card_id"], "name": api_name, "changes": changes})

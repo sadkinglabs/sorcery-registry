@@ -104,6 +104,8 @@ def _apply_plan(con, plan, as_of):
                     "INSERT INTO rules_history (rules_text, card_id, valid_from, valid_to) "
                     "VALUES (?, ?, ?, NULL)",
                     (change["new"] or "", update["card_id"], as_of))
+                cur.execute("UPDATE cards SET errata = 1 WHERE card_id = ?",
+                            (update["card_id"],))
 
     for printing in plan["new_printings"]:
         printing_id = allocate_id(con, "next_printing_id")
