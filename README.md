@@ -4,9 +4,9 @@ Stable identifiers for every card and printing in **Sorcery: Contested Realm** -
 
 ## The problem
 
-The identifier most tools work from is the official API slug, e.g. `004-witch-b-s`. That slug is a composite key: set number, card name, product and finish all packed into one string, in a format that was never publicly specified. Worse, the slug is derived from data that shifts - when the sets were renumbered, every slug changed with it, and every database keyed on those slugs broke at once. (And note what the slug does *not* contain: a collector number. Cards have no official serialisation within a set at all.)
+The identifier most tools work from is the official API slug, e.g. `004-witch-b-s`. That slug is a composite key: set code, card name, product and finish all packed into one string, in a format that was never publicly specified. Worse, the slug is derived from data that shifts - when the sets were renumbered, every slug changed with it, and every database keyed on those slugs broke at once. (And note what the slug does *not* contain: a collector number. Cards have no official serialisation within a set at all.)
 
-There is also nothing in the official data linking two printings of the same card to each other except the card's name, so every tool reconstructs that link by name-matching, which breaks at the first inconsistency.
+The only durable handle the official data gives a card is its name, so every tool that wants to link two printings of the same card ends up name-matching, which breaks at the first inconsistency.
 
 The official API was rebuilt in 2026 and now serves an `id` on every card and printing. Those are the backend's own minting ids: its developers confirm they are regenerated whenever the data is re-imported, so they are not stable either. The registry does not store them.
 
@@ -36,7 +36,7 @@ If yes - the copy matters - you want the **printing**. If any copy of the card w
 
 If you know Yu-Gi-Oh or Magic tooling, this is the same two-level split you already use. Konami's printed passcode is a *card*-level ID (every reprint of a card shares it), while the printing level in Yu-Gi-Oh is the set number (`LOB-001`) - a composite of set code and collector number, which is precisely the kind of derived key that breaks when naming changes. Scryfall gives Magic stable IDs at both levels (`oracle_id` for the card, a per-printing id for the print). This registry does what Scryfall did: both levels, both stable, so nobody has to reconstruct either one by string-matching.
 
-Set, set number, product and finish sit in ordinary columns *next to* the IDs, not inside them. When the official naming convention changes again, the slug column updates, a row is added to `slug_history`, and **the IDs do not move**. Nothing downstream needs remapping, ever.
+Set code, set name, product and finish sit in ordinary columns *next to* the IDs, not inside them. When the official naming convention changes again, the slug column updates, a row is added to `slug_history`, and **the IDs do not move**. Nothing downstream needs remapping, ever.
 
 Five guarantees, enforced by CI on every commit, not by promise:
 
@@ -69,7 +69,7 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
                        "cards": 407, "printings": 817 }, ... ],
   "cards":         [ { "codex_id": "C000001", "name": "Apprentice Wizard",
                        "type": "Minion", "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
-                       "subtypes": ["Mortal"], "elements": ["Air"], "keywords": ["Spellcaster", "Genesis"],
+                       "subtypes": ["Mortal"], "elements": ["Air"], "keywords": ["Genesis", "Spellcaster"],
                        "umbrellas": [], "cost": 3, "attack": 1, "defense": 1, "life": null,
                        "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
                        "rules_text": "Spellcaster\nGenesis → Draw a spell.", "back": null,
@@ -78,7 +78,7 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
   "printings":     [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
                        "set_name": "Alpha", "set_code": "001", "released_at": "2023-06-22",
                        "product": "Booster", "finish": "Standard", "slug": "001-apprentice_wizard-b-s",
-                       "artist": "Ossi Hiekkala", "artist_slug": "ossi_hiekkala", "flavour_text": "...",
+                       "artist": "Ossi Hiekkala", "artist_slug": "ossi_hiekkala", "flavour_text": "",
                        "typeline": "An Ordinary Mortal new to power", "back": null, ... } ],
   "slug_history":  [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ],
   "name_history":  [ { "name": "...", "codex_id": "C000001", "valid_from": "2026-08-19", "valid_to": null } ],
