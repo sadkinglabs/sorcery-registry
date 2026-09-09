@@ -1,0 +1,105 @@
+name: drift
+
+# Nightly early warning: fetch the official API and dry-run the sync.
+# Quiet when upstream matches the registry. Otherwise - data changed, an
+# override no longer matches, ambiguous cases, or the adapter can no longer
+# read the payload at all - it opens (or updates) one issue labelled
+# upstream-drift with the plan, and keeps the raw payload as an artifact so
+# the run can be reproduced with --from-file. It never applies anything.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      force_report:
+        description: "File the report even when nothing changed (tests the issue plumbing)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Dry-run the sync against the live API
+        id: dry
+        run: |
+          set +e
+          python -m registry.sync --dry-run > report.txt 2>&1
+          code=$?
+          set -e
+          cat report.txt
+          if [ "$code" = "0" ] && grep -q "^nothing to do$" report.txt \
+             && ! grep -q "override no longer matches" report.txt; then
+            state=quiet
+          elif [ "$code" = "0" ]; then
+            state=changes
+          elif [ "$code" = "2" ]; then
+            state=ambiguous
+          else
+            state=broken
+          fi
+          echo "state=$state" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "upstream: $state (exit $code)"
+
+      - name: Keep the payload for reproduction
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-snapshot
+          path: |
+            review/upstream-snapshot.json
+            review/pending.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Report
+        if: steps.dry.outputs.state != 'quiet' || inputs.force_report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATE: ${{ steps.dry.outputs.state }}
+          CODE: ${{ steps.dry.outputs.code }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          case "$STATE" in
+            changes)   title="Upstream drift: the official API differs from the registry";;
+            ambiguous) title="Upstream drift: ambiguous cases need human review";;
+            broken)    title="Upstream drift: the sync can no longer read the official API";;
+            *)         title="Upstream drift: plumbing test, nothing changed";;
+          esac
+          {
+            echo "Nightly dry run against the official API on $(date -u +%Y-%m-%d): **$STATE** (exit code $CODE)."
+            echo
+            echo "Nothing was applied. The raw payload is attached to the run as the \`upstream-snapshot\` artifact; reproduce locally with \`python -m registry.sync --dry-run --from-file review/upstream-snapshot.json\`."
+            echo
+            echo "Run: $RUN_URL"
+            echo
+            echo '```'
+            tail -n 120 report.txt
+            echo '```'
+          } > body.md
+          gh label create upstream-drift \
+            --description "The official API no longer matches the registry" \
+            --color D93F0B --force
+          existing=$(gh issue list --label upstream-drift --state open \
+                       --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+            gh issue edit "$existing" --title "$title"
+          else
+            gh issue create --title "$title" --label upstream-drift --body-file body.md
+          fi
