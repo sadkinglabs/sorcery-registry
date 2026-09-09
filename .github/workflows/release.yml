@@ -1,0 +1,44 @@
+name: release
+
+# Publishes a data release when an annotated tag (v1.2.0, v2.0.0, ...) is
+# pushed: proves the invariants on the tagged commit, builds the release
+# manifest, and creates the GitHub release with the tag's message as its
+# notes and the manifest attached. The manifest is never committed; this
+# is the only place it is produced for publication.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install mcp jsonschema
+
+      - name: Tests and invariants on the tagged commit
+        run: |
+          python -m unittest discover -s tests
+          python -m registry.validate
+
+      - name: Build the manifest
+        run: python -m registry.manifest --dataset-version "${GITHUB_REF_NAME}" --out manifest.json
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" manifest.json \
+            --title "${GITHUB_REF_NAME}" --notes-from-tag --verify-tag

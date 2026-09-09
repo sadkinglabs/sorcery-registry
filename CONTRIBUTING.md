@@ -52,12 +52,14 @@ When a new set drops, this is the whole flow. Existing IDs never change; a set r
 4. Watch the override notes: if upstream fixed an error we correct in `data/overrides.json`, the sync reports the entry as matching nothing - delete it in this same PR.
 5. Apply against the exact reviewed bytes: `python -m registry.sync --from-file review/upstream-snapshot.json`.
 6. `python -m registry.validate --against origin/main`, then push and open the PR. CI re-proves everything, including that every pre-existing ID survived.
-7. After merge: tag a data release (bump the minor version), generate the manifest, and attach it:
+7. After merge: tag a data release. Bump the minor version for data (a new set, corrections); bump the major version when the export's shape changes (a `schema_version` bump). Write the release notes as the tag message and push the tag:
 
    ```bash
-   python -m registry.manifest --dataset-version vX.Y.0 --out manifest.json
-   gh release create vX.Y.0 manifest.json --title "vX.Y.0" --notes "<what the set added>"
+   git tag -a vX.Y.0 -m "<what changed, for consumers>"
+   git push origin vX.Y.0
    ```
+
+   The `release` workflow does the rest: it re-runs the tests and invariants on the tagged commit, builds the manifest (`python -m registry.manifest --dataset-version vX.Y.0 --out manifest.json`, should you want it locally), and publishes the GitHub release with the tag message as its notes and the manifest attached.
 
 8. Never run the first sync of a new set through the GitHub Action - it applies with `--yes`. The Action is for routine re-syncs once the drop has been reviewed by a human once.
 
