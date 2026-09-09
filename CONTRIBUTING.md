@@ -32,6 +32,7 @@ python -m unittest discover -s tests   # test suite
 python -m registry.sync --dry-run      # fetch the API, snapshot the payload, show what would change
 python -m registry.sync --from-file review/upstream-snapshot.json   # apply those exact bytes, after confirmation
 python -m registry.validate            # check every invariant
+python -m registry.publish             # write dist/: one object per card, printing, slug and set (see docs/api.md)
 ```
 
 Every fetch over the network writes the raw payload to `review/upstream-snapshot.json` (a local working file, never committed) before anything is diffed. Applying from that file rather than fetching a second time is the recommended flow: the apply then acts on exactly the bytes the dry run showed you, not on whatever upstream is serving a minute later. Plain `python -m registry.sync` still works and simply fetches afresh.
