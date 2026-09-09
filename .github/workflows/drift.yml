@@ -1,6 +1,9 @@
 name: drift
 
-# Nightly early warning: fetch the official API and dry-run the sync.
+# Weekly early warning: fetch the official API and dry-run the sync.
+# Weekly, not nightly: the game ships a set a year and the data churn
+# between sets (errata, renames, fixes) is rare, so a week's latency is
+# fine and keeps the issue feed proportionate. Run it by hand on release day.
 # Quiet when upstream matches the registry. Otherwise - data changed, an
 # override no longer matches, ambiguous cases, or the adapter can no longer
 # read the payload at all - it opens (or updates) one issue labelled
@@ -9,7 +12,7 @@ name: drift
 
 on:
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "0 6 * * 1"
   workflow_dispatch:
     inputs:
       force_report:
@@ -82,7 +85,7 @@ jobs:
             *)         title="Upstream drift: plumbing test, nothing changed";;
           esac
           {
-            echo "Nightly dry run against the official API on $(date -u +%Y-%m-%d): **$STATE** (exit code $CODE)."
+            echo "Dry run against the official API on $(date -u +%Y-%m-%d): **$STATE** (exit code $CODE)."
             echo
             echo "Nothing was applied. The raw payload is attached to the run as the \`upstream-snapshot\` artifact; reproduce locally with \`python -m registry.sync --dry-run --from-file review/upstream-snapshot.json\`."
             echo
