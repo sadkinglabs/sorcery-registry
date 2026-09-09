@@ -29,8 +29,8 @@ SLUG_RE = re.compile(r"^(\d+)-(.+)-([a-z_]+)-([a-z]+)$")
 
 
 def parse_slug(slug):
-    """Split a slug like '004-witch-b-s' into (set_number, name_segment,
-    product_code, finish_code). The leading digits are the SET's number
+    """Split a slug like '004-witch-b-s' into (set_code, name_segment,
+    product_code, finish_code). The leading digits are the SET's code
     (001 = Alpha, 002 = Beta, ...), not a collector number - the official
     data has no within-set serialisation at all. Kept as a string to
     preserve its official spelling ('006', '999'). Returns four Nones if
