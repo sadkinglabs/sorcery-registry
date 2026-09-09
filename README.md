@@ -145,6 +145,8 @@ The official API occasionally ships errors (at the time of writing, 17 Gothic ca
 
 A sync script fetches the official API, diffs it against the registry, and classifies every difference. New cards get new IDs. Attribute changes update in place (a change to a card's rules text also lands in `rules_history`). Slug renames are matched conservatively (name, rules text, set, product, finish) - and anything that does not resolve to an unambiguous one-to-one match is quarantined for human review instead of guessed at, because a wrong guess would silently fork one card into two IDs. Every fetch over the network is snapshotted locally before anything is diffed, so the dry run that shows the plan and the run that applies it can be guaranteed to have seen identical data. Syncs are run manually (or via the manually-triggered GitHub Action) and land as pull requests, never as direct pushes.
 
+A nightly workflow dry-runs the sync against the live API and files an `upstream-drift` issue the moment the official data stops matching the registry - new cards, changed attributes, ambiguous renames, or a payload the adapter can no longer read. It applies nothing; it exists so that an upstream change is a notification, not a surprise.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for running the pipeline yourself and for how ambiguous cases are resolved.
 
 ## Licence
