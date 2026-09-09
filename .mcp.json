@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sorcery-registry": {
+      "command": "uv",
+      "args": ["run", "mcp_server.py"]
+    }
+  }
+}
