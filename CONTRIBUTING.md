@@ -59,7 +59,7 @@ When a new set drops, this is the whole flow. Existing IDs never change; a set r
    git push origin vX.Y.0
    ```
 
-   The `release` workflow does the rest: it re-runs the tests and invariants on the tagged commit, builds the manifest (`python -m registry.manifest --dataset-version vX.Y.0 --out manifest.json`, should you want it locally), and publishes the GitHub release with the tag message as its notes and the manifest attached.
+   The `release` workflow does the rest: it re-runs the tests and invariants on the tagged commit, builds the manifest (`python -m registry.manifest --dataset-version vX.Y.0 --out manifest.json`, should you want it locally), and publishes the GitHub release with the tag message as its notes and the manifest attached. Where pushing tags is not possible (some tooling can push branches but not tags), run the same workflow by hand from the Actions tab with the version and the notes as inputs: it creates the annotated tag on `main` itself and continues identically.
 
 8. Never run the first sync of a new set through the GitHub Action - it applies with `--yes`. The Action is for routine re-syncs once the drop has been reviewed by a human once.
 

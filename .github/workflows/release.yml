@@ -1,14 +1,25 @@
 name: release
 
-# Publishes a data release when an annotated tag (v1.2.0, v2.0.0, ...) is
-# pushed: proves the invariants on the tagged commit, builds the release
-# manifest, and creates the GitHub release with the tag's message as its
-# notes and the manifest attached. The manifest is never committed; this
-# is the only place it is produced for publication.
+# Publishes a data release. Two ways in, one path out:
+#   - push an annotated tag (v1.2.0, v2.0.0, ...): its message is the notes;
+#   - run the workflow by hand with a version and notes: the workflow creates
+#     that annotated tag on the chosen ref first.
+# Either way it then proves the invariants on the tagged commit, builds the
+# release manifest and creates the GitHub release with the tag message as its
+# notes and the manifest attached. The manifest is never committed; this is
+# the only place it is produced for publication.
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag to create and release, e.g. v2.0.0"
+        required: true
+      notes:
+        description: "Release notes (Markdown). Become the tag message."
+        required: true
 
 permissions:
   contents: write
@@ -20,6 +31,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Create the annotated tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          VERSION: ${{ inputs.version }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          case "$VERSION" in v[0-9]*) ;; *) echo "::error::version must look like v2.0.0"; exit 1;; esac
+          git config user.name "registry-release"
+          git config user.email "actions@github.com"
+          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
+          git tag -a "$VERSION" -F "$RUNNER_TEMP/notes.md"
+          git push origin "refs/tags/$VERSION"
+          echo "TAG=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Use the pushed tag
+        if: github.event_name == 'push'
+        run: echo "TAG=$GITHUB_REF_NAME" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         with:
@@ -34,11 +63,11 @@ jobs:
           python -m registry.validate
 
       - name: Build the manifest
-        run: python -m registry.manifest --dataset-version "${GITHUB_REF_NAME}" --out manifest.json
+        run: python -m registry.manifest --dataset-version "$TAG" --out manifest.json
 
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" manifest.json \
-            --title "${GITHUB_REF_NAME}" --notes-from-tag --verify-tag
+          gh release create "$TAG" manifest.json \
+            --title "$TAG" --notes-from-tag --verify-tag
