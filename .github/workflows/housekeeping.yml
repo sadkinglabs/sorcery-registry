@@ -1,0 +1,42 @@
+name: housekeeping
+
+# On demand: delete every remote branch already merged into main, plus any
+# branches named in the input (for unmerged scratch branches). main itself
+# is never touched. Prints what it deleted.
+
+on:
+  workflow_dispatch:
+    inputs:
+      extra:
+        description: "Unmerged branches to delete as well, space-separated"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged branches
+        env:
+          EXTRA: ${{ inputs.extra }}
+        run: |
+          git fetch --prune origin
+          merged=$(git branch -r --merged origin/main \
+                   | grep -v -- '->' | sed 's#^ *origin/##' | grep -v -x main || true)
+          for branch in $merged $EXTRA; do
+            [ "$branch" = "main" ] && continue
+            if git push origin --delete "$branch"; then
+              echo "deleted $branch"
+            else
+              echo "::warning::could not delete $branch"
+            fi
+          done
+          echo "remaining:"
+          git ls-remote --heads origin | cut -f2
