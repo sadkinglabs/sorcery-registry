@@ -11,8 +11,8 @@ Checks, in order:
  4. Every printing's current slug has exactly one open slug_history row,
     and that row agrees with the slug column, and no slug - current or
     historical - has ever referred to more than one printing.
- 5. Every card has exactly one open name_history row, and that row agrees
-    with the name column.
+ 5. Every card has exactly one open name_history row and exactly one open
+    rules_history row, and each agrees with the card's column.
  6. Regenerating the export from the database is byte-identical to the
     committed export file (nobody edited one without the other), and each
     card's derived printing_ids list agrees with the printings table.
@@ -94,6 +94,22 @@ def check_internal(con, errors):
         elif row["open_name"] != row["name"]:
             errors.append(f"card {row['card_id']}: name column {row['name']!r} "
                           f"disagrees with open history row {row['open_name']!r}")
+
+    # The card's current text is the open rules_history row, the same way
+    # its current name is the open name_history row.
+    rows = con.execute("""
+        SELECT c.card_id, c.rules_text,
+               (SELECT count(*) FROM rules_history h
+                 WHERE h.card_id = c.card_id AND h.valid_to IS NULL) AS open_rows,
+               (SELECT h.rules_text FROM rules_history h
+                 WHERE h.card_id = c.card_id AND h.valid_to IS NULL) AS open_text
+        FROM cards c""").fetchall()
+    for row in rows:
+        if row["open_rows"] != 1:
+            errors.append(f"card {row['card_id']}: {row['open_rows']} open rules_history rows, expected 1")
+        elif row["open_text"] != row["rules_text"]:
+            errors.append(f"card {row['card_id']}: rules_text column disagrees "
+                          f"with its open rules_history row")
 
     # A slug belongs permanently to one printing: every slug the registry has
     # ever used, current or historical, must name exactly one printing_id.
@@ -214,7 +230,7 @@ def check_against_ref(con, ref, export_path, errors):
                           f"{current['slug']!r} without a slug_history record")
 
     for key in ("cards", "printings", "slug_history"):
-        if new["header"][key] < old["header"][key]:
+        if key in old["header"] and new["header"][key] < old["header"][key]:
             errors.append(f"{key} count decreased: {old['header'][key]} -> {new['header'][key]}")
 
 

@@ -19,7 +19,7 @@ Found a card whose registry data is wrong?
 }
 ```
 
-  Every entry needs a `reason` - it is the audit trail. Add `"set_name"` inside `match` to restrict the fix to one set's printings; without it the fix applies to the card and all its printings. When upstream later fixes the error, the sync flags the entry as matching nothing and it gets removed.
+  Every entry needs a `reason` - it is the audit trail. A field is written wherever the record has that column: `life` is a card fact, `artist` a printing fact. Add `"set_name"` inside `match` to restrict the fix to one set's printings; without it the fix applies to the card and all its printings. When upstream later fixes the error, the sync flags the entry as matching nothing and it gets removed.
 
 - If the registry disagrees with the API for no documented reason: that is a bug in the pipeline. Open an issue with both values.
 
@@ -36,7 +36,9 @@ python -m registry.validate            # check every invariant
 
 Every fetch over the network writes the raw payload to `review/upstream-snapshot.json` (a local working file, never committed) before anything is diffed. Applying from that file rather than fetching a second time is the recommended flow: the apply then acts on exactly the bytes the dry run showed you, not on whatever upstream is serving a minute later. Plain `python -m registry.sync` still works and simply fetches afresh.
 
-There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the export for AI agents (see the README). It contains no logic of its own beyond indexing and querying `export/registry.json` - if the export is right, the server is right. Its query layer is unit-tested in `tests/test_mcp.py`; running the server itself additionally needs `pip install mcp`. If you change the export's shape, update the server's `Registry` class, its tests, and `schema/registry.schema.json` in the same PR - CI validates the export against the schema. Note also `name_history`, the card-name counterpart of `slug_history`: every card rename must close the old name's row and open one for the new name, which the pipeline does automatically.
+There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the export for AI agents (see the README). It contains no logic of its own beyond indexing and querying `export/registry.json` - if the export is right, the server is right. Its query layer is unit-tested in `tests/test_mcp.py`; running the server itself additionally needs `pip install mcp`. If you change the export's shape, update the server's `Registry` class, its tests, and `schema/registry.schema.json` in the same PR - CI validates the export against the schema. Note also `name_history` and `rules_history`, the card-name and rules-text counterparts of `slug_history`: every card rename or rewording must close the old row and open one for the new value, which the pipeline does automatically.
+
+The registry mirrors the shape the official API serves today: its field names (`set_code`, `defense`, `typeline`, `BoxTopper`), its list fields in its order, and its split between gameplay data on the card and physical facts on the printing. When upstream changes shape again, the adapter in `registry/fetch.py` is the one place that knows the upstream layout; everything downstream works from the snapshot it builds. A schema bump that restructures the database ships with a migration script (see `registry/migrate_v7.py`) that rebuilds the file from the new DDL and proves every id survived.
 
 A sync PR should contain: the updated `registry.sqlite`, the regenerated `export/registry.json`, and nothing hand-written except (when relevant) override or decision files. Run `python -m registry.validate --against origin/main` before pushing; CI runs the same check.
 
@@ -85,7 +87,7 @@ Every push and PR: the test suite, then `registry.validate`, which checks that
 
 - the database's invariant triggers are intact and all foreign keys hold,
 - no ID exceeds its allocation counter (nothing bypassed ID assignment),
-- every printing's slug agrees with its open `slug_history` row,
+- every printing's slug agrees with its open `slug_history` row, and every card's name and rules text agree with their open history rows,
 - the committed JSON is byte-identical to what the committed database generates,
 - and against the base branch: every ID that existed before still exists, printings still point at the same card, counters never decreased, and every slug change is explained by `slug_history`.
 

@@ -12,60 +12,54 @@ from registry.export import build_export, render
 from registry.fetch import apply_overrides, build_snapshot
 from registry.sync import apply_plan
 
+
+def engine(**overrides):
+    base = {
+        "type": "Minion", "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
+        "rules": "Spellcaster\r\n\r\nGenesis → Draw a spell.",
+        "cost": 3, "attack": 1, "defense": 1, "life": None,
+        "air": 1, "earth": 0, "fire": 0, "water": 0,
+        "elements": ["Air"], "subtypes": ["Mortal"], "keywords": ["Spellcaster", "Genesis"],
+        "umbrellas": [], "back": None,
+    }
+    return {**base, **overrides}
+
+
+def upstream_printing(slug, set_name, code, printed_at, **overrides):
+    meta = {"finish": "Standard", "product": "Booster",
+            "typeline": "An Ordinary Mortal new to power", "flavor": None,
+            "artist": {"name": "Ossi Hiekkala", "slug": "ossi_hiekkala"}, "back": None}
+    meta.update(overrides)
+    return {"id": "cmt000000000000000000000",
+            "slug": slug, "printedAt": printed_at + "T07:00:00.000Z",
+            "set": {"name": set_name, "code": code,
+                    "releasedAt": "2026-08-25T04:21:27.405Z"},
+            "meta": meta}
+
+
 RAW_API = [
     {
+        "id": "cmt111111111111111111111",
         "name": "Apprentice Wizard",
-        "guardian": {
-            "rarity": "Ordinary", "type": "Minion",
-            "rulesText": "Spellcaster\r\nGenesis → Draw a spell.",
-            "cost": 3, "attack": 1, "defence": 1, "life": None,
-            "thresholds": {"air": 1, "earth": 0, "fire": 0, "water": 0},
-        },
-        "elements": "Air",
-        "subTypes": "Mortal",
-        "sets": [{
-            "name": "Alpha",
-            "releasedAt": "2023-04-19T00:00:00.000Z",
-            "metadata": {
-                "rarity": "Ordinary", "type": "Minion",
-                "rulesText": "Spellcaster\n\nGenesis → Draw a spell.",
-                "cost": 3, "attack": 1, "defence": 1, "life": None,
-                "thresholds": {"air": 1, "earth": 0, "fire": 0, "water": 0},
-            },
-            "variants": [
-                {"slug": "001-apprentice_wizard-b-s", "finish": "Standard",
-                 "product": "Booster", "artist": "Ossi Hiekkala",
-                 "flavorText": "", "typeText": "An Ordinary Mortal new to power"},
-                {"slug": "001-apprentice_wizard-b-f", "finish": "Foil",
-                 "product": "Booster", "artist": "Ossi Hiekkala",
-                 "flavorText": "", "typeText": "An Ordinary Mortal new to power"},
-            ],
-        }],
+        "slug": "apprentice_wizard",
+        "engine": engine(),
+        "printings": [
+            upstream_printing("001-apprentice_wizard-b-s", "Alpha", "001", "2023-06-22"),
+            upstream_printing("001-apprentice_wizard-b-f", "Alpha", "001", "2023-06-22",
+                              finish="Foil"),
+        ],
     },
     {
+        "id": "cmt222222222222222222222",
         "name": "Broken Site",
-        "guardian": {
-            "rarity": "Ordinary", "type": "Site",
-            "rulesText": "UPDATED: All sites are broken.",
-            "cost": None, "attack": None, "defence": None, "life": 20,
-            "thresholds": {"air": 0, "earth": 0, "fire": 0, "water": 0},
-        },
-        "elements": "None",
-        "subTypes": "",
-        "sets": [{
-            "name": "Gothic",
-            "releasedAt": "2026-05-01T00:00:00.000Z",
-            "metadata": {
-                "rarity": "Ordinary", "type": "Site",
-                "rulesText": "UPDATED: All sites are broken.",
-                "cost": None, "attack": None, "defence": None, "life": 20,
-                "thresholds": {"air": 0, "earth": 0, "fire": 0, "water": 0},
-            },
-            "variants": [
-                {"slug": "010-broken_site-b-s", "finish": "Standard",
-                 "product": "Booster", "artist": "", "flavorText": "", "typeText": ""},
-            ],
-        }],
+        "slug": "broken_site",
+        "engine": engine(type="Site", category="Site", rules="All sites are broken.",
+                         cost=None, attack=None, defense=None, life=20,
+                         air=0, elements=["None"], subtypes=[], keywords=[]),
+        "printings": [
+            upstream_printing("010-broken_site-b-s", "Gothic", "010", "2026-05-01",
+                              typeline="", artist={"name": "", "slug": ""}),
+        ],
     },
 ]
 
@@ -77,7 +71,7 @@ class CanonTest(unittest.TestCase):
         self.assertIsNone(canon_text(None))
 
     def test_parse_slug(self):
-        # The leading digits are the SET's number, kept as a string.
+        # The leading digits are the SET's code, kept as a string.
         self.assertEqual(parse_slug("004-witch-b-s"), ("004", "witch", "b", "s"))
         self.assertEqual(parse_slug("999-apprentice_wizard-wk-f"),
                          ("999", "apprentice_wizard", "wk", "f"))
@@ -88,22 +82,58 @@ class SnapshotTest(unittest.TestCase):
     def test_flatten_shapes_and_canonicalisation(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
         wizard = snapshot["cards"]["Apprentice Wizard"]
-        # \r\n and \n\n both collapse to the same canonical text.
+        # \r\n\r\n collapses to one newline per ability.
         self.assertEqual(wizard["rules_text"], "Spellcaster\nGenesis → Draw a spell.")
+        self.assertEqual(wizard["defense"], 1)
+        self.assertEqual(wizard["thr_air"], 1)
+        self.assertEqual(wizard["elements"], ["Air"])
+        self.assertEqual(wizard["keywords"], ["Spellcaster", "Genesis"])
+        self.assertIsNone(wizard["back"])
+        # Gameplay data is card-level only: printings carry physical facts.
         printing = snapshot["printings"]["001-apprentice_wizard-b-s"]
-        self.assertEqual(printing["rules_text"], wizard["rules_text"])
-        self.assertEqual(printing["set_number"], "001")
-        self.assertEqual(printing["released_at"], "2023-04-19")
+        self.assertNotIn("rules_text", printing)
+        self.assertEqual(printing["set_code"], "001")
+        self.assertEqual(printing["artist"], "Ossi Hiekkala")
+        self.assertEqual(printing["artist_slug"], "ossi_hiekkala")
+        self.assertEqual(printing["typeline"], "An Ordinary Mortal new to power")
+        # printedAt is the release date; set.releasedAt is a database
+        # timestamp upstream and is never read.
+        self.assertEqual(printing["released_at"], "2023-06-22")
+        self.assertIsNone(printing["back"])
+
+    def test_upstream_ids_are_not_carried(self):
+        snapshot = build_snapshot(copy.deepcopy(RAW_API))
+        self.assertNotIn("id", snapshot["cards"]["Apprentice Wizard"])
+        self.assertNotIn("id", snapshot["printings"]["001-apprentice_wizard-b-s"])
+
+    def test_back_faces(self):
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["engine"]["back"] = engine(type="Avatar", category="Avatar", rarity=None,
+                                          rules="Tap → Play or draw a site.", life=20,
+                                          cost=None, keywords=[])
+        raw[0]["printings"][0]["meta"]["back"] = {
+            "finish": "Standard", "product": "Booster", "flavor": None,
+            "typeline": "Your Avatar is a force of nature!",
+            "artist": {"name": "Bryon Wackwitz", "slug": "bryon_wackwitz"}}
+        snapshot = build_snapshot(raw)
+        back = snapshot["cards"]["Apprentice Wizard"]["back"]
+        self.assertEqual(back["type"], "Avatar")
+        self.assertEqual(back["life"], 20)
+        self.assertEqual(back["rules_text"], "Tap → Play or draw a site.")
+        self.assertNotIn("back", back)
+        self.assertEqual(snapshot["printings"]["001-apprentice_wizard-b-s"]["back"], {
+            "artist": "Bryon Wackwitz", "artist_slug": "bryon_wackwitz",
+            "flavour_text": None, "typeline": "Your Avatar is a force of nature!"})
 
     def test_duplicate_slug_fails_loudly(self):
         raw = copy.deepcopy(RAW_API)
-        raw[1]["sets"][0]["variants"][0]["slug"] = "001-apprentice_wizard-b-s"
+        raw[1]["printings"][0]["slug"] = "001-apprentice_wizard-b-s"
         with self.assertRaises(ValueError):
             build_snapshot(raw)
 
 
 class OverridesTest(unittest.TestCase):
-    def test_override_corrects_card_and_printings(self):
+    def test_override_corrects_the_card(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
         unmatched = apply_overrides(snapshot, [{
             "match": {"card_name": "Broken Site"},
@@ -111,7 +141,19 @@ class OverridesTest(unittest.TestCase):
             "reason": "API data error: only Avatars have life."}])
         self.assertEqual(unmatched, [])
         self.assertIsNone(snapshot["cards"]["Broken Site"]["life"])
-        self.assertIsNone(snapshot["printings"]["010-broken_site-b-s"]["life"])
+        # life is a card fact; the printing record has no such column.
+        self.assertNotIn("life", snapshot["printings"]["010-broken_site-b-s"])
+
+    def test_override_restricted_to_a_set_touches_printings_only(self):
+        snapshot = build_snapshot(copy.deepcopy(RAW_API))
+        unmatched = apply_overrides(snapshot, [{
+            "match": {"card_name": "Apprentice Wizard", "set_name": "Alpha"},
+            "set_fields": {"artist": "Corrected Artist"},
+            "reason": "misattributed upstream"}])
+        self.assertEqual(unmatched, [])
+        for slug in ("001-apprentice_wizard-b-s", "001-apprentice_wizard-b-f"):
+            self.assertEqual(snapshot["printings"][slug]["artist"], "Corrected Artist")
+        self.assertNotIn("artist", snapshot["cards"]["Apprentice Wizard"])
 
     def test_unmatched_override_is_reported_not_fatal(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
@@ -155,28 +197,36 @@ class EndToEndTest(unittest.TestCase):
             sorted(p["printing_id"] for p in export_one["printings"]
                    if p["codex_id"] == wizard_id))
         self.assertIn(foil_id, wizard["printing_ids"])
-        # The errata flag reads the upstream "UPDATED" rules-text convention.
-        self.assertFalse(wizard["errata"])
+        # Lists round-trip through SQLite as lists, in upstream's order.
+        self.assertEqual(wizard["keywords"], ["Spellcaster", "Genesis"])
+        self.assertEqual(wizard["elements"], ["Air"])
+        self.assertIsNone(wizard["back"])
         broken = next(c for c in export_one["cards"] if c["name"] == "Broken Site")
-        self.assertTrue(broken["errata"])
-        # Derived set data: per-card set membership and the set catalogue.
-        self.assertEqual(wizard["set_numbers"], ["001"])
-        self.assertEqual(broken["set_numbers"], ["010"])
+        # Derived set data: per-card set membership and the set catalogue,
+        # whose release date is the earliest printing date in the set.
+        self.assertEqual(wizard["set_codes"], ["001"])
+        self.assertEqual(broken["set_codes"], ["010"])
         self.assertEqual(export_one["header"]["sets"], 2)
         self.assertEqual(export_one["sets"], [
-            {"set_number": "001", "set_name": "Alpha",
-             "released_at": "2023-04-19", "cards": 1, "printings": 2},
-            {"set_number": "010", "set_name": "Gothic",
+            {"set_code": "001", "set_name": "Alpha",
+             "released_at": "2023-06-22", "cards": 1, "printings": 2},
+            {"set_code": "010", "set_name": "Gothic",
              "released_at": "2026-05-01", "cards": 1, "printings": 1},
         ])
 
-        # Every card starts with one open name_history row carrying its name.
+        # Every card starts with one open name_history row carrying its name
+        # and one open rules_history row carrying its text.
         self.assertEqual(export_one["header"]["name_history"], 2)
         by_name = {h["name"]: h for h in export_one["name_history"]}
         self.assertEqual(sorted(by_name), ["Apprentice Wizard", "Broken Site"])
         self.assertEqual(by_name["Apprentice Wizard"]["codex_id"], wizard_id)
         for row in export_one["name_history"]:
             self.assertEqual(row["valid_from"], "2026-08-19")
+            self.assertIsNone(row["valid_to"])
+        self.assertEqual(export_one["header"]["rules_history"], 2)
+        by_text = {h["rules_text"]: h for h in export_one["rules_history"]}
+        self.assertEqual(by_text["Spellcaster\nGenesis → Draw a spell."]["codex_id"], wizard_id)
+        for row in export_one["rules_history"]:
             self.assertIsNone(row["valid_to"])
 
         # Second run, same data: a no-op, and the export is byte-identical.
@@ -186,8 +236,8 @@ class EndToEndTest(unittest.TestCase):
 
         # Third run: the naming convention flips back to hyphens.
         renamed = copy.deepcopy(RAW_API)
-        for variant in renamed[0]["sets"][0]["variants"]:
-            variant["slug"] = variant["slug"].replace("apprentice_wizard", "apprentice-wizard")
+        for printing in renamed[0]["printings"]:
+            printing["slug"] = printing["slug"].replace("apprentice_wizard", "apprentice-wizard")
         plan = diff(load_registry_state(con), build_snapshot(renamed))
         self.assertEqual(len(plan["printing_renames"]), 2)
         self.assertFalse(plan["ambiguous"])
@@ -219,10 +269,9 @@ class EndToEndTest(unittest.TestCase):
         # gameplay fingerprint cannot pair the two names.
         modified = copy.deepcopy(RAW_API)
         modified[0]["name"] = "Apprentice Sorcerer"
-        modified[0]["guardian"]["rulesText"] = "Spellcaster\r\nGenesis → Draw two spells."
-        modified[0]["sets"][0]["metadata"]["rulesText"] = "Spellcaster\n\nGenesis → Draw two spells."
-        for variant in modified[0]["sets"][0]["variants"]:
-            variant["slug"] = variant["slug"].replace("apprentice_wizard", "apprentice_sorcerer")
+        modified[0]["engine"]["rules"] = "Spellcaster\r\nGenesis → Draw two spells."
+        for printing in modified[0]["printings"]:
+            printing["slug"] = printing["slug"].replace("apprentice_wizard", "apprentice_sorcerer")
         modified_snapshot = build_snapshot(modified)
 
         plan = diff(load_registry_state(con), modified_snapshot)
@@ -277,6 +326,178 @@ class EndToEndTest(unittest.TestCase):
             con.execute("UPDATE printings SET card_id = 2 WHERE printing_id = 1")
 
 
+class RulesHistoryTest(unittest.TestCase):
+    """Upstream publishes only the current text and no longer marks errata;
+    the registry records every change it observes instead."""
+
+    def test_reworded_card_closes_and_opens_rows(self):
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+
+        reworded = copy.deepcopy(RAW_API)
+        reworded[0]["engine"]["rules"] = "Spellcaster\r\n\r\nGenesis → Draw two spells."
+        plan = diff(load_registry_state(con), build_snapshot(reworded))
+        self.assertEqual([u["name"] for u in plan["card_updates"]], ["Apprentice Wizard"])
+        self.assertEqual(list(plan["card_updates"][0]["changes"]), ["rules_text"])
+        self.assertFalse(plan["card_renames"] or plan["ambiguous"])
+        apply_plan(con, plan, "2026-09-01")
+
+        export = build_export(con)
+        wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
+        self.assertEqual(wizard["rules_text"], "Spellcaster\nGenesis → Draw two spells.")
+        rows = [h for h in export["rules_history"] if h["codex_id"] == wizard["codex_id"]]
+        self.assertEqual(rows, [
+            {"rules_text": "Spellcaster\nGenesis → Draw a spell.",
+             "codex_id": wizard["codex_id"], "valid_from": "2026-08-19",
+             "valid_to": "2026-09-01"},
+            {"rules_text": "Spellcaster\nGenesis → Draw two spells.",
+             "codex_id": wizard["codex_id"], "valid_from": "2026-09-01",
+             "valid_to": None},
+        ])
+        # The untouched card still has exactly its one open row.
+        broken = next(c for c in export["cards"] if c["name"] == "Broken Site")
+        self.assertEqual(len([h for h in export["rules_history"]
+                              if h["codex_id"] == broken["codex_id"]]), 1)
+
+
+class FrozenFlavourTextTest(unittest.TestCase):
+    """Upstream serves flavour text as null for every printing since the
+    rebuild. A null must not erase the text the registry already holds."""
+
+    def test_null_upstream_leaves_registry_value_alone(self):
+        con = open_db(":memory:")
+        init_db(con)
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["printings"][0]["meta"]["flavor"] = "The first of many."
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+
+        plan = diff(load_registry_state(con), build_snapshot(copy.deepcopy(RAW_API)))
+        self.assertTrue(is_noop(plan), plan)
+        state = load_registry_state(con)
+        self.assertEqual(state["printings"]["001-apprentice_wizard-b-s"]["flavour_text"],
+                         "The first of many.")
+
+    def test_real_upstream_value_still_updates(self):
+        con = open_db(":memory:")
+        init_db(con)
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["printings"][0]["meta"]["flavor"] = "The first of many."
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        raw[0]["printings"][0]["meta"]["flavor"] = "The first of many, revised."
+        plan = diff(load_registry_state(con), build_snapshot(raw))
+        self.assertEqual(plan["printing_updates"][0]["changes"]["flavour_text"]["new"],
+                         "The first of many, revised.")
+
+
+class BackFaceRoundTripTest(unittest.TestCase):
+    def test_faces_survive_storage_and_export_in_fixed_order(self):
+        con = open_db(":memory:")
+        init_db(con)
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["engine"]["back"] = engine(type="Avatar", category="Avatar", rarity=None,
+                                          rules="Tap → Play or draw a site.", life=20,
+                                          cost=None, keywords=[])
+        raw[0]["printings"][0]["meta"]["back"] = {
+            "finish": "Standard", "product": "Booster", "flavor": None,
+            "typeline": "Your Avatar is a force of nature!",
+            "artist": {"name": "Bryon Wackwitz", "slug": "bryon_wackwitz"}}
+        snapshot = build_snapshot(raw)
+        apply_plan(con, diff(load_registry_state(con), snapshot), "2026-08-19")
+        self.assertTrue(is_noop(diff(load_registry_state(con), snapshot)))
+
+        export = build_export(con)
+        wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
+        front_keys = [k for k in wizard if k not in ("codex_id", "name", "back",
+                                                     "set_codes", "printing_ids")]
+        self.assertEqual(list(wizard["back"]), front_keys)
+        self.assertEqual(wizard["back"]["life"], 20)
+        printing = next(p for p in export["printings"]
+                        if p["slug"] == "001-apprentice_wizard-b-s")
+        self.assertEqual(list(printing["back"]),
+                         ["artist", "artist_slug", "flavour_text", "typeline"])
+        self.assertEqual(printing["back"]["artist_slug"], "bryon_wackwitz")
+
+
+class MigrationTest(unittest.TestCase):
+    """The v6 -> v7 rebuild keeps every id and history row and re-encodes
+    only what the old API's shape forced on the data."""
+
+    V6_DDL = """
+    CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    CREATE TABLE cards (card_id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE,
+        type TEXT, rarity TEXT, subtypes TEXT, elements TEXT, cost INTEGER,
+        attack INTEGER, defence INTEGER, life INTEGER,
+        thr_air INTEGER NOT NULL DEFAULT 0, thr_earth INTEGER NOT NULL DEFAULT 0,
+        thr_fire INTEGER NOT NULL DEFAULT 0, thr_water INTEGER NOT NULL DEFAULT 0,
+        rules_text TEXT NOT NULL DEFAULT '');
+    CREATE TABLE printings (printing_id INTEGER PRIMARY KEY, card_id INTEGER NOT NULL,
+        set_name TEXT NOT NULL, released_at TEXT, set_number TEXT, product TEXT,
+        finish TEXT, slug TEXT NOT NULL UNIQUE, artist TEXT, flavour_text TEXT,
+        type_text TEXT, rarity TEXT, type TEXT, rules_text TEXT, cost INTEGER,
+        attack INTEGER, defence INTEGER, life INTEGER,
+        thr_air INTEGER NOT NULL DEFAULT 0, thr_earth INTEGER NOT NULL DEFAULT 0,
+        thr_fire INTEGER NOT NULL DEFAULT 0, thr_water INTEGER NOT NULL DEFAULT 0,
+        image_hash TEXT, retired_at TEXT);
+    CREATE TABLE slug_history (slug TEXT NOT NULL, printing_id INTEGER NOT NULL,
+        valid_from TEXT NOT NULL, valid_to TEXT);
+    CREATE TABLE name_history (name TEXT NOT NULL, card_id INTEGER NOT NULL,
+        valid_from TEXT NOT NULL, valid_to TEXT);
+    INSERT INTO meta VALUES ('schema_version', '6'), ('next_card_id', '8'),
+                            ('next_printing_id', '12');
+    INSERT INTO cards VALUES (7, 'Daperyll Vampire', 'Minion', 'Exceptional',
+        'Undead, Beast', 'Earth, Water', 5, 4, 4, NULL, 0, 2, 0, 1,
+        'UPDATED: Airborne' || char(10) || 'Strike damage heals you.');
+    INSERT INTO printings VALUES (11, 7, 'Alpha', '2023-04-19', '001', 'Booster',
+        'Standard', '001-daperyll_vampire-b-s', 'An Artist', 'Flavour.', 'A typeline',
+        'Exceptional', 'Minion', 'old copy', 5, 4, 4, NULL, 0, 2, 0, 1, NULL, NULL);
+    INSERT INTO slug_history VALUES ('001-daperyll-vampire-b-s', 11, '2026-08-19', '2026-08-20');
+    INSERT INTO slug_history VALUES ('001-daperyll_vampire-b-s', 11, '2026-08-20', NULL);
+    INSERT INTO name_history VALUES ('Daperyll Vampire', 7, '2026-08-19', NULL);
+    """
+
+    def test_rebuild_keeps_ids_and_reencodes_fields(self):
+        from registry.migrate_v7 import migrate
+        from registry.validate import check_internal
+        old = open_db(":memory:")
+        old.executescript(self.V6_DDL)
+        new = open_db(":memory:")
+        migrate(old, new, "2026-09-09")
+
+        state = load_registry_state(new)
+        card = state["cards"]["Daperyll Vampire"]
+        self.assertEqual(card["card_id"], 7)
+        self.assertEqual(card["defense"], 4)
+        self.assertEqual(card["subtypes"], ["Undead", "Beast"])
+        self.assertEqual(card["elements"], ["Earth", "Water"])
+        self.assertEqual(card["rules_text"], "Airborne\nStrike damage heals you.")
+        self.assertIsNone(card["category"])
+        printing = state["printings"]["001-daperyll_vampire-b-s"]
+        self.assertEqual(printing["printing_id"], 11)
+        self.assertEqual(printing["set_code"], "001")
+        self.assertEqual(printing["typeline"], "A typeline")
+        self.assertEqual(printing["flavour_text"], "Flavour.")
+        self.assertNotIn("rules_text", printing)
+        self.assertEqual(state["slug_owners"],
+                         {"001-daperyll-vampire-b-s": 11, "001-daperyll_vampire-b-s": 11})
+        self.assertEqual(registry.db.get_meta(new, "next_card_id"), "8")
+        self.assertEqual(registry.db.get_meta(new, "next_printing_id"), "12")
+        rows = new.execute("SELECT rules_text, valid_from, valid_to FROM rules_history").fetchall()
+        self.assertEqual([tuple(r) for r in rows],
+                         [("Airborne\nStrike damage heals you.", "2026-09-09", None)])
+        errors = []
+        check_internal(new, errors)
+        self.assertEqual(errors, [])
+
+    def test_refuses_a_database_that_is_not_v6(self):
+        from registry.migrate_v7 import migrate
+        old = open_db(":memory:")
+        init_db(old)
+        with self.assertRaises(ValueError):
+            migrate(old, open_db(":memory:"), "2026-09-09")
+
+
 class ExportArtifactsTest(unittest.TestCase):
     def test_write_export_emits_matching_checksum(self):
         import hashlib
@@ -308,21 +529,28 @@ class ExportArtifactsTest(unittest.TestCase):
         schema = json.loads(schema_file.read_text(encoding="utf-8"))
         con = open_db(":memory:")
         init_db(con)
-        apply_plan(con, diff(load_registry_state(con),
-                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["engine"]["back"] = engine(type="Avatar", category="Avatar", rarity=None)
+        raw[0]["printings"][0]["meta"]["back"] = {
+            "finish": "Standard", "product": "Booster", "flavor": None,
+            "typeline": "Back", "artist": {"name": "B", "slug": "b"}}
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
         export = json.loads(render(build_export(con)))
         errors = list(jsonschema.Draft202012Validator(schema).iter_errors(export))
         self.assertEqual(errors, [], [e.message for e in errors[:3]])
 
 
-class NameHistoryValidationTest(unittest.TestCase):
-    def test_missing_open_name_row_is_reported(self):
-        from registry.validate import check_internal
+class HistoryValidationTest(unittest.TestCase):
+    def populated(self):
         con = open_db(":memory:")
         init_db(con)
         apply_plan(con, diff(load_registry_state(con),
                              build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        return con
 
+    def test_missing_open_name_row_is_reported(self):
+        from registry.validate import check_internal
+        con = self.populated()
         errors = []
         check_internal(con, errors)
         self.assertEqual(errors, [])
@@ -332,6 +560,14 @@ class NameHistoryValidationTest(unittest.TestCase):
         errors = []
         check_internal(con, errors)
         self.assertTrue(any("open name_history rows" in e for e in errors), errors)
+
+    def test_rules_history_must_agree_with_the_card(self):
+        from registry.validate import check_internal
+        con = self.populated()
+        con.execute("UPDATE cards SET rules_text = 'edited by hand' WHERE card_id = 1")
+        errors = []
+        check_internal(con, errors)
+        self.assertTrue(any("open rules_history row" in e for e in errors), errors)
 
 
 class SnapshotArtifactTest(unittest.TestCase):
@@ -429,7 +665,8 @@ class ManifestTest(unittest.TestCase):
 
         self.assertEqual(manifest["dataset_version"], "v0.0.0-test")
         self.assertEqual(manifest["schema_version"], header["schema_version"])
-        for key in ("sets", "cards", "printings", "slug_history", "name_history"):
+        for key in ("sets", "cards", "printings", "slug_history", "name_history",
+                    "rules_history"):
             self.assertEqual(manifest["counts"][key], header[key])
         self.assertEqual([a["name"] for a in manifest["artifacts"]],
                          ["registry.json", "registry.sqlite", "registry.schema.json"])

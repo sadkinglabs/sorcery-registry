@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/sadkinglabs/sorcery-registry/main/schema/registry.schema.json",
   "title": "Sorcery Card Registry export",
-  "description": "Stable identifiers for every card and printing in Sorcery: Contested Realm. codex_id (C000042) identifies a card across all its reprints; printing_id (P000042) identifies one physical print. Key on those two - every other field is data that can change. This schema is structural: vocabularies noted in descriptions (product, finish, type, rarity) are the values observed today, not closed sets, so new official values never become schema violations.",
+  "description": "Stable identifiers for every card and printing in Sorcery: Contested Realm. codex_id (C000042) identifies a card across all its reprints; printing_id (P000042) identifies one physical print. Key on those two - every other field is data that can change. The shape mirrors the official API: gameplay data lives on the card, physical facts on the printing. This schema is structural: vocabularies noted in descriptions (product, finish, type, rarity, category) are the values observed today, not closed sets, so new official values never become schema violations.",
   "$defs": {
     "codexId": {
       "type": "string",
@@ -14,11 +14,6 @@
       "pattern": "^P[0-9]{6}$",
       "description": "Permanent id of one physical print (set + product + finish)."
     },
-    "setNumber": {
-      "type": "string",
-      "pattern": "^[0-9]{3}$",
-      "description": "The set's official number from the slug (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promotional). There is no collector number: cards have no official serialisation within a set."
-    },
     "date": {
       "type": "string",
       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
@@ -26,6 +21,174 @@
     "threshold": {
       "type": "integer",
       "minimum": 0
+    },
+    "setCode": {
+      "type": "string",
+      "pattern": "^[0-9]{3}$",
+      "description": "The set's official code (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promotional). A code, not a number: 003 is deliberately unused, so codes do not imply an order. There is no collector number: cards have no official serialisation within a set."
+    },
+    "face": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Observed values: Artifact, Aura, Avatar, Magic, Minion, Site."
+        },
+        "category": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Coarser grouping: Spell (Minion, Magic, Artifact, Aura), Site, Avatar, Token."
+        },
+        "rarity": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The rarity printed on the card. Observed values: Ordinary, Exceptional, Elite, Unique; null on Avatars and some tokens."
+        },
+        "slot": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The rarity slot the card is distributed in. Agrees with rarity except for Avatars (no printed rarity) and tokens."
+        },
+        "subtypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "In upstream's order, e.g. [\"Beast\", \"Spirit\"]."
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "In upstream's order. [\"None\"] means colourless (Artifacts, Avatars, most Sites)."
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ability keywords the card carries (Airborne, Genesis, Spellcaster, ...), as upstream tags them."
+        },
+        "umbrellas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Cross-subtype groupings rules text refers to (Evil, Knight, Royalty)."
+        },
+        "cost": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Mana cost. null for Sites and Avatars, and for X costs."
+        },
+        "attack": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "defense": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "life": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Only Avatars have a life value."
+        },
+        "thr_air": {
+          "$ref": "#/$defs/threshold"
+        },
+        "thr_earth": {
+          "$ref": "#/$defs/threshold"
+        },
+        "thr_fire": {
+          "$ref": "#/$defs/threshold"
+        },
+        "thr_water": {
+          "$ref": "#/$defs/threshold"
+        },
+        "rules_text": {
+          "type": "string",
+          "description": "Current text the card plays by, applying to every printing. Canonicalised: \\n line endings, no trailing whitespace, one line per ability. Changes are recorded in rules_history."
+        }
+      },
+      "required": [
+        "type",
+        "category",
+        "rarity",
+        "slot",
+        "subtypes",
+        "elements",
+        "keywords",
+        "umbrellas",
+        "cost",
+        "attack",
+        "defense",
+        "life",
+        "thr_air",
+        "thr_earth",
+        "thr_fire",
+        "thr_water",
+        "rules_text"
+      ],
+      "additionalProperties": false,
+      "description": "The gameplay data of one face of a card."
+    },
+    "printingFace": {
+      "type": "object",
+      "properties": {
+        "artist": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "artist_slug": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Upstream's slug for the artist, e.g. jeff_a_menges."
+        },
+        "flavour_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "typeline": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The flavour typeline printed under the name, e.g. 'An Ordinary Mortal new to power'."
+        }
+      },
+      "required": [
+        "artist",
+        "artist_slug",
+        "flavour_text",
+        "typeline"
+      ],
+      "additionalProperties": false,
+      "description": "The physical facts that differ per face of a double-faced printing."
     }
   },
   "type": "object",
@@ -54,6 +217,9 @@
         },
         "name_history": {
           "type": "integer"
+        },
+        "rules_history": {
+          "type": "integer"
         }
       },
       "required": [
@@ -63,7 +229,8 @@
         "cards",
         "printings",
         "slug_history",
-        "name_history"
+        "name_history",
+        "rules_history"
       ],
       "additionalProperties": false,
       "description": "Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a byte-identical file."
@@ -73,10 +240,10 @@
       "items": {
         "type": "object",
         "properties": {
-          "set_number": {
+          "set_code": {
             "anyOf": [
               {
-                "$ref": "#/$defs/setNumber"
+                "$ref": "#/$defs/setCode"
               },
               {
                 "type": "null"
@@ -94,7 +261,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Derived: the earliest released_at among the set's printings."
           },
           "cards": {
             "type": "integer"
@@ -104,7 +272,7 @@
           }
         },
         "required": [
-          "set_number",
+          "set_code",
           "set_name",
           "released_at",
           "cards",
@@ -132,31 +300,61 @@
             ],
             "description": "Observed values: Artifact, Aura, Avatar, Magic, Minion, Site."
           },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Coarser grouping: Spell (Minion, Magic, Artifact, Aura), Site, Avatar, Token."
+          },
           "rarity": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Observed values: Ordinary, Elite, Exceptional, Unique, None."
+            "description": "The rarity printed on the card. Observed values: Ordinary, Exceptional, Elite, Unique; null on Avatars and some tokens."
           },
-          "subtypes": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "elements": {
+          "slot": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Comma-separated element list as upstream states it, e.g. 'Air' or 'Earth, Fire, Water, Air'."
+            "description": "The rarity slot the card is distributed in. Agrees with rarity except for Avatars (no printed rarity) and tokens."
+          },
+          "subtypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "In upstream's order, e.g. [\"Beast\", \"Spirit\"]."
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "In upstream's order. [\"None\"] means colourless (Artifacts, Avatars, most Sites)."
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ability keywords the card carries (Airborne, Genesis, Spellcaster, ...), as upstream tags them."
+          },
+          "umbrellas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Cross-subtype groupings rules text refers to (Evil, Knight, Royalty)."
           },
           "cost": {
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "Mana cost. null for Sites and Avatars, and for X costs."
           },
           "attack": {
             "type": [
@@ -164,7 +362,7 @@
               "null"
             ]
           },
-          "defence": {
+          "defense": {
             "type": [
               "integer",
               "null"
@@ -191,16 +389,23 @@
           },
           "rules_text": {
             "type": "string",
-            "description": "Current text the card plays by. Canonicalised: \n line endings, no trailing whitespace, one line per ability."
+            "description": "Current text the card plays by, applying to every printing. Canonicalised: \\n line endings, no trailing whitespace, one line per ability. Changes are recorded in rules_history."
           },
-          "errata": {
-            "type": "boolean",
-            "description": "Derived from the upstream convention that an errata'd card's rules text begins with UPDATED."
+          "back": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/face"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The back face of a double-faced card; null for every other card. The card's own fields are its front."
           },
-          "set_numbers": {
+          "set_codes": {
             "type": "array",
             "items": {
-              "$ref": "#/$defs/setNumber"
+              "$ref": "#/$defs/setCode"
             },
             "description": "Derived, sorted: the sets this card appears in. For products and finishes, follow printing_ids."
           },
@@ -216,20 +421,24 @@
           "codex_id",
           "name",
           "type",
+          "category",
           "rarity",
+          "slot",
           "subtypes",
           "elements",
+          "keywords",
+          "umbrellas",
           "cost",
           "attack",
-          "defence",
+          "defense",
           "life",
           "thr_air",
           "thr_earth",
           "thr_fire",
           "thr_water",
           "rules_text",
-          "errata",
-          "set_numbers",
+          "back",
+          "set_codes",
           "printing_ids"
         ],
         "additionalProperties": false,
@@ -254,6 +463,16 @@
           "set_name": {
             "type": "string"
           },
+          "set_code": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/setCode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "released_at": {
             "anyOf": [
               {
@@ -262,24 +481,15 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "set_number": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/setNumber"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "description": "The date this printing reached the public."
           },
           "product": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Official product line. Observed values: Booster, Welcome_Kit, Organized_Play, Box_Topper, Dust, Preconstructed_Deck, Draft_Kit, Kickstarter, Alpha_Investments, Team_Covenant, Star_City_Games."
+            "description": "Official product line, spelled as upstream spells it. Observed values: Booster, BoxTopper, Dust, OrganizedPlay, PreconstructedDeck, DraftKit, AlphaInvestments, WelcomeKit, Kickstarter, TeamCovenant, StarCityGames."
           },
           "finish": {
             "type": [
@@ -298,72 +508,36 @@
               "null"
             ]
           },
+          "artist_slug": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Upstream's slug for the artist, e.g. jeff_a_menges."
+          },
           "flavour_text": {
             "type": [
               "string",
               "null"
             ]
           },
-          "type_text": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "rarity": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "type": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "rules_text": {
+          "typeline": {
             "type": [
               "string",
               "null"
             ],
-            "description": "The text as printed in this set, which can differ from the card's current text."
+            "description": "The flavour typeline printed under the name, e.g. 'An Ordinary Mortal new to power'."
           },
-          "cost": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          },
-          "attack": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          },
-          "defence": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          },
-          "life": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          },
-          "thr_air": {
-            "$ref": "#/$defs/threshold"
-          },
-          "thr_earth": {
-            "$ref": "#/$defs/threshold"
-          },
-          "thr_fire": {
-            "$ref": "#/$defs/threshold"
-          },
-          "thr_water": {
-            "$ref": "#/$defs/threshold"
+          "back": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/printingFace"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Back face of a double-faced printing; null otherwise."
           },
           "image_hash": {
             "type": [
@@ -389,30 +563,21 @@
           "codex_id",
           "card_name",
           "set_name",
+          "set_code",
           "released_at",
-          "set_number",
           "product",
           "finish",
           "slug",
           "artist",
+          "artist_slug",
           "flavour_text",
-          "type_text",
-          "rarity",
-          "type",
-          "rules_text",
-          "cost",
-          "attack",
-          "defence",
-          "life",
-          "thr_air",
-          "thr_earth",
-          "thr_fire",
-          "thr_water",
+          "typeline",
+          "back",
           "image_hash",
           "retired_at"
         ],
         "additionalProperties": false,
-        "description": "One record per physical print: a specific set, product and finish."
+        "description": "One record per physical print: a specific set, product and finish. Gameplay data is on the card it points at."
       }
     },
     "slug_history": {
@@ -484,6 +649,41 @@
         "additionalProperties": false,
         "description": "Every name a card has ever carried. valid_to null = the current name. Unlike slugs, a name is not owned: two cards may hold the same name at different times."
       }
+    },
+    "rules_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rules_text": {
+            "type": "string"
+          },
+          "codex_id": {
+            "$ref": "#/$defs/codexId"
+          },
+          "valid_from": {
+            "$ref": "#/$defs/date"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "rules_text",
+          "codex_id",
+          "valid_from",
+          "valid_to"
+        ],
+        "additionalProperties": false,
+        "description": "Every text a card has played by, as observed by syncs. valid_to null = the current text. A closed row means the card's wording changed on valid_to; the registry records the change and does not rule on why."
+      }
     }
   },
   "required": [
@@ -492,7 +692,8 @@
     "cards",
     "printings",
     "slug_history",
-    "name_history"
+    "name_history",
+    "rules_history"
   ],
   "additionalProperties": false
 }

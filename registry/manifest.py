@@ -34,6 +34,7 @@ def build_manifest(dataset_version, export_path, db_path, schema_path):
         "printings": header["printings"],
         "slug_history": header["slug_history"],
         "name_history": header["name_history"],
+        "rules_history": header["rules_history"],
     }
 
     artifacts = []

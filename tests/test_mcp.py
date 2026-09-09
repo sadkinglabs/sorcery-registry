@@ -7,42 +7,43 @@ import unittest
 
 from mcp_server import Registry, card_ref, printing_ref
 
+def _printing(printing_id, codex_id, set_name, set_code, released_at, slug,
+              finish="Standard", artist="A", product="Booster"):
+    return {"printing_id": printing_id, "codex_id": codex_id, "set_name": set_name,
+            "set_code": set_code, "released_at": released_at, "product": product,
+            "finish": finish, "slug": slug, "artist": artist,
+            "artist_slug": artist.lower(), "flavour_text": None, "typeline": "",
+            "back": None, "image_hash": None, "retired_at": None}
+
+
 DATA = {
-    "header": {"schema_version": 1, "source": "test", "cards": 2,
+    "header": {"schema_version": 7, "source": "test", "cards": 2,
                "printings": 3, "slug_history": 4},
     "cards": [
         {"codex_id": "C000001", "name": "Apprentice Wizard", "type": "Minion",
-         "rarity": "Ordinary", "subtypes": "Mortal", "elements": "Air",
-         "cost": 3, "attack": 1, "defence": 1, "life": None,
+         "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
+         "subtypes": ["Mortal"], "elements": ["Air"],
+         "keywords": ["Spellcaster", "Genesis"], "umbrellas": [],
+         "cost": 3, "attack": 1, "defense": 1, "life": None,
          "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
-         "rules_text": "Spellcaster", "printing_ids": ["P000001", "P000002"]},
+         "rules_text": "Spellcaster", "back": None,
+         "set_codes": ["001", "002"], "printing_ids": ["P000001", "P000002"]},
         {"codex_id": "C000002", "name": "Witch", "type": "Minion",
-         "rarity": "Elite", "subtypes": "Mortal", "elements": "Water",
-         "cost": 2, "attack": 1, "defence": 1, "life": None,
+         "category": "Spell", "rarity": "Elite", "slot": "Elite",
+         "subtypes": ["Mortal"], "elements": ["Water", "Air"],
+         "keywords": ["Spellcaster"], "umbrellas": ["Evil"],
+         "cost": 2, "attack": 1, "defense": 1, "life": None,
          "thr_air": 0, "thr_earth": 0, "thr_fire": 0, "thr_water": 1,
-         "rules_text": "Curse.", "printing_ids": ["P000003"]},
+         "rules_text": "Curse.", "back": None,
+         "set_codes": ["001"], "printing_ids": ["P000003"]},
     ],
     "printings": [
-        {"printing_id": "P000001", "codex_id": "C000001", "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
-         "product": "Booster", "finish": "Standard",
-         "slug": "001-apprentice_wizard-b-s", "artist": "A", "flavour_text": "",
-         "type_text": "", "rarity": "Ordinary", "type": "Minion",
-         "rules_text": "Spellcaster", "cost": 3, "attack": 1, "defence": 1,
-         "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
-         "thr_water": 0, "image_hash": None, "retired_at": None},
-        {"printing_id": "P000002", "codex_id": "C000001", "set_name": "Beta", "released_at": "2023-11-10", "set_number": "002",
-         "product": "Booster", "finish": "Foil",
-         "slug": "002-apprentice_wizard-b-f", "artist": "A", "flavour_text": "",
-         "type_text": "", "rarity": "Ordinary", "type": "Minion",
-         "rules_text": "Spellcaster", "cost": 3, "attack": 1, "defence": 1,
-         "life": None, "thr_air": 1, "thr_earth": 0, "thr_fire": 0,
-         "thr_water": 0, "image_hash": None, "retired_at": None},
-        {"printing_id": "P000003", "codex_id": "C000002", "set_name": "Alpha", "released_at": "2023-04-19", "set_number": "001",
-         "product": "Booster", "finish": "Standard", "slug": "004-witch_x-b-s",
-         "artist": "B", "flavour_text": "", "type_text": "", "rarity": "Elite",
-         "type": "Minion", "rules_text": "Curse.", "cost": 2, "attack": 1,
-         "defence": 1, "life": None, "thr_air": 0, "thr_earth": 0,
-         "thr_fire": 0, "thr_water": 1, "image_hash": None, "retired_at": None},
+        _printing("P000001", "C000001", "Alpha", "001", "2023-06-22",
+                  "001-apprentice_wizard-b-s"),
+        _printing("P000002", "C000001", "Beta", "002", "2023-10-06",
+                  "002-apprentice_wizard-b-f", finish="Foil"),
+        _printing("P000003", "C000002", "Alpha", "001", "2023-06-22",
+                  "004-witch_x-b-s", artist="B"),
     ],
     "slug_history": [
         {"slug": "001-apprentice_wizard-b-s", "printing_id": "P000001",
@@ -167,37 +168,51 @@ class SearchTest(unittest.TestCase):
         self.assertEqual([c["name"] for c in result["cards"]], ["Witch"])
 
     def test_filters_combine(self):
-        result = self.reg.search_cards(type="Minion", element="Air")
-        self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000001"])
+        result = self.reg.search_cards(type="Minion", element="Water")
+        self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000002"])
         result = self.reg.search_cards(card_set="Beta")
         self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000001"])
+
+    def test_element_matches_any_of_a_multi_element_card(self):
+        # Witch is Water and Air: an Air search finds both cards.
+        result = self.reg.search_cards(element="air")
+        self.assertEqual([c["codex_id"] for c in result["cards"]], ["C000001", "C000002"])
+
+    def test_keyword_and_category_filters(self):
+        result = self.reg.search_cards(keyword="genesis")
+        self.assertEqual([c["name"] for c in result["cards"]], ["Apprentice Wizard"])
+        self.assertEqual(result["cards"][0]["keywords"], ["Spellcaster", "Genesis"])
+        self.assertEqual(self.reg.search_cards(category="Spell")["total_matches"], 2)
+        self.assertEqual(self.reg.search_cards(category="Site")["total_matches"], 0)
 
     def test_limit_reports_total(self):
         result = self.reg.search_cards(limit=1)
         self.assertEqual(result["total_matches"], 2)
         self.assertEqual(result["returned"], 1)
 
-    def test_errata_filter_and_derivation(self):
-        # The flag is derived on load when an export predates it.
-        data = copy.deepcopy(DATA)
-        data["cards"][1]["rules_text"] = "UPDATED: Curse."
-        reg = Registry(data)
-        result = reg.search_cards(errata=True)
-        self.assertEqual([c["name"] for c in result["cards"]], ["Witch"])
-        self.assertTrue(result["cards"][0]["errata"])
-        self.assertEqual(reg.search_cards(errata=False)["total_matches"], 1)
+    def test_pre_v7_export_with_string_lists_is_normalised(self):
+        legacy = copy.deepcopy(DATA)
+        legacy["cards"][1]["elements"] = "Water, Air"
+        legacy["cards"][1]["subtypes"] = "Mortal"
+        for printing in legacy["printings"]:
+            printing["set_number"] = printing.pop("set_code")
+            printing["type_text"] = printing.pop("typeline")
+        reg = Registry(legacy)
+        self.assertEqual(reg.search_cards(element="air")["total_matches"], 2)
+        self.assertEqual(reg.resolve_slug("004-witch-b-s")["set_code"], "001")
 
 
 class SearchPrintingsTest(unittest.TestCase):
     def setUp(self):
         self.reg = Registry(copy.deepcopy(DATA))
 
-    def test_product_filter_tolerates_spaces(self):
+    def test_product_filter_tolerates_spaces_underscores_and_case(self):
         data = copy.deepcopy(DATA)
-        data["printings"][1]["product"] = "Box_Topper"
+        data["printings"][1]["product"] = "BoxTopper"
         reg = Registry(data)
-        result = reg.search_printings(product="Box Topper")
-        self.assertEqual([p["printing_id"] for p in result["printings"]], ["P000002"])
+        for spelling in ("Box Topper", "box_topper", "BoxTopper"):
+            result = reg.search_printings(product=spelling)
+            self.assertEqual([p["printing_id"] for p in result["printings"]], ["P000002"])
         self.assertEqual(result["distinct_cards"], 1)
 
     def test_filters_combine(self):
@@ -217,14 +232,14 @@ class SearchPrintingsTest(unittest.TestCase):
 
 class SetContentsTest(unittest.TestCase):
     def test_distinct_cards_and_counts(self):
-        # A set is addressable by name or by its official number.
+        # A set is addressable by name or by its official code.
         reg = Registry(copy.deepcopy(DATA))
         self.assertEqual(reg.set_contents("1"), reg.set_contents("Alpha"))
         result = reg.set_contents("Alpha")
         self.assertEqual(result["set_name"], "Alpha")
         self.assertEqual(result["distinct_cards"], 2)
         self.assertEqual(result["total_printings"], 2)
-        self.assertEqual(result["set_number"], "001")
+        self.assertEqual(result["set_code"], "001")
         # Ordered by name: the official data has no within-set serialisation.
         self.assertEqual([c["name"] for c in result["cards"]],
                          ["Apprentice Wizard", "Witch"])
@@ -233,12 +248,13 @@ class SetContentsTest(unittest.TestCase):
 class StatsTest(unittest.TestCase):
     def test_per_set_counts(self):
         stats = Registry(copy.deepcopy(DATA)).stats()
-        self.assertEqual(stats["schema_version"], 1)
-        by_number = {s["set_number"]: s for s in stats["sets"]}
-        self.assertEqual(by_number["001"]["set_name"], "Alpha")
-        self.assertEqual(by_number["001"]["cards"], 2)
-        self.assertEqual(by_number["001"]["printings"], 2)
-        self.assertEqual(by_number["002"]["printings"], 1)
+        self.assertEqual(stats["schema_version"], 7)
+        by_code = {s["set_code"]: s for s in stats["sets"]}
+        self.assertEqual(by_code["001"]["set_name"], "Alpha")
+        self.assertEqual(by_code["001"]["released_at"], "2023-06-22")
+        self.assertEqual(by_code["001"]["cards"], 2)
+        self.assertEqual(by_code["001"]["printings"], 2)
+        self.assertEqual(by_code["002"]["printings"], 1)
 
 
 if __name__ == "__main__":

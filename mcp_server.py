@@ -115,16 +115,20 @@ def _normalise_ids(data):
         card["codex_id"] = card_ref(card.pop("card_id", None) or card["codex_id"])
         if "printing_ids" in card:
             card["printing_ids"] = [printing_ref(p) for p in card["printing_ids"]]
-        card.setdefault("errata", (card.get("rules_text") or "").startswith("UPDATED"))
+        # Exports before v7 carried subtypes and elements as comma-joined
+        # strings.
+        for field in ("subtypes", "elements"):
+            if isinstance(card.get(field), str):
+                card[field] = [v.strip() for v in card[field].split(",") if v.strip()]
     for printing in data["printings"]:
         printing["printing_id"] = printing_ref(printing["printing_id"])
         printing["codex_id"] = card_ref(printing.pop("card_id", None) or printing["codex_id"])
-        # Older exports called the slug's set number "card_number" (a
-        # mislabel: the digits are the set's number, e.g. 006 = Gothic)
-        # and carried a registry-invented "set_code".
+        # Older exports called the set code "set_number" or "card_number".
         printing.pop("card_number", None)
-        printing.pop("set_code", None)
-        printing.setdefault("set_number", printing["slug"].split("-")[0])
+        legacy = printing.pop("set_number", None)
+        printing.setdefault("set_code", legacy or printing["slug"].split("-")[0])
+        if "typeline" not in printing:
+            printing["typeline"] = printing.pop("type_text", None)
     names = {c["codex_id"]: c["name"] for c in data["cards"]}
     for printing in data["printings"]:
         printing.setdefault("card_name", names.get(printing["codex_id"]))
@@ -188,7 +192,7 @@ class Registry:
             "current_slug": printing["slug"],
             "queried_slug_is_current": printing["slug"] == slug,
             "set_name": printing["set_name"],
-            "set_number": printing["set_number"],
+            "set_code": printing["set_code"],
             "product": printing["product"],
             "finish": printing["finish"],
             "retired_at": printing["retired_at"],
@@ -200,8 +204,9 @@ class Registry:
         if card is None:
             return {"found": False, "codex_id": card_id}
         printings = [
-            {k: p[k] for k in ("printing_id", "slug", "set_name", "set_number",
-                               "product", "finish", "artist", "retired_at")}
+            {k: p.get(k) for k in ("printing_id", "slug", "set_name", "set_code",
+                                   "released_at", "product", "finish", "artist",
+                                   "retired_at")}
             for p in sorted(self.printings_by_card.get(card_id, []),
                             key=lambda p: p["printing_id"])
         ]
@@ -217,15 +222,18 @@ class Registry:
 
     @staticmethod
     def _in_set(printing, wanted):
-        """Match a printing against a set given as its official number
+        """Match a printing against a set given as its official code
         ('006', '6', 6) or its name ('Gothic'), case-insensitively."""
         text = str(wanted).strip()
         if text.isdigit():
-            return printing["set_number"] == text.zfill(3)
+            return printing["set_code"] == text.zfill(3)
         return (printing["set_name"] or "").lower() == text.lower()
 
     def search_cards(self, name=None, type=None, element=None, rarity=None,
-                     card_set=None, errata=None, limit=20):
+                     card_set=None, keyword=None, category=None, limit=20):
+        def has(values, wanted):
+            return wanted.lower() in [v.lower() for v in (values or [])]
+
         results = []
         name_lower = name.lower() if name else None
         for card in self.cards.values():
@@ -233,19 +241,21 @@ class Registry:
                 continue
             if type and (card["type"] or "").lower() != type.lower():
                 continue
-            if element and element.lower() not in (card["elements"] or "").lower():
+            if category and (card.get("category") or "").lower() != category.lower():
+                continue
+            if element and not has(card["elements"], element):
                 continue
             if rarity and (card["rarity"] or "").lower() != rarity.lower():
                 continue
-            if errata is not None and card["errata"] != errata:
+            if keyword and not has(card.get("keywords"), keyword):
                 continue
             if card_set and not any(
                     self._in_set(p, card_set)
                     for p in self.printings_by_card.get(card["codex_id"], [])):
                 continue
-            results.append({k: card[k] for k in
-                            ("codex_id", "name", "type", "rarity", "elements",
-                             "cost", "errata", "rules_text")})
+            results.append({k: card.get(k) for k in
+                            ("codex_id", "name", "type", "category", "rarity",
+                             "elements", "keywords", "cost", "rules_text")})
         results.sort(key=lambda c: c["codex_id"])
         return {"total_matches": len(results), "returned": min(len(results), limit),
                 "cards": results[:limit]}
@@ -254,11 +264,11 @@ class Registry:
         # Ordered by name: the official data has no collector numbers, so
         # there is no official ordering of cards within a set to follow.
         entries = {}
-        set_name = set_number = None
+        set_name = set_code = None
         for p in self.printings.values():
             if not self._in_set(p, card_set):
                 continue
-            set_name, set_number = p["set_name"], p["set_number"]
+            set_name, set_code = p["set_name"], p["set_code"]
             key = p["codex_id"]
             entry = entries.setdefault(key, {
                 "codex_id": key,
@@ -267,17 +277,17 @@ class Registry:
             })
             entry["printing_ids"].append(p["printing_id"])
         cards = sorted(entries.values(), key=lambda e: e["name"])
-        return {"set_name": set_name, "set_number": set_number,
+        return {"set_name": set_name, "set_code": set_code,
                 "distinct_cards": len(cards),
                 "total_printings": sum(len(c["printing_ids"]) for c in cards),
                 "cards": cards}
 
     def search_printings(self, name=None, card_set=None, product=None,
                          finish=None, limit=50):
-        # product matching tolerates spaces for underscores ("Box Topper"
-        # finds Box_Topper); the values are the API's own product names.
+        # product matching ignores case, spaces and underscores, so "Box
+        # Topper", "box_topper" and the official BoxTopper all match.
         def norm(text):
-            return str(text).strip().lower().replace(" ", "_")
+            return str(text).strip().lower().replace(" ", "").replace("_", "")
 
         results = []
         name_lower = name.lower() if name else None
@@ -292,7 +302,7 @@ class Registry:
                 continue
             results.append({k: p[k] for k in
                             ("printing_id", "codex_id", "card_name", "slug",
-                             "set_name", "set_number", "product", "finish",
+                             "set_name", "set_code", "product", "finish",
                              "retired_at")})
         results.sort(key=lambda p: p["printing_id"])
         return {"total_matches": len(results),
@@ -304,15 +314,18 @@ class Registry:
         sets = {}
         products = {}
         for p in self.printings.values():
-            entry = sets.setdefault(p["set_number"], {
-                "set_number": p["set_number"], "set_name": p["set_name"],
+            entry = sets.setdefault(p["set_code"], {
+                "set_code": p["set_code"], "set_name": p["set_name"],
                 "released_at": p["released_at"], "cards": set(), "printings": 0})
+            if p["released_at"] and (entry["released_at"] is None
+                                     or p["released_at"] < entry["released_at"]):
+                entry["released_at"] = p["released_at"]
             entry["cards"].add(p["codex_id"])
             entry["printings"] += 1
             products[p["product"]] = products.get(p["product"], 0) + 1
         set_list = [{**s, "cards": len(s["cards"])}
                     for s in sorted(sets.values(),
-                                    key=lambda s: (s["released_at"] or "", s["set_number"] or ""))]
+                                    key=lambda s: (s["released_at"] or "", s["set_code"] or ""))]
         product_list = [{"product": name, "printings": count}
                         for name, count in sorted(products.items(),
                                                   key=lambda kv: -kv[1])]
@@ -340,10 +353,14 @@ def build_server():
             "they are the only safe keys to "
             "store. The official API slug (e.g. 004-witch-b-s) is mutable and has "
             "changed for entire sets in the past: treat any slug as a lookup input "
-            "for resolve_slug, never as an identifier. Set codes, collector "
-            "numbers, and names are plain data columns, also unsafe as keys. "
+            "for resolve_slug, never as an identifier. Set codes, product names "
+            "and card names are plain data columns, also unsafe as keys; so are "
+            "the ids upstream itself serves, which are regenerated on re-import. "
+            "Gameplay data (rules_text, stats, keywords) lives on the card and "
+            "applies to every printing; a printing carries physical facts only. "
             "Only Avatars have a life value; the registry corrects known upstream "
-            "data errors, with every correction documented in the repo."
+            "data errors, with every correction documented in the repo. A card "
+            "whose wording changed has a closed row in the export's rules_history."
         ),
     )
     registry = Registry(load_registry())
@@ -363,25 +380,27 @@ def build_server():
     def get_printing(printing_id: str) -> dict:
         """Fetch one printing by its permanent printing_id (e.g. 'P000042'; a
         bare number is accepted too): the exact physical print (set, product,
-        finish) with its per-set data and current slug."""
+        finish) with its physical facts and current slug."""
         return registry.get_printing(printing_id)
 
     def search_cards(name: str = None, type: str = None, element: str = None,
                      rarity: str = None, card_set: str = None,
-                     errata: bool = None, limit: int = 20) -> dict:
+                     keyword: str = None, category: str = None,
+                     limit: int = 20) -> dict:
         """Search cards. name is a case-insensitive substring; type (Minion,
-        Magic, Site, Artifact, Aura, Avatar), element (Air, Earth, Fire, Water,
-        None) and rarity (Ordinary, Elite, Exceptional, Unique) are exact;
+        Magic, Site, Artifact, Aura, Avatar), category (Spell, Site, Avatar,
+        Token), rarity (Ordinary, Elite, Exceptional, Unique), element (Air,
+        Earth, Fire, Water, None - a card with several elements matches each)
+        and keyword (Airborne, Genesis, Spellcaster, Submerge, ...) are exact;
         card_set restricts to cards printed in a set, given as its official
-        number ('006') or name ('Gothic'); errata=true finds cards whose rules
-        text has been officially updated since printing."""
+        code ('006') or name ('Gothic')."""
         return registry.search_cards(name, type, element, rarity, card_set,
-                                     errata, limit)
+                                     keyword, category, limit)
 
     def set_contents(card_set: str) -> dict:
         """List every distinct card in a set with its printing_ids, ordered by
         name (the official data has no collector numbers, so cards have no
-        official order within a set). The set is given as its official number
+        official order within a set). The set is given as its official code
         ('006') or name ('Gothic'). This is the authoritative answer to 'how
         many cards are in set X', which the official data states nowhere."""
         return registry.set_contents(card_set)
@@ -390,11 +409,11 @@ def build_server():
                          product: str = None, finish: str = None,
                          limit: int = 50) -> dict:
         """Search physical printings. name is a case-insensitive substring of
-        the card's name; card_set is a set's official number ('006') or name
-        ('Gothic'); product is the official product line exactly as the API
-        names it (Booster, Welcome_Kit, Organized_Play, Box_Topper, Dust,
-        Preconstructed_Deck, Draft_Kit, Kickstarter, Alpha_Investments,
-        Team_Covenant, Star_City_Games - spaces work too, e.g. 'Box Topper');
+        the card's name; card_set is a set's official code ('006') or name
+        ('Gothic'); product is the official product line as the API names it
+        (Booster, BoxTopper, Dust, OrganizedPlay, PreconstructedDeck, DraftKit,
+        AlphaInvestments, WelcomeKit, Kickstarter, TeamCovenant, StarCityGames
+        - case, spaces and underscores are ignored, so 'box topper' works);
         finish is Standard, Foil or Rainbow. Answers questions like 'what is
         in the Arthurian Legends box topper' or 'which cards are sold as
         Dust' in one call."""
