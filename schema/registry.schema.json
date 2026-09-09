@@ -25,7 +25,7 @@
     "setCode": {
       "type": "string",
       "pattern": "^[0-9]{3}$",
-      "description": "The set's official code (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promotional). A code, not a number: 003 is deliberately unused, so codes do not imply an order. There is no collector number: cards have no official serialisation within a set."
+      "description": "The set's official code (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promo). A code, not a number: 003 is deliberately unused, so codes do not imply an order. There is no collector number: cards have no official serialisation within a set."
     },
     "face": {
       "type": "object",

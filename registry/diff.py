@@ -293,7 +293,7 @@ def diff(registry, api, decisions=None):
     pairable_added = [p for p in added if p["slug"] not in forced_new]
 
     # Pairing key: card + set + product + finish. Deliberately NOT the
-    # slug's set_number - that changes when the sets are renumbered, which
+    # slug's set_code - that changes when the sets are renumbered, which
     # is exactly the event a rename has to be matched across. (There is no
     # collector number in the official data to tiebreak on.)
     def pair_key_old(p):
