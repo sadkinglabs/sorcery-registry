@@ -9,6 +9,7 @@ The invariants are enforced in the schema itself, not by convention:
   other than the one it has always referred to.
 """
 
+import json
 import sqlite3
 
 from . import SCHEMA_VERSION
@@ -16,21 +17,34 @@ from . import SCHEMA_VERSION
 DB_FILENAME = "registry.sqlite"
 
 CARD_FIELDS = [
-    "name", "type", "rarity", "subtypes", "elements",
-    "cost", "attack", "defence", "life",
+    "name", "type", "category", "rarity", "slot",
+    "subtypes", "elements", "keywords", "umbrellas",
+    "cost", "attack", "defense", "life",
     "thr_air", "thr_earth", "thr_fire", "thr_water",
-    "rules_text",
+    "rules_text", "back",
 ]
 
+# Registry-owned card columns: stored on the card, published with it, but
+# never read from upstream and never compared against it.
+CARD_OWNED_FIELDS = ["errata"]
+
+# The gameplay fields a back face carries: the card fields minus name and
+# minus the face itself.
+FACE_FIELDS = [f for f in CARD_FIELDS if f not in ("name", "back")]
+
 PRINTING_FIELDS = [
-    "set_name", "released_at", "set_number",
+    "set_name", "set_code", "released_at",
     "product", "finish", "slug",
-    "artist", "flavour_text", "type_text",
-    "rarity", "type", "rules_text",
-    "cost", "attack", "defence", "life",
-    "thr_air", "thr_earth", "thr_fire", "thr_water",
+    "artist", "artist_slug", "flavour_text", "typeline", "back",
     "image_hash",
 ]
+
+# A printing's back face: the physical facts that differ per face.
+PRINTING_FACE_FIELDS = ["artist", "artist_slug", "flavour_text", "typeline"]
+
+# Lists and objects live as JSON text in SQLite and as Python values
+# everywhere else (snapshots, plans, the export).
+JSON_FIELDS = {"subtypes", "elements", "keywords", "umbrellas", "back"}
 
 DDL = """
 CREATE TABLE meta (
@@ -42,43 +56,43 @@ CREATE TABLE cards (
     card_id    INTEGER PRIMARY KEY,
     name       TEXT NOT NULL UNIQUE,
     type       TEXT,
+    category   TEXT,
     rarity     TEXT,
+    slot       TEXT,
     subtypes   TEXT,
     elements   TEXT,
+    keywords   TEXT,
+    umbrellas  TEXT,
     cost       INTEGER,
     attack     INTEGER,
-    defence    INTEGER,
+    defense    INTEGER,
     life       INTEGER,
     thr_air    INTEGER NOT NULL DEFAULT 0,
     thr_earth  INTEGER NOT NULL DEFAULT 0,
     thr_fire   INTEGER NOT NULL DEFAULT 0,
     thr_water  INTEGER NOT NULL DEFAULT 0,
-    rules_text TEXT NOT NULL DEFAULT ''
+    rules_text TEXT NOT NULL DEFAULT '',
+    back       TEXT,
+    -- Registry-owned: true once the card's text has been updated since it
+    -- was printed. Seeded from the old upstream UPDATED: marker, set by
+    -- every observed rules_text change, corrected only through overrides.
+    errata     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE printings (
     printing_id  INTEGER PRIMARY KEY,
     card_id      INTEGER NOT NULL REFERENCES cards(card_id),
     set_name     TEXT NOT NULL,
+    set_code     TEXT,
     released_at  TEXT,
-    set_number   TEXT,
     product      TEXT,
     finish       TEXT,
     slug         TEXT NOT NULL UNIQUE,
     artist       TEXT,
+    artist_slug  TEXT,
     flavour_text TEXT,
-    type_text    TEXT,
-    rarity       TEXT,
-    type         TEXT,
-    rules_text   TEXT,
-    cost         INTEGER,
-    attack       INTEGER,
-    defence      INTEGER,
-    life         INTEGER,
-    thr_air      INTEGER NOT NULL DEFAULT 0,
-    thr_earth    INTEGER NOT NULL DEFAULT 0,
-    thr_fire     INTEGER NOT NULL DEFAULT 0,
-    thr_water    INTEGER NOT NULL DEFAULT 0,
+    typeline     TEXT,
+    back         TEXT,
     image_hash   TEXT,
     retired_at   TEXT
 );
@@ -108,6 +122,21 @@ CREATE TABLE name_history (
 );
 
 CREATE INDEX idx_name_history_name ON name_history(name);
+
+-- Every text a card has played by. Upstream publishes only the current
+-- text and no longer marks errata, so the registry records what it
+-- observes: a sync that changes a card's rules_text closes the open row
+-- and opens a new one. Consumers see that a card's wording changed, and
+-- when, without the registry ruling on why.
+CREATE TABLE rules_history (
+    rules_text TEXT NOT NULL,
+    card_id    INTEGER NOT NULL REFERENCES cards(card_id),
+    valid_from TEXT NOT NULL,
+    valid_to   TEXT,
+    UNIQUE (card_id, rules_text, valid_from)
+);
+
+CREATE INDEX idx_rules_history_card ON rules_history(card_id);
 
 -- Identifier immutability, enforced at the engine level.
 CREATE TRIGGER cards_no_delete BEFORE DELETE ON cards
@@ -143,6 +172,20 @@ WHEN EXISTS (SELECT 1 FROM slug_history
               WHERE slug = NEW.slug AND printing_id != NEW.printing_id)
 BEGIN SELECT RAISE(ABORT, 'slug already belongs to a different printing'); END;
 """
+
+
+def encode_field(field, value):
+    """Python value -> SQLite cell. Lists and objects become JSON text with
+    sorted keys, so the same value always produces the same bytes."""
+    if field in JSON_FIELDS and value is not None:
+        return json.dumps(value, ensure_ascii=False, sort_keys=True)
+    return value
+
+
+def decode_field(field, value):
+    if field in JSON_FIELDS and value is not None:
+        return json.loads(value)
+    return value
 
 
 def open_db(path):
@@ -186,14 +229,15 @@ def load_registry_state(con):
     cards = {}
     card_names = {}
     for row in con.execute("SELECT * FROM cards"):
-        record = {field: row[field] for field in CARD_FIELDS}
+        record = {field: decode_field(field, row[field]) for field in CARD_FIELDS}
         record["card_id"] = row["card_id"]
+        record["errata"] = bool(row["errata"])
         cards[row["name"]] = record
         card_names[row["card_id"]] = row["name"]
 
     printings = {}
     for row in con.execute("SELECT * FROM printings"):
-        record = {field: row[field] for field in PRINTING_FIELDS}
+        record = {field: decode_field(field, row[field]) for field in PRINTING_FIELDS}
         record["printing_id"] = row["printing_id"]
         record["card_name"] = card_names[row["card_id"]]
         record["retired_at"] = row["retired_at"]

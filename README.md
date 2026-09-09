@@ -8,6 +8,8 @@ The identifier most tools work from is the official API slug, e.g. `004-witch-b-
 
 There is also nothing in the official data linking two printings of the same card to each other except the card's name, so every tool reconstructs that link by name-matching, which breaks at the first inconsistency.
 
+The official API was rebuilt in 2026 and now serves an `id` on every card and printing. Those are the backend's own minting ids: its developers confirm they are regenerated whenever the data is re-imported, so they are not stable either. The registry does not store them.
+
 ## The fix
 
 This registry follows the pattern that already works elsewhere - Konami's passcodes for Yu-Gi-Oh, Scryfall's oracle IDs for Magic. Two identifiers, both permanent, both in a fixed shape: a one-letter prefix naming the ID space, then six zero-padded digits.
@@ -62,16 +64,25 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 
 ```jsonc
 {
-  "header":       { "schema_version": 4, "source": "...", "sets": 6, "cards": 1100, ... },
-  "sets":         [ { "set_number": "001", "set_name": "Alpha", "released_at": "2023-04-19",
-                      "cards": 407, "printings": 817 }, ... ],
-  "cards":        [ { "codex_id": "C000001", "name": "Apprentice Wizard", "type": "Minion", ...,
-                      "errata": false, "set_numbers": ["001", "002", "999"],
-                      "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
-  "printings":    [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
-                      "slug": "001-apprentice_wizard-b-s", "set_name": "Alpha", "set_number": "001",
-                      "product": "Booster", "finish": "Standard", ... } ],
-  "slug_history": [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ]
+  "header":        { "schema_version": 7, "source": "...", "sets": 6, "cards": 1100, ... },
+  "sets":          [ { "set_code": "001", "set_name": "Alpha", "released_at": "2023-06-22",
+                       "cards": 407, "printings": 817 }, ... ],
+  "cards":         [ { "codex_id": "C000001", "name": "Apprentice Wizard",
+                       "type": "Minion", "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
+                       "subtypes": ["Mortal"], "elements": ["Air"], "keywords": ["Spellcaster", "Genesis"],
+                       "umbrellas": [], "cost": 3, "attack": 1, "defense": 1, "life": null,
+                       "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
+                       "rules_text": "Spellcaster\nGenesis → Draw a spell.", "back": null,
+                       "set_codes": ["001", "002", "999"],
+                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
+  "printings":     [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
+                       "set_name": "Alpha", "set_code": "001", "released_at": "2023-06-22",
+                       "product": "Booster", "finish": "Standard", "slug": "001-apprentice_wizard-b-s",
+                       "artist": "Ossi Hiekkala", "artist_slug": "ossi_hiekkala", "flavour_text": "...",
+                       "typeline": "An Ordinary Mortal new to power", "back": null, ... } ],
+  "slug_history":  [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ],
+  "name_history":  [ { "name": "...", "codex_id": "C000001", "valid_from": "2026-08-19", "valid_to": null } ],
+  "rules_history": [ { "rules_text": "...", "codex_id": "C000001", "valid_from": "2026-09-09", "valid_to": null } ]
 }
 ```
 
@@ -79,14 +90,18 @@ The file's exact shape is formally described by [`schema/registry.schema.json`](
 
 Practical notes:
 
-- **Key on the IDs, treat everything else as data.** `slug`, `set_number`, `set_name`, `card_name` are conveniences that can change; `codex_id` and `printing_id` cannot. Sets are identified by their two official facts: `set_number`, the numbering parsed from the slug (001 = Alpha, 002 = Beta, 006 = Gothic), and `set_name`, the official display name. Both are published exactly as upstream states them - the registry invents no codes of its own.
+- **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `set_name`, `card_name` are conveniences that can change; `codex_id` and `printing_id` cannot. Sets are identified by their two official facts: `set_code` (001 = Alpha, 002 = Beta, 006 = Gothic; 003 is deliberately unused, so the codes are labels, not an order) and `set_name`, the official display name. Both are published exactly as upstream states them - the registry invents no codes of its own.
+- **Gameplay data lives on the card; physical facts live on the printing.** This is how the official API is organised, and the registry mirrors it. `rules_text`, stats, thresholds, `keywords` and the rest describe the card and apply to every printing of it; a printing carries set, product, finish, slug, artist, typeline and flavour text. There is no such thing as "the text printed in Alpha": a card plays by its current text wherever it was printed.
+- **Lists are lists.** `subtypes`, `elements`, `keywords` and `umbrellas` are arrays, in upstream's own order. `["None"]` in `elements` means colourless. `slot` is the rarity slot a card is distributed in and agrees with `rarity` except where nothing is printed on the card (Avatars, some tokens). `umbrellas` are the cross-subtype groups rules text refers to (Evil, Knight, Royalty).
+- **Double-faced cards have a `back`.** For the two physically double-faced cards (Druid, Foot Soldier) the card's `back` carries the full gameplay data of the reverse face, and each printing's `back` its artist and typeline. Everything else is a front; `back` is `null` for every other card.
 - **Printings are readable on their own.** Each printing carries `card_name`, derived at export time from the card its `codex_id` points at, so a printing record never needs a join just to be understood. It's a convenience copy: the card record stays the source of truth for card-level data.
 - **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `codex_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
-- **The `sets` section is the set catalogue.** One record per set with its official number, name, release date, and distinct-card and printing counts - the authoritative answer to "how many cards are in set X", which the official data states nowhere. Each card also lists its `set_numbers`; for products and finishes, follow its `printing_ids`.
-- **`errata` marks officially updated cards.** The upstream convention is that an errata'd card's rules text begins with `UPDATED`; the registry publishes that as a boolean so you don't have to know the convention. The flag is derived from the rules text at export time - if upstream changes how it marks errata, the flag follows the data. The rules text itself is always published verbatim (canonicalised, never rewritten).
+- **The `sets` section is the set catalogue.** One record per set with its official code, name, release date, and distinct-card and printing counts - the authoritative answer to "how many cards are in set X", which the official data states nowhere. A set's `released_at` is the earliest date any of its printings reached the public; each printing carries its own. Each card also lists its `set_codes`; for products and finishes, follow its `printing_ids`.
+- **`errata` and `rules_history` are the registry's own record of updated cards.** Upstream publishes only the current text and no longer marks errata (the old API prefixed updated text with `UPDATED:`; the rebuilt one does not). The registry keeps the flag itself: `errata` is `true` once a card's text has been updated since it was printed - seeded from the old marker, and set whenever a sync observes a card's `rules_text` change. Each such change also lands in `rules_history`: the previous text is closed with a `valid_to` date and the new text opens a row, so you can see what the wording was and when it changed. Every card has exactly one open row, which equals its `rules_text`. Corrections to the flag go through [`data/overrides.json`](data/overrides.json) like any other.
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.
+- **Flavour text is kept.** Since the API rebuild upstream serves `flavor` as null for every printing while the cards themselves still carry flavour text. The registry keeps the values it holds and treats an upstream null as "no information", never as an erasure.
 - The committed SQLite database (`registry.sqlite`) is the **pipeline's internal working database**, not a second published artifact: it uses bare integer ids and internal column names, and lacks the derived fields. The JSON export is the only published contract; CI guarantees the JSON is exactly what the database produces.
 
 ## For AI agents (MCP)
@@ -115,12 +130,12 @@ Seven tools, each returning a small, focused answer rather than the whole databa
 | `resolve_slug` | Any slug - current **or from an older naming convention** - to its permanent `printing_id` and `codex_id`. This is how a tool holding pre-rename slugs migrates itself. |
 | `get_card` | One card by `codex_id`, with its gameplay data and every printing of it. |
 | `get_printing` | One physical print by `printing_id`, with its set, product, finish and current slug. |
-| `search_cards` | Cards by name, type, element, rarity, set, or errata status. |
-| `search_printings` | Physical printings by card name, set, product line (Booster, Box_Topper, Dust, ...) or finish - "what's in the Arthurian Legends box topper" is one call. |
+| `search_cards` | Cards by name, type, category, element, rarity, keyword, set, or errata status. |
+| `search_printings` | Physical printings by card name, set, product line (Booster, BoxTopper, Dust, ...) or finish - "what's in the Arthurian Legends box topper" is one call. |
 | `set_contents` | Every distinct card in a set - the authoritative answer to "how many cards are in set X", which the official data states nowhere. |
 | `registry_stats` | Totals, per-set counts, and the product lines with printing counts. |
 
-The server also teaches connected agents the ground rules (key on the IDs, never on slugs; only Avatars have life), so tools built with AI assistance inherit correct usage by default.
+The server also teaches connected agents the ground rules (key on the IDs, never on slugs or upstream's own ids; gameplay data is on the card; only Avatars have life), so tools built with AI assistance inherit correct usage by default.
 
 ## Data corrections
 
@@ -128,7 +143,7 @@ The official API occasionally ships errors (at the time of writing, 17 Gothic ca
 
 ## How updates happen
 
-A sync script fetches the official API, diffs it against the registry, and classifies every difference. New cards get new IDs. Attribute changes update in place. Slug renames are matched conservatively (name, rules text, set, product, finish) - and anything that does not resolve to an unambiguous one-to-one match is quarantined for human review instead of guessed at, because a wrong guess would silently fork one card into two IDs. Every fetch over the network is snapshotted locally before anything is diffed, so the dry run that shows the plan and the run that applies it can be guaranteed to have seen identical data. Syncs are run manually (or via the manually-triggered GitHub Action) and land as pull requests, never as direct pushes.
+A sync script fetches the official API, diffs it against the registry, and classifies every difference. New cards get new IDs. Attribute changes update in place (a change to a card's rules text also lands in `rules_history`). Slug renames are matched conservatively (name, rules text, set, product, finish) - and anything that does not resolve to an unambiguous one-to-one match is quarantined for human review instead of guessed at, because a wrong guess would silently fork one card into two IDs. Every fetch over the network is snapshotted locally before anything is diffed, so the dry run that shows the plan and the run that applies it can be guaranteed to have seen identical data. Syncs are run manually (or via the manually-triggered GitHub Action) and land as pull requests, never as direct pushes.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for running the pipeline yourself and for how ambiguous cases are resolved.
 

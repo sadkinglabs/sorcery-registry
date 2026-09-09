@@ -17,5 +17,15 @@ API slug demoted to an ordinary, mutable column.
 # printing_id (engine triggers + planner + validator).
 # v6: name_history - card renames tracked like slug renames, seeded with
 # current names; export gains the section; release manifest tooling added.
-SCHEMA_VERSION = 6
+# v7: the upstream API was rebuilt and the registry mirrors its new shape.
+# Cards gain category, slot, keywords, umbrellas and an optional back face;
+# subtypes and elements are arrays; defence is spelled defense. Printings
+# carry physical facts only (gameplay columns removed - the current rules
+# belong to the card), set_number is set_code (it is a code, not a number),
+# type_text is typeline, artist gains artist_slug, and released_at is the
+# printing's own date. Upstream no longer marks errata (the UPDATED: text
+# prefix is gone), so errata is now a registry-owned stored flag: seeded
+# from the old marker, set whenever a sync observes a card's text change,
+# and rules_history records every such change alongside it.
+SCHEMA_VERSION = 7
 API_URL = "https://api.sorcerytcg.com/api/cards"

@@ -11,7 +11,8 @@ import json
 from pathlib import Path
 
 from . import API_URL, SCHEMA_VERSION
-from .db import CARD_FIELDS, PRINTING_FIELDS, open_db
+from .db import (CARD_FIELDS, FACE_FIELDS, PRINTING_FACE_FIELDS, PRINTING_FIELDS,
+                 decode_field, open_db)
 from .ids import format_card_id, format_printing_id
 
 EXPORT_PATH = Path("export") / "registry.json"
@@ -23,33 +24,46 @@ def checksum_path(export_path):
     return export_path.with_name(export_path.name + ".sha256")
 
 
+def _face(value, fields):
+    """A back face in fixed key order, or None. Stored JSON has sorted
+    keys; the export reads in the same order as the front face."""
+    if value is None:
+        return None
+    return {field: value.get(field) for field in fields}
+
+
 def build_export(con):
     # Derived at export time from the printings table, never stored: the
     # reverse card -> printings link cannot drift from the forward one.
     printing_ids_by_card = {}
-    set_numbers_by_card = {}
+    set_codes_by_card = {}
     for row in con.execute(
-            "SELECT card_id, printing_id, set_number FROM printings ORDER BY printing_id"):
+            "SELECT card_id, printing_id, set_code FROM printings ORDER BY printing_id"):
         printing_ids_by_card.setdefault(row["card_id"], []).append(
             format_printing_id(row["printing_id"]))
-        if row["set_number"] is not None:
-            set_numbers_by_card.setdefault(row["card_id"], set()).add(row["set_number"])
+        if row["set_code"] is not None:
+            set_codes_by_card.setdefault(row["card_id"], set()).add(row["set_code"])
 
-    # Derived set catalogue: the six sets themselves, with counts - the
-    # answer to "what sets exist and how big are they", which the official
-    # data states nowhere.
+    # Derived set catalogue: the sets themselves, with counts - the answer
+    # to "what sets exist and how big are they", which the official data
+    # states nowhere. A set's release date is the earliest date any of its
+    # printings reached the public; upstream's own set timestamp is a
+    # database artefact and is never read.
     set_agg = {}
     for row in con.execute(
-            "SELECT set_number, set_name, released_at, card_id FROM printings"):
-        entry = set_agg.setdefault(row["set_number"], {
-            "set_number": row["set_number"], "set_name": row["set_name"],
-            "released_at": row["released_at"], "card_ids": set(), "printings": 0})
+            "SELECT set_code, set_name, released_at, card_id FROM printings"):
+        entry = set_agg.setdefault(row["set_code"], {
+            "set_code": row["set_code"], "set_name": row["set_name"],
+            "released_at": None, "card_ids": set(), "printings": 0})
+        if row["released_at"] is not None and (
+                entry["released_at"] is None or row["released_at"] < entry["released_at"]):
+            entry["released_at"] = row["released_at"]
         entry["card_ids"].add(row["card_id"])
         entry["printings"] += 1
     sets = []
     for key in sorted(set_agg, key=lambda k: (k is None, k)):
         entry = set_agg[key]
-        sets.append({"set_number": entry["set_number"],
+        sets.append({"set_code": entry["set_code"],
                      "set_name": entry["set_name"],
                      "released_at": entry["released_at"],
                      "cards": len(entry["card_ids"]),
@@ -61,12 +75,10 @@ def build_export(con):
     for row in con.execute("SELECT * FROM cards ORDER BY card_id"):
         record = {"codex_id": format_card_id(row["card_id"])}
         for field in CARD_FIELDS:
-            record[field] = row[field]
-        # Derived: upstream marks errata'd cards by starting the rules text
-        # with "UPDATED". The registry publishes that convention as a flag
-        # rather than expecting every consumer to rediscover it.
-        record["errata"] = (row["rules_text"] or "").startswith("UPDATED")
-        record["set_numbers"] = sorted(set_numbers_by_card.get(row["card_id"], set()))
+            record[field] = decode_field(field, row[field])
+        record["back"] = _face(record["back"], FACE_FIELDS)
+        record["errata"] = bool(row["errata"])
+        record["set_codes"] = sorted(set_codes_by_card.get(row["card_id"], set()))
         record["printing_ids"] = printing_ids_by_card.get(row["card_id"], [])
         cards.append(record)
 
@@ -81,7 +93,8 @@ def build_export(con):
                   "codex_id": format_card_id(row["card_id"]),
                   "card_name": name_by_card[row["card_id"]]}
         for field in PRINTING_FIELDS:
-            record[field] = row[field]
+            record[field] = decode_field(field, row[field])
+        record["back"] = _face(record["back"], PRINTING_FACE_FIELDS)
         record["retired_at"] = row["retired_at"]
         printings.append(record)
 
@@ -107,6 +120,17 @@ def build_export(con):
             "valid_to": row["valid_to"],
         })
 
+    rules_history = []
+    for row in con.execute(
+            "SELECT rules_text, card_id, valid_from, valid_to FROM rules_history "
+            "ORDER BY card_id, valid_from, rules_text"):
+        rules_history.append({
+            "rules_text": row["rules_text"],
+            "codex_id": format_card_id(row["card_id"]),
+            "valid_from": row["valid_from"],
+            "valid_to": row["valid_to"],
+        })
+
     return {
         "header": {
             "schema_version": SCHEMA_VERSION,
@@ -116,12 +140,14 @@ def build_export(con):
             "printings": len(printings),
             "slug_history": len(slug_history),
             "name_history": len(name_history),
+            "rules_history": len(rules_history),
         },
         "sets": sets,
         "cards": cards,
         "printings": printings,
         "slug_history": slug_history,
         "name_history": name_history,
+        "rules_history": rules_history,
     }
 
 

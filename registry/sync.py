@@ -28,8 +28,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from . import SCHEMA_VERSION
-from .db import (CARD_FIELDS, PRINTING_FIELDS, allocate_id, get_meta,
-                 init_db, load_registry_state, open_db)
+from .db import (CARD_FIELDS, PRINTING_FIELDS, allocate_id, encode_field,
+                 get_meta, init_db, load_registry_state, open_db)
 from .diff import diff, is_noop, summarise
 from .export import write_export
 from .fetch import apply_overrides, build_snapshot, fetch_api, load_api_file, load_overrides
@@ -78,11 +78,15 @@ def _apply_plan(con, plan, as_of):
         holes = ", ".join("?" for _ in CARD_FIELDS)
         cur.execute(
             f"INSERT INTO cards (card_id, {columns}) VALUES (?, {holes})",
-            [card_id] + [card.get(field) for field in CARD_FIELDS])
+            [card_id] + [encode_field(field, card.get(field)) for field in CARD_FIELDS])
         cur.execute(
             "INSERT INTO name_history (name, card_id, valid_from, valid_to) "
             "VALUES (?, ?, ?, NULL)",
             (card["name"], card_id, as_of))
+        cur.execute(
+            "INSERT INTO rules_history (rules_text, card_id, valid_from, valid_to) "
+            "VALUES (?, ?, ?, NULL)",
+            (card.get("rules_text") or "", card_id, as_of))
 
     card_ids = {row["name"]: row["card_id"]
                 for row in con.execute("SELECT name, card_id FROM cards")}
@@ -90,7 +94,18 @@ def _apply_plan(con, plan, as_of):
     for update in plan["card_updates"]:
         for field, change in update["changes"].items():
             cur.execute(f"UPDATE cards SET {field} = ? WHERE card_id = ?",
-                        (change["new"], update["card_id"]))
+                        (encode_field(field, change["new"]), update["card_id"]))
+            if field == "rules_text":
+                cur.execute(
+                    "UPDATE rules_history SET valid_to = ? "
+                    "WHERE card_id = ? AND valid_to IS NULL",
+                    (as_of, update["card_id"]))
+                cur.execute(
+                    "INSERT INTO rules_history (rules_text, card_id, valid_from, valid_to) "
+                    "VALUES (?, ?, ?, NULL)",
+                    (change["new"] or "", update["card_id"], as_of))
+                cur.execute("UPDATE cards SET errata = 1 WHERE card_id = ?",
+                            (update["card_id"],))
 
     for printing in plan["new_printings"]:
         printing_id = allocate_id(con, "next_printing_id")
@@ -99,7 +114,7 @@ def _apply_plan(con, plan, as_of):
         cur.execute(
             f"INSERT INTO printings (printing_id, card_id, {columns}) VALUES (?, ?, {holes})",
             [printing_id, card_ids[printing["card_name"]]]
-            + [printing.get(field) for field in PRINTING_FIELDS])
+            + [encode_field(field, printing.get(field)) for field in PRINTING_FIELDS])
         cur.execute(
             "INSERT INTO slug_history (slug, printing_id, valid_from, valid_to) "
             "VALUES (?, ?, ?, NULL)",
@@ -120,7 +135,7 @@ def _apply_plan(con, plan, as_of):
     for update in plan["printing_updates"]:
         for field, change in update["changes"].items():
             cur.execute(f"UPDATE printings SET {field} = ? WHERE printing_id = ?",
-                        (change["new"], update["printing_id"]))
+                        (encode_field(field, change["new"]), update["printing_id"]))
 
     for retire in plan["retire_printings"]:
         cur.execute("UPDATE printings SET retired_at = ? WHERE printing_id = ?",

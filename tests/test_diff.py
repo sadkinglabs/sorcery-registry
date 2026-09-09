@@ -7,20 +7,18 @@ import unittest
 from registry.diff import diff, is_noop
 
 CARD_DEFAULTS = {
-    "type": "Minion", "rarity": "Ordinary", "subtypes": "Mortal",
-    "elements": "Air", "cost": 3, "attack": 1, "defence": 1, "life": None,
+    "type": "Minion", "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
+    "subtypes": ["Mortal"], "elements": ["Air"], "keywords": ["Spellcaster"],
+    "umbrellas": [], "cost": 3, "attack": 1, "defense": 1, "life": None,
     "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
-    "rules_text": "Spellcaster",
+    "rules_text": "Spellcaster", "back": None,
 }
 
 PRINTING_DEFAULTS = {
-    "set_name": "Alpha", "released_at": "2023-04-19",
-    "set_number": "001", "product": "Booster", "finish": "Standard",
-    "artist": "A. Artist", "flavour_text": "", "type_text": "",
-    "rarity": "Ordinary", "type": "Minion", "rules_text": "Spellcaster",
-    "cost": 3, "attack": 1, "defence": 1, "life": None,
-    "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
-    "image_hash": None,
+    "set_name": "Alpha", "set_code": "001", "released_at": "2023-06-22",
+    "product": "Booster", "finish": "Standard",
+    "artist": "A. Artist", "artist_slug": "a_artist", "flavour_text": "",
+    "typeline": "", "back": None, "image_hash": None,
 }
 
 
@@ -62,7 +60,7 @@ class NewThingsTest(unittest.TestCase):
         api = api_of(
             [card("Witch"), card("Wizard", rules_text="Genesis: draw.")],
             [printing("004-witch-b-s", "Witch"),
-             printing("005-wizard-b-s", "Wizard", set_number="005")])
+             printing("005-wizard-b-s", "Wizard", set_code="005")])
         plan = diff(reg, api)
         self.assertEqual([c["name"] for c in plan["new_cards"]], ["Wizard"])
         self.assertEqual([p["slug"] for p in plan["new_printings"]], ["005-wizard-b-s"])
@@ -74,7 +72,7 @@ class NewThingsTest(unittest.TestCase):
             [card("Witch")],
             [printing("004-witch-b-s", "Witch"),
              printing("102-witch-b-s", "Witch", set_name="Beta",
-                      set_number="102")])
+                      set_code="102")])
         plan = diff(reg, api)
         self.assertEqual([p["slug"] for p in plan["new_printings"]], ["102-witch-b-s"])
         self.assertFalse(plan["printing_renames"])
@@ -84,21 +82,24 @@ class NewThingsTest(unittest.TestCase):
 class AttributeUpdateTest(unittest.TestCase):
     def test_changed_fields_update_without_touching_ids(self):
         reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch")])
-        api = api_of([card("Witch", cost=4)],
-                     [printing("004-witch-b-s", "Witch", cost=4, artist="B. Artist")])
+        api = api_of([card("Witch", cost=4, keywords=["Spellcaster", "Ward"])],
+                     [printing("004-witch-b-s", "Witch", typeline="A Witch",
+                               artist="B. Artist")])
         plan = diff(reg, api)
         self.assertEqual(plan["card_updates"][0]["changes"]["cost"], {"old": 3, "new": 4})
+        self.assertEqual(plan["card_updates"][0]["changes"]["keywords"]["new"],
+                         ["Spellcaster", "Ward"])
         changed = plan["printing_updates"][0]["changes"]
-        self.assertEqual(set(changed), {"cost", "artist"})
+        self.assertEqual(set(changed), {"typeline", "artist"})
         self.assertFalse(plan["new_cards"] or plan["new_printings"] or plan["ambiguous"])
 
 
 class SlugRenameTest(unittest.TestCase):
     def test_clean_slug_rename_matches_and_keeps_id(self):
         reg = registry_of([card("Apprentice Wizard")],
-                          [printing("004-apprentice-wizard-b-s", "Apprentice Wizard", set_number="004")])
+                          [printing("004-apprentice-wizard-b-s", "Apprentice Wizard", set_code="004")])
         api = api_of([card("Apprentice Wizard")],
-                     [printing("004-apprentice_wizard-b-s", "Apprentice Wizard", set_number="004")])
+                     [printing("004-apprentice_wizard-b-s", "Apprentice Wizard", set_code="004")])
         plan = diff(reg, api)
         self.assertEqual(plan["printing_renames"], [{
             "printing_id": 1, "old_slug": "004-apprentice-wizard-b-s",
@@ -111,19 +112,19 @@ class SlugRenameTest(unittest.TestCase):
         reg = registry_of(
             [card(n, rules_text=f"unique text {n}") for n in names],
             [printing(f"{i:03d}-card-{i}-b-s", f"Card {i}", set_name=f"Set {i}",
-                      set_number=f"{i:03d}") for i in range(20)])
+                      set_code=f"{i:03d}") for i in range(20)])
         api = api_of(
             [card(n, rules_text=f"unique text {n}") for n in names],
             [printing(f"{i:03d}-card_{i}-b-s", f"Card {i}", set_name=f"Set {i}",
-                      set_number=f"{i:03d}") for i in range(20)])
+                      set_code=f"{i:03d}") for i in range(20)])
         plan = diff(reg, api)
         self.assertEqual(len(plan["printing_renames"]), 20)
         self.assertFalse(plan["new_printings"] or plan["retire_printings"] or plan["ambiguous"])
 
     def test_rename_with_attribute_change_still_pairs_on_key(self):
-        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_number="004")])
+        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_code="004")])
         api = api_of([card("Witch")],
-                     [printing("004-witch_x-b-s", "Witch", set_number="004", artist="New Artist")])
+                     [printing("004-witch_x-b-s", "Witch", set_code="004", artist="New Artist")])
         plan = diff(reg, api)
         self.assertEqual(len(plan["printing_renames"]), 1)
         self.assertEqual(plan["printing_updates"][0]["changes"]["artist"]["new"], "New Artist")
@@ -131,13 +132,13 @@ class SlugRenameTest(unittest.TestCase):
     def test_set_renumbering_pairs_and_updates_set_number(self):
         # The actual incident shape: EC renumbers the sets, so the slug's
         # leading digits change while the set itself is the same. The pair
-        # key deliberately excludes set_number, so this is a clean rename
-        # plus a set_number attribute update.
-        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_number="004")])
-        api = api_of([card("Witch")], [printing("017-witch-b-s", "Witch", set_number="017")])
+        # key deliberately excludes set_code, so this is a clean rename
+        # plus a set_code attribute update.
+        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_code="004")])
+        api = api_of([card("Witch")], [printing("017-witch-b-s", "Witch", set_code="017")])
         plan = diff(reg, api)
         self.assertEqual(plan["printing_renames"][0]["decided_by"], "set+product+finish")
-        self.assertEqual(plan["printing_updates"][0]["changes"]["set_number"],
+        self.assertEqual(plan["printing_updates"][0]["changes"]["set_code"],
                          {"old": "004", "new": "017"})
         self.assertFalse(plan["ambiguous"])
 
@@ -147,12 +148,12 @@ class SlugRenameTest(unittest.TestCase):
         # forbidden move.
         reg = registry_of(
             [card("Witch")],
-            [printing("004-witch-b-s", "Witch", set_number="004"),
-             printing("005-witch-b-s", "Witch", set_number="005")])
+            [printing("004-witch-b-s", "Witch", set_code="004"),
+             printing("005-witch-b-s", "Witch", set_code="005")])
         api = api_of(
             [card("Witch")],
-            [printing("021-witch-b-s", "Witch", set_number="021"),
-             printing("022-witch-b-s", "Witch", set_number="022")])
+            [printing("021-witch-b-s", "Witch", set_code="021"),
+             printing("022-witch-b-s", "Witch", set_code="022")])
         plan = diff(reg, api)
         self.assertFalse(plan["printing_renames"])
         self.assertEqual(len(plan["ambiguous"]), 1)
@@ -163,10 +164,10 @@ class SlugRenameTest(unittest.TestCase):
         # A printing vanished while a different-looking one appeared for the
         # same card in another set. Retire + add, or a rename with a set
         # change? Not decidable from the data: quarantine.
-        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_number="004")])
+        reg = registry_of([card("Witch")], [printing("004-witch-b-s", "Witch", set_code="004")])
         api = api_of([card("Witch")],
-                     [printing("099-witch-p-s", "Witch", set_name="Promotional", product="Organized_Play",
-                               set_number="099")])
+                     [printing("099-witch-p-s", "Witch", set_name="Promotional", product="OrganizedPlay",
+                               set_code="099")])
         plan = diff(reg, api)
         self.assertFalse(plan["printing_renames"])
         self.assertEqual(len(plan["ambiguous"]), 1)
@@ -175,7 +176,7 @@ class SlugRenameTest(unittest.TestCase):
         reg = registry_of([card("Witch"), card("Wizard", rules_text="other")],
                           [printing("004-witch-b-s", "Witch")])
         api = api_of([card("Witch"), card("Wizard", rules_text="other")],
-                     [printing("004-witch-b-s", "Wizard", rules_text="other")])
+                     [printing("004-witch-b-s", "Wizard")])
         plan = diff(reg, api)
         self.assertEqual(plan["ambiguous"][0]["problem"],
                          "slug kept but now belongs to a different card")
@@ -206,7 +207,7 @@ class RemovalTest(unittest.TestCase):
         reg = registry_of([card("Witch")],
                           [printing("004-witch-b-s", "Witch"),
                            printing("old-witch-b-s", "Witch", retired_at="2026-01-01",
-                                    set_number=None)])
+                                    set_code=None)])
         api = api_of([card("Witch")], [printing("004-witch-b-s", "Witch")])
         plan = diff(reg, api)
         self.assertTrue(is_noop(plan), plan)
@@ -215,11 +216,9 @@ class RemovalTest(unittest.TestCase):
 class CardRenameTest(unittest.TestCase):
     def test_card_rename_matches_on_fingerprint(self):
         reg = registry_of([card("Wich", rules_text="A very specific ability.")],
-                          [printing("004-wich-b-s", "Wich",
-                                    rules_text="A very specific ability.")])
+                          [printing("004-wich-b-s", "Wich")])
         api = api_of([card("Witch", rules_text="A very specific ability.")],
-                     [printing("004-witch-b-s", "Witch",
-                               rules_text="A very specific ability.")])
+                     [printing("004-witch-b-s", "Witch")])
         plan = diff(reg, api)
         self.assertEqual(plan["card_renames"], [{
             "card_id": 1, "old_name": "Wich", "new_name": "Witch",
@@ -247,10 +246,10 @@ class CardRenameTest(unittest.TestCase):
         # a rename whose attributes also changed, so nothing is decided:
         # auto-issuing "Fresh" an id would fork "Gone" if they are one card.
         reg = registry_of([card("Gone", rules_text="Old ability.")],
-                          [printing("004-gone-b-s", "Gone", rules_text="Old ability.")])
+                          [printing("004-gone-b-s", "Gone")])
         api = api_of([card("Fresh", rules_text="New ability.", cost=9)],
-                     [printing("009-fresh-b-s", "Fresh", rules_text="New ability.",
-                               cost=9, set_number="009")])
+                     [printing("009-fresh-b-s", "Fresh",
+                               cost=9, set_code="009")])
         plan = diff(reg, api)
         self.assertFalse(plan["card_renames"])
         self.assertFalse(plan["new_cards"])
@@ -276,11 +275,9 @@ class CardForkGuardTest(unittest.TestCase):
 
     def test_rename_with_rules_text_change_quarantines(self):
         reg = registry_of([card("Old Name", rules_text="Old ability.")],
-                          [printing("004-old_name-b-s", "Old Name",
-                                    rules_text="Old ability.")])
+                          [printing("004-old_name-b-s", "Old Name")])
         api = api_of([card("New Name", rules_text="New ability.")],
-                     [printing("004-new_name-b-s", "New Name",
-                               rules_text="New ability.")])
+                     [printing("004-new_name-b-s", "New Name")])
         plan = diff(reg, api)
         self.assertFalse(plan["card_renames"])
         self.assertFalse(plan["new_cards"])
@@ -306,15 +303,12 @@ class CardForkGuardTest(unittest.TestCase):
         # The gate only fires on disappearances the fingerprint could not
         # explain: a clean rename is explained, so the newcomer is new.
         reg = registry_of([card("Wich", rules_text="A very specific ability.")],
-                          [printing("004-wich-b-s", "Wich",
-                                    rules_text="A very specific ability.")])
+                          [printing("004-wich-b-s", "Wich")])
         api = api_of(
             [card("Witch", rules_text="A very specific ability."),
              card("Brand New", rules_text="Something else entirely.")],
-            [printing("004-witch-b-s", "Witch",
-                      rules_text="A very specific ability."),
-             printing("009-brand_new-b-s", "Brand New", set_number="009",
-                      rules_text="Something else entirely.")])
+            [printing("004-witch-b-s", "Witch"),
+             printing("009-brand_new-b-s", "Brand New", set_code="009")])
         plan = diff(reg, api)
         self.assertEqual([r["new_name"] for r in plan["card_renames"]], ["Witch"])
         self.assertEqual([c["name"] for c in plan["new_cards"]], ["Brand New"])
@@ -326,14 +320,12 @@ class CardForkGuardTest(unittest.TestCase):
         # The classifier cannot know which newcomer is the rename, so both
         # are candidates and neither is auto-added.
         reg = registry_of([card("Gone", rules_text="Old ability.")],
-                          [printing("004-gone-b-s", "Gone", rules_text="Old ability.")])
+                          [printing("004-gone-b-s", "Gone")])
         api = api_of(
             [card("Renamed Gone", rules_text="Reworded ability."),
              card("Brand New", rules_text="Something else entirely.")],
-            [printing("004-renamed_gone-b-s", "Renamed Gone",
-                      rules_text="Reworded ability."),
-             printing("009-brand_new-b-s", "Brand New", set_number="009",
-                      rules_text="Something else entirely.")])
+            [printing("004-renamed_gone-b-s", "Renamed Gone"),
+             printing("009-brand_new-b-s", "Brand New", set_code="009")])
         plan = diff(reg, api)
         self.assertFalse(plan["new_cards"] or plan["card_renames"])
         self.assertEqual(len(plan["ambiguous"]), 1)
@@ -359,14 +351,12 @@ class CardForkGuardTest(unittest.TestCase):
 
     def test_decisions_resolve_the_quarantine(self):
         reg = registry_of([card("Old Name", rules_text="Old ability.")],
-                          [printing("004-old_name-b-s", "Old Name",
-                                    rules_text="Old ability.")])
+                          [printing("004-old_name-b-s", "Old Name")])
         api = api_of(
             [card("New Name", rules_text="New ability."),
              card("Brand New", rules_text="Something else entirely.")],
-            [printing("004-new_name-b-s", "New Name", rules_text="New ability."),
-             printing("009-brand_new-b-s", "Brand New", set_number="009",
-                      rules_text="Something else entirely.")])
+            [printing("004-new_name-b-s", "New Name"),
+             printing("009-brand_new-b-s", "Brand New", set_code="009")])
         decisions = {"card_renames": [{"card_id": 1, "new_name": "New Name"}],
                      "new_cards": ["Brand New"]}
         plan = diff(reg, api, decisions)
@@ -384,10 +374,9 @@ class CardForkGuardTest(unittest.TestCase):
 
     def test_forced_new_card_leaves_a_lone_disappearance_to_retire(self):
         reg = registry_of([card("Gone", rules_text="Old ability.")],
-                          [printing("004-gone-b-s", "Gone", rules_text="Old ability.")])
+                          [printing("004-gone-b-s", "Gone")])
         api = api_of([card("Brand New", rules_text="Something else entirely.")],
-                     [printing("009-brand_new-b-s", "Brand New", set_number="009",
-                               rules_text="Something else entirely.")])
+                     [printing("009-brand_new-b-s", "Brand New", set_code="009")])
         plan = diff(reg, api, {"new_cards": ["Brand New"]})
         self.assertFalse(plan["ambiguous"])
         self.assertEqual([c["name"] for c in plan["new_cards"]], ["Brand New"])
@@ -400,12 +389,12 @@ class DecisionsTest(unittest.TestCase):
     def ambiguous_fixture(self):
         reg = registry_of(
             [card("Witch")],
-            [printing("004-witch-b-s", "Witch", set_number="004"),
-             printing("005-witch-b-s", "Witch", set_number="005")])
+            [printing("004-witch-b-s", "Witch", set_code="004"),
+             printing("005-witch-b-s", "Witch", set_code="005")])
         api = api_of(
             [card("Witch")],
-            [printing("021-witch-b-s", "Witch", set_number="021"),
-             printing("022-witch-b-s", "Witch", set_number="022")])
+            [printing("021-witch-b-s", "Witch", set_code="021"),
+             printing("022-witch-b-s", "Witch", set_code="022")])
         return reg, api
 
     def test_decisions_resolve_a_quarantined_case(self):
@@ -442,6 +431,57 @@ class DecisionsTest(unittest.TestCase):
         decisions = {"printing_renames": [{"printing_id": 99, "new_slug": "021-witch-b-s"}]}
         with self.assertRaises(ValueError):
             diff(reg, api, decisions)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+class ListFieldTest(unittest.TestCase):
+    """Elements, subtypes, keywords and umbrellas are lists in upstream's
+    order; faces are objects. Both must fingerprint and compare by value."""
+
+    def test_reordered_list_is_an_attribute_update(self):
+        reg = registry_of([card("Caravan", elements=["Earth", "Fire", "Water", "Air"])], [])
+        api = api_of([card("Caravan", elements=["Air", "Earth", "Fire", "Water"])], [])
+        plan = diff(reg, api)
+        self.assertEqual(plan["card_updates"][0]["changes"]["elements"]["new"],
+                         ["Air", "Earth", "Fire", "Water"])
+
+    def test_rename_pairs_on_list_and_face_fields(self):
+        back = {**CARD_DEFAULTS, "type": "Avatar", "life": 20}
+        del back["back"]
+        reg = registry_of([card("Old", keywords=["Airborne"], back=back)],
+                          [printing("004-old-b-s", "Old")])
+        api = api_of([card("New", keywords=["Airborne"], back=dict(back))],
+                     [printing("004-new-b-s", "New")])
+        plan = diff(reg, api)
+        self.assertEqual([r["new_name"] for r in plan["card_renames"]], ["New"])
+        self.assertFalse(plan["ambiguous"])
+
+    def test_slot_and_subtypes_do_not_block_a_rename(self):
+        reg = registry_of([card("Old", slot="Ordinary", subtypes=["Mortal"])], [])
+        api = api_of([card("New", slot="Elite", subtypes=["Mortal", "Knight"])], [])
+        plan = diff(reg, api)
+        self.assertEqual([r["new_name"] for r in plan["card_renames"]], ["New"])
+
+
+class FrozenFieldTest(unittest.TestCase):
+    def test_null_flavour_text_upstream_is_not_a_change(self):
+        reg = registry_of([card("Witch")],
+                          [printing("004-witch-b-s", "Witch", flavour_text="Old words.")])
+        api = api_of([card("Witch")],
+                     [printing("004-witch-b-s", "Witch", flavour_text=None)])
+        self.assertTrue(is_noop(diff(reg, api)))
+
+    def test_flavour_text_still_updates_to_a_value(self):
+        reg = registry_of([card("Witch")],
+                          [printing("004-witch-b-s", "Witch", flavour_text="Old words.")])
+        api = api_of([card("Witch")],
+                     [printing("004-witch-b-s", "Witch", flavour_text="New words.")])
+        plan = diff(reg, api)
+        self.assertEqual(plan["printing_updates"][0]["changes"]["flavour_text"]["new"],
+                         "New words.")
 
 
 if __name__ == "__main__":

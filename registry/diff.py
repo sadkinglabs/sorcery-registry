@@ -25,13 +25,28 @@ Both sides go to quarantine instead. Disappearances alone still retire
 their printings, and newcomers alone are still genuinely new.
 """
 
+import json
+
 from .db import CARD_FIELDS, PRINTING_FIELDS
 
 # Fields compared for "attributes changed" on matched records.
 # image_hash is registry-owned, never sourced from the API, so it is
-# excluded from printing comparison.
+# excluded from printing comparison. errata is registry-owned too: an API
+# snapshot carries no value for it, so it only ever changes through an
+# override, which sets it on the snapshot explicitly.
 CARD_COMPARE = [f for f in CARD_FIELDS if f != "name"]
 PRINTING_COMPARE = [f for f in PRINTING_FIELDS if f not in ("slug", "image_hash")]
+OWNED_COMPARE = ["errata"]
+
+# Fields that upstream may serve as null without meaning "there is none":
+# a null here leaves the registry's value alone rather than erasing it.
+# flavour_text is served null for every printing since the API rebuild
+# while the cards themselves still carry flavour text.
+FROZEN_WHEN_NULL = {"flavour_text"}
+
+# Fields that do not define a card's gameplay identity: rarity and slot
+# are distribution facts, subtypes a classification that gets revised.
+NOT_FINGERPRINT = {"rarity", "slot", "subtypes"}
 
 EMPTY_DECISIONS = {
     "card_renames": [],      # {"card_id": int, "new_name": str}
@@ -42,16 +57,24 @@ EMPTY_DECISIONS = {
 }
 
 
+def _hashable(value):
+    if isinstance(value, (list, dict)):
+        return json.dumps(value, sort_keys=True, ensure_ascii=False)
+    return value
+
+
 def card_fingerprint(card):
     """Everything that defines a card's gameplay identity except its name.
     Used to recognise 'same card, new name'."""
-    return tuple(card.get(field) for field in CARD_COMPARE
-                 if field not in ("rarity", "subtypes"))
+    return tuple(_hashable(card.get(field)) for field in CARD_COMPARE
+                 if field not in NOT_FINGERPRINT)
 
 
 def field_changes(old, new, fields):
     changes = {}
     for field in fields:
+        if field in FROZEN_WHEN_NULL and new.get(field) is None:
+            continue
         if old.get(field) != new.get(field):
             changes[field] = {"old": old.get(field), "new": new.get(field)}
     return changes
@@ -75,7 +98,7 @@ def _card_summary(card):
         "type": card.get("type"),
         "cost": card.get("cost"),
         "attack": card.get("attack"),
-        "defence": card.get("defence"),
+        "defense": card.get("defense"),
         "life": card.get("life"),
         "thresholds": {element: card.get(f"thr_{element}")
                        for element in ("air", "earth", "fire", "water")},
@@ -201,6 +224,10 @@ def diff(registry, api, decisions=None):
         if api_name not in api_cards or old_name in ambiguous_card_names:
             continue
         changes = field_changes(card, api_cards[api_name], CARD_COMPARE)
+        api_card = api_cards[api_name]
+        for field in OWNED_COMPARE:
+            if field in api_card and api_card[field] != card.get(field):
+                changes[field] = {"old": card.get(field), "new": api_card[field]}
         if changes:
             plan["card_updates"].append(
                 {"card_id": card["card_id"], "name": api_name, "changes": changes})
