@@ -568,7 +568,7 @@
               "boolean",
               "null"
             ],
-            "description": "Derived: whether the values physically printed on this printing equal the card's current gameplay face - true when the printing was released on or after the current face took effect, or when the card's face has never changed. null when the printing has no release date."
+            "description": "Derived: whether the values physically printed on this printing equal the card's current gameplay face - true when the printing was released on or after the current face took effect, or entered the registry on or after it (a reprint that arrives in the same sync as the change it carries), or when the card's face has never changed. null when the printing has no release date and predates the current face."
           },
           "retired_at": {
             "anyOf": [

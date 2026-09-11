@@ -50,15 +50,23 @@ def default_printing(printings):
                                     p["printing_id"]))["printing_id"]
 
 
-def printed_as_current(released_at, history):
-    """Whether a printing released on `released_at` shows the card's current
-    face. The card's first history row stands for everything before the
-    registry started recording, so a printing released before the current
-    face took effect is up to date only when that face is the first one."""
+def printed_as_current(released_at, history, added_on=None):
+    """Whether a printing shows the card's current face.
+
+    The card's first history row stands for everything before the registry
+    started recording, so under it every printing is current. Otherwise a
+    printing is current when it was released on or after the current face
+    took effect - or when it entered the registry on or after that date
+    (`added_on`, its first slug_history row): a face is recorded on the
+    date of the sync that saw it, which is normally after the reprint that
+    carries it reached the public, and a printing first seen alongside or
+    after the new face was necessarily printed with it."""
     if not history:
         return None
     current = history[-1]
     if len(history) == 1:
+        return True
+    if added_on is not None and added_on >= current["valid_from"]:
         return True
     if released_at is None:
         return None
@@ -85,10 +93,14 @@ def build_export(con):
             "SELECT card_id, valid_from, valid_to, face FROM card_history "
             "ORDER BY card_id, valid_from, valid_to IS NULL, face"):
         history_by_card.setdefault(row["card_id"], []).append(dict(row))
+    added_on = {row["printing_id"]: row["first_seen"] for row in con.execute(
+        "SELECT printing_id, min(valid_from) AS first_seen FROM slug_history "
+        "GROUP BY printing_id")}
     for card_id, entries in printings_by_card.items():
         for entry in entries:
             entry["printed_as_current"] = printed_as_current(
-                entry["released_at"], history_by_card.get(card_id, []))
+                entry["released_at"], history_by_card.get(card_id, []),
+                added_on.get(entry["printing_id"]))
 
     # Derived set catalogue: the sets themselves, with counts - the answer
     # to "what sets exist and how big are they", which the official data
@@ -152,7 +164,8 @@ def build_export(con):
             record[field] = decode_field(field, row[field])
         record["back"] = _face(record["back"], PRINTING_FACE_FIELDS)
         record["printed_as_current"] = printed_as_current(
-            row["released_at"], history_by_card.get(row["card_id"], []))
+            row["released_at"], history_by_card.get(row["card_id"], []),
+            added_on.get(row["printing_id"]))
         record["retired_at"] = row["retired_at"]
         printings.append(record)
 
