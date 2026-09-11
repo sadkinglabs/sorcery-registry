@@ -27,5 +27,11 @@ API slug demoted to an ordinary, mutable column.
 # prefix is gone), so errata is now a registry-owned stored flag: seeded
 # from the old marker, set whenever a sync observes a card's text change,
 # and rules_history records every such change alongside it.
-SCHEMA_VERSION = 7
+# v8: rules_history becomes card_history - one row per state of the whole
+# gameplay face (stats, thresholds, elements, text, back), not just the
+# text - so a reprint that changes a card's cost or power is recorded like
+# a rewording. errata now means any gameplay field changed since printing.
+# Export gains derived default_printing_id on cards and printed_as_current
+# on printings.
+SCHEMA_VERSION = 8
 API_URL = "https://api.sorcerytcg.com/api/cards"

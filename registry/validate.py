@@ -12,7 +12,7 @@ Checks, in order:
     and that row agrees with the slug column, and no slug - current or
     historical - has ever referred to more than one printing.
  5. Every card has exactly one open name_history row and exactly one open
-    rules_history row, and each agrees with the card's column.
+    card_history row, and each agrees with the card's columns.
  6. Regenerating the export from the database is byte-identical to the
     committed export file (nobody edited one without the other), and each
     card's derived printing_ids list agrees with the printings table.
@@ -33,7 +33,7 @@ import sys
 from pathlib import Path
 
 from . import SCHEMA_VERSION
-from .db import get_meta, open_db
+from .db import HISTORY_FIELDS, decode_field, face_of, get_meta, open_db
 from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, render
 from .ids import id_number
 
@@ -95,21 +95,30 @@ def check_internal(con, errors):
             errors.append(f"card {row['card_id']}: name column {row['name']!r} "
                           f"disagrees with open history row {row['open_name']!r}")
 
-    # The card's current text is the open rules_history row, the same way
+    # The card's current face is the open card_history row, the same way
     # its current name is the open name_history row.
     rows = con.execute("""
-        SELECT c.card_id, c.rules_text,
-               (SELECT count(*) FROM rules_history h
+        SELECT c.*,
+               (SELECT count(*) FROM card_history h
                  WHERE h.card_id = c.card_id AND h.valid_to IS NULL) AS open_rows,
-               (SELECT h.rules_text FROM rules_history h
-                 WHERE h.card_id = c.card_id AND h.valid_to IS NULL) AS open_text
+               (SELECT h.face FROM card_history h
+                 WHERE h.card_id = c.card_id AND h.valid_to IS NULL) AS open_face
         FROM cards c""").fetchall()
     for row in rows:
         if row["open_rows"] != 1:
-            errors.append(f"card {row['card_id']}: {row['open_rows']} open rules_history rows, expected 1")
-        elif row["open_text"] != row["rules_text"]:
-            errors.append(f"card {row['card_id']}: rules_text column disagrees "
-                          f"with its open rules_history row")
+            errors.append(f"card {row['card_id']}: {row['open_rows']} open card_history rows, expected 1")
+        elif row["open_face"] != face_of({f: decode_field(f, row[f]) for f in HISTORY_FIELDS}):
+            errors.append(f"card {row['card_id']}: gameplay columns disagree "
+                          f"with its open card_history row")
+
+    # A pinned default printing must be one of the card's own printings.
+    for row in con.execute("""
+        SELECT c.card_id, c.default_printing_id AS pinned, p.card_id AS owner
+        FROM cards c LEFT JOIN printings p ON p.printing_id = c.default_printing_id
+        WHERE c.default_printing_id IS NOT NULL"""):
+        if row["owner"] != row["card_id"]:
+            errors.append(f"card {row['card_id']}: default_printing_id {row['pinned']} "
+                          f"is not one of its printings")
 
     # A slug belongs permanently to one printing: every slug the registry has
     # ever used, current or historical, must name exactly one printing_id.

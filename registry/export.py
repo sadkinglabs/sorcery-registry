@@ -11,8 +11,8 @@ import json
 from pathlib import Path
 
 from . import API_URL, SCHEMA_VERSION
-from .db import (CARD_FIELDS, FACE_FIELDS, PRINTING_FACE_FIELDS, PRINTING_FIELDS,
-                 decode_field, open_db)
+from .db import (CARD_FIELDS, FACE_FIELDS, HISTORY_FIELDS, PRINTING_FACE_FIELDS,
+                 PRINTING_FIELDS, decode_field, open_db)
 from .ids import format_card_id, format_printing_id
 
 EXPORT_PATH = Path("export") / "registry.json"
@@ -32,17 +32,63 @@ def _face(value, fields):
     return {field: value.get(field) for field in fields}
 
 
+def default_printing(printings):
+    """The representative printing of a card, by a fixed rule so every
+    consumer picks the same one: not retired; showing the card's current
+    face (printed_as_current) over one with older values; Booster over other
+    products; Standard over other finishes; most recently released; lowest
+    id. So a reprint that changed the card's stats becomes the default even
+    when it is a promo, and otherwise a promo never outranks a Booster."""
+    live = [p for p in printings if p["retired_at"] is None] or list(printings)
+    if not live:
+        return None
+    return min(live, key=lambda p: (p.get("printed_as_current") is not True,
+                                    p["product"] != "Booster",
+                                    p["finish"] != "Standard",
+                                    "" if p["released_at"] is None else
+                                    "".join(chr(255 - ord(c)) for c in p["released_at"]),
+                                    p["printing_id"]))["printing_id"]
+
+
+def printed_as_current(released_at, history):
+    """Whether a printing released on `released_at` shows the card's current
+    face. The card's first history row stands for everything before the
+    registry started recording, so a printing released before the current
+    face took effect is up to date only when that face is the first one."""
+    if not history:
+        return None
+    current = history[-1]
+    if len(history) == 1:
+        return True
+    if released_at is None:
+        return None
+    return released_at >= current["valid_from"]
+
+
 def build_export(con):
     # Derived at export time from the printings table, never stored: the
     # reverse card -> printings link cannot drift from the forward one.
     printing_ids_by_card = {}
     set_codes_by_card = {}
+    printings_by_card = {}
     for row in con.execute(
-            "SELECT card_id, printing_id, set_code FROM printings ORDER BY printing_id"):
+            "SELECT card_id, printing_id, set_code, released_at, product, finish, "
+            "retired_at FROM printings ORDER BY printing_id"):
         printing_ids_by_card.setdefault(row["card_id"], []).append(
             format_printing_id(row["printing_id"]))
+        printings_by_card.setdefault(row["card_id"], []).append(dict(row))
         if row["set_code"] is not None:
             set_codes_by_card.setdefault(row["card_id"], set()).add(row["set_code"])
+
+    history_by_card = {}
+    for row in con.execute(
+            "SELECT card_id, valid_from, valid_to, face FROM card_history "
+            "ORDER BY card_id, valid_from, valid_to IS NULL, face"):
+        history_by_card.setdefault(row["card_id"], []).append(dict(row))
+    for card_id, entries in printings_by_card.items():
+        for entry in entries:
+            entry["printed_as_current"] = printed_as_current(
+                entry["released_at"], history_by_card.get(card_id, []))
 
     # Derived set catalogue: the sets themselves, with counts - the answer
     # to "what sets exist and how big are they", which the official data
@@ -80,6 +126,16 @@ def build_export(con):
         record["errata"] = bool(row["errata"])
         record["set_codes"] = sorted(set_codes_by_card.get(row["card_id"], set()))
         record["printing_ids"] = printing_ids_by_card.get(row["card_id"], [])
+        # A hand-picked default (through overrides) wins over the rule, but
+        # only while it names one of the card's own printings.
+        own = printings_by_card.get(row["card_id"], [])
+        pinned = row["default_printing_id"]
+        if pinned is not None and any(p["printing_id"] == pinned for p in own):
+            chosen = pinned
+        else:
+            chosen = default_printing(own)
+        record["default_printing_id"] = (format_printing_id(chosen)
+                                         if chosen is not None else None)
         cards.append(record)
 
     # card_name is derived from the cards table at export time, so a
@@ -95,6 +151,8 @@ def build_export(con):
         for field in PRINTING_FIELDS:
             record[field] = decode_field(field, row[field])
         record["back"] = _face(record["back"], PRINTING_FACE_FIELDS)
+        record["printed_as_current"] = printed_as_current(
+            row["released_at"], history_by_card.get(row["card_id"], []))
         record["retired_at"] = row["retired_at"]
         printings.append(record)
 
@@ -120,16 +178,19 @@ def build_export(con):
             "valid_to": row["valid_to"],
         })
 
-    rules_history = []
-    for row in con.execute(
-            "SELECT rules_text, card_id, valid_from, valid_to FROM rules_history "
-            "ORDER BY card_id, valid_from, rules_text"):
-        rules_history.append({
-            "rules_text": row["rules_text"],
-            "codex_id": format_card_id(row["card_id"]),
-            "valid_from": row["valid_from"],
-            "valid_to": row["valid_to"],
-        })
+    # One row per state of a card's gameplay face, oldest first, the open
+    # row last; the face's fields are flattened into the row.
+    card_history = []
+    for card_id in sorted(history_by_card):
+        for row in history_by_card[card_id]:
+            face = json.loads(row["face"])
+            entry = {"codex_id": format_card_id(card_id),
+                     "valid_from": row["valid_from"],
+                     "valid_to": row["valid_to"]}
+            for field in HISTORY_FIELDS:
+                entry[field] = face.get(field)
+            entry["back"] = _face(entry["back"], FACE_FIELDS)
+            card_history.append(entry)
 
     return {
         "header": {
@@ -140,14 +201,14 @@ def build_export(con):
             "printings": len(printings),
             "slug_history": len(slug_history),
             "name_history": len(name_history),
-            "rules_history": len(rules_history),
+            "card_history": len(card_history),
         },
         "sets": sets,
         "cards": cards,
         "printings": printings,
         "slug_history": slug_history,
         "name_history": name_history,
-        "rules_history": rules_history,
+        "card_history": card_history,
     }
 
 

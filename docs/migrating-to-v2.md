@@ -1,4 +1,20 @@
-# Migrating from v1.x to v2.0
+# Migrating to v3.0 (from v2.0) and to v2.0 (from v1.x)
+
+## v2.0 → v3.0 (schema 7 → 8)
+
+Prompted by upstream announcing reprints that change existing cards' cost and power. v2.0 recorded only rules-text changes; v3.0 records the whole gameplay face. **No identifier changed.**
+
+| v2.0 | v3.0 | Note |
+|---|---|---|
+| `rules_history` section: `{rules_text, codex_id, valid_from, valid_to}` | `card_history` section: `{codex_id, valid_from, valid_to, type, category, rarity, slot, subtypes, elements, keywords, umbrellas, cost, attack, defense, life, thr_*, rules_text, back}` | **Renamed and widened.** One row per state of the face, oldest first, open row last. The v2.0 rows carry over exactly: under v2.0 only text ever changed, so each old row's face is the current face with that row's text. |
+| `header.rules_history` | `header.card_history` | |
+| `errata` = text changed | `errata` = any gameplay field changed (`type`, `elements`, `cost`, `attack`, `defense`, `life`, thresholds, `rules_text`, `back`) | Same values today (29 cards); the meaning widened. Classification changes (`rarity`, `slot`, `subtypes`, `keywords`, `umbrellas`) are recorded in `card_history` but do not set `errata`. |
+| - | `cards[].default_printing_id` | New, derived: not retired, showing the card's current face over older values, Booster over other products, Standard over other finishes, most recent release, lowest id. |
+| - | `printings[].printed_as_current` | New, derived: whether the printing's physical values equal the card's current face - `true` when released on or after the current face's `valid_from`, or when the face never changed; `null` without a release date. |
+
+Code: `export["rules_history"]` → `export["card_history"]`; read `row["rules_text"]` as before, and now also `row["cost"]` etc. Published objects: `history/rules.json` → `history/cards.json`; `cards/{id}.json` carries `card_history` instead of `rules_history`.
+
+## v1.x → v2.0 (schema 6 → 7)
 
 Registry release v2.0.0 (export `schema_version` 7) changed the shape of every record. **No identifier changed**: every `codex_id` and `printing_id` from v1.x is present in v2.0 and refers to the same card or printing, and CI proved append-only across the change. If you key on the ids, as the README asks, migration is renaming fields and, in three places, changing a type.
 
@@ -58,12 +74,7 @@ Unchanged: `printing_id`, `codex_id`, `card_name`, `set_name`, `finish`, `slug`,
 | `set_number` | `set_code` | |
 | `released_at` | `released_at` | Now the earliest `released_at` among the set's printings. |
 
-## New section: `rules_history`
-
-```json
-{ "rules_text": "Lance\nThe first time Sir Lancelot fights each turn, untap him.",
-  "codex_id": "C000572", "valid_from": "2026-09-09", "valid_to": "2026-09-09" }
-```
+## New section: `rules_history` (v2.0; widened into `card_history` in v3.0)
 
 One row per text a card has played by. Every card has exactly one open row (`valid_to: null`) equal to its `rules_text`; a closed row is a wording the card used to have. Seeded on 2026-09-09 with every card's text at that date, so history before that is not recorded.
 

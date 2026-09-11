@@ -20,7 +20,7 @@ All paths below are relative to a version root. The plan is two roots per major 
 
 | Path | Answers | Shape |
 |---|---|---|
-| `cards/{codex_id}.json` | one card | the card record from the export, plus `printings` (a summary of each: `printing_id`, `slug`, `set_code`, `set_name`, `released_at`, `product`, `finish`, `retired_at`), `name_history` and `rules_history` (that card's rows) |
+| `cards/{codex_id}.json` | one card | the card record from the export (including `default_printing_id`), plus `printings` (a summary of each: `printing_id`, `slug`, `set_code`, `set_name`, `released_at`, `product`, `finish`, `printed_as_current`, `retired_at`), `name_history` and `card_history` (that card's rows) |
 | `printings/{printing_id}.json` | one physical print | the printing record, plus `slug_history` (that printing's rows) |
 | `slugs/{slug}.json` | "what is this slug?" for **any slug that has ever existed** | `slug`, `printing_id`, `codex_id`, `card_name`, `current_slug`, `is_current`, `valid_from`, `valid_to`, `set_code`, `set_name`, `product`, `finish`, `retired_at` |
 | `sets.json` | the set catalogue | the export's `sets` section |
@@ -32,13 +32,13 @@ A slug object exists for every slug in `slug_history`, current or superseded. Th
 
 The registry has ~1,100 cards; filtering them in the client is a millisecond. These are the compact lists to do it with:
 
-- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `set_codes` per card (~200 KB).
-- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `product`, `finish`, `retired_at` per printing (~450 KB).
+- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `errata`, `set_codes`, `default_printing_id` per card (~220 KB).
+- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `product`, `finish`, `printed_as_current`, `retired_at` per printing (~500 KB).
 - `index/slugs.json` - `{slug: printing_id}` for every slug ever (~100 KB).
 
 ## History, whole
 
-`history/slugs.json`, `history/names.json`, `history/rules.json` - the export's three history sections, for consumers that want them all at once.
+`history/slugs.json`, `history/names.json`, `history/cards.json` - the export's three history sections, for consumers that want them all at once. `history/cards.json` is every state every card's gameplay face has been in; a printing released within a row's dates was printed with that row's values.
 
 ## Guarantees carried over
 

@@ -59,8 +59,12 @@ class ObjectsTest(unittest.TestCase):
         self.assertEqual(wizard["printings"][1]["slug"], "001-apprentice-wizard-b-f")
         self.assertEqual(wizard["printings"][1]["finish"], "Foil")
         self.assertEqual(len(wizard["name_history"]), 1)
-        self.assertEqual(wizard["rules_history"][0]["rules_text"], wizard["rules_text"])
-        self.assertIsNone(wizard["rules_history"][0]["valid_to"])
+        self.assertEqual(wizard["card_history"][0]["rules_text"], wizard["rules_text"])
+        self.assertEqual(wizard["card_history"][0]["cost"], wizard["cost"])
+        self.assertIsNone(wizard["card_history"][0]["valid_to"])
+        self.assertNotIn("codex_id", wizard["card_history"][0])
+        self.assertEqual(wizard["default_printing_id"], "P000001")
+        self.assertTrue(wizard["printings"][0]["printed_as_current"])
 
     def test_printing_object_carries_its_slug_history(self):
         foil = self.objects["printings/P000002.json"]
@@ -100,6 +104,9 @@ class ObjectsTest(unittest.TestCase):
         self.assertEqual(root["dataset_version"], "v9.9.9")
         self.assertEqual(root["schema_version"], self.export["header"]["schema_version"])
         self.assertEqual(root["counts"]["slug_history"], 5)
+        self.assertEqual(root["counts"]["card_history"], 2)
+        self.assertEqual(self.objects["history/cards.json"], self.export["card_history"])
+        self.assertEqual(self.objects["index/cards.json"][0]["default_printing_id"], "P000001")
         self.assertEqual(root["endpoints"], ENDPOINTS)
         for pattern in ENDPOINTS.values():
             # Every pattern is either a concrete object or a template whose

@@ -363,8 +363,10 @@ def build_server():
             "applies to every printing; a printing carries physical facts only. "
             "Only Avatars have a life value; the registry corrects known upstream "
             "data errors, with every correction documented in the repo. A card "
-            "whose wording changed carries errata=true and a closed row in the "
-            "export's rules_history."
+            "whose text or stats changed since printing carries errata=true and a "
+            "closed row in the export's card_history; default_printing_id names "
+            "its representative printing and each printing's printed_as_current "
+            "says whether its printed values match the card's current face."
         ),
     )
     registry = Registry(load_registry())
@@ -397,9 +399,9 @@ def build_server():
         Earth, Fire, Water, None - a card with several elements matches each)
         and keyword (Airborne, Genesis, Spellcaster, Submerge, ...) are exact;
         card_set restricts to cards printed in a set, given as its official
-        code ('006') or name ('Gothic'); errata=true finds cards whose rules
-        text has been updated since they were printed (the registry tracks
-        this itself; see rules_history in the export for the wording)."""
+        code ('006') or name ('Gothic'); errata=true finds cards whose text
+        or stats have been updated since they were printed (the registry
+        tracks this itself; card_history in the export has every state)."""
         return registry.search_cards(name, type, element, rarity, card_set,
                                      keyword, category, errata, limit)
 
