@@ -419,6 +419,34 @@ class CardHistoryTest(unittest.TestCase):
                         if p["slug"] == "999-apprentice_wizard-op-f")
         self.assertEqual(wizard["default_printing_id"], promo_id)
 
+    def test_reprint_seen_in_the_same_sync_as_the_change_is_current(self):
+        # The realistic sequence: the set ships on the 1st with the new
+        # values printed on it; the registry syncs on the 6th and sees the
+        # stat change and the new printing together. The reprint's release
+        # date is before the face's date, yet it was printed with the face.
+        con = self.populated()
+        later = copy.deepcopy(RAW_API)
+        later[0]["engine"]["cost"] = 4
+        later[0]["engine"]["attack"] = 3
+        later[0]["printings"].append(upstream_printing(
+            "007-apprentice_wizard-b-s", "Revised", "007", "2026-10-01"))
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(later)), "2026-10-06")
+        export = build_export(con)
+        wizard, rows = self.rows_for(export, "Apprentice Wizard")
+        self.assertEqual([(r["valid_from"], r["valid_to"]) for r in rows],
+                         [("2026-08-19", "2026-10-06"), ("2026-10-06", None)])
+        flags = {p["slug"]: p["printed_as_current"] for p in export["printings"]
+                 if p["codex_id"] == wizard["codex_id"]}
+        self.assertEqual(flags, {"001-apprentice_wizard-b-s": False,
+                                 "001-apprentice_wizard-b-f": False,
+                                 "007-apprentice_wizard-b-s": True})
+        self.assertEqual(wizard["default_printing_id"],
+                         next(p["printing_id"] for p in export["printings"]
+                              if p["slug"] == "007-apprentice_wizard-b-s"))
+        self.assertTrue(wizard["errata"])
+        self.assertIn("007", wizard["set_codes"])
+        self.assertEqual([s["set_code"] for s in export["sets"]], ["001", "007", "010"])
+
     def test_promo_never_outranks_a_booster_showing_the_same_face(self):
         con = self.populated()
         later = copy.deepcopy(RAW_API)
