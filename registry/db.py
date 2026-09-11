@@ -13,6 +13,7 @@ import json
 import sqlite3
 
 from . import SCHEMA_VERSION
+from .ids import format_printing_id
 
 DB_FILENAME = "registry.sqlite"
 
@@ -26,11 +27,22 @@ CARD_FIELDS = [
 
 # Registry-owned card columns: stored on the card, published with it, but
 # never read from upstream and never compared against it.
-CARD_OWNED_FIELDS = ["errata"]
+CARD_OWNED_FIELDS = ["errata", "default_printing_id"]
 
 # The gameplay fields a back face carries: the card fields minus name and
 # minus the face itself.
 FACE_FIELDS = [f for f in CARD_FIELDS if f not in ("name", "back")]
+
+# Everything card_history records: the whole face, back included. A change
+# to any of these closes the card's open history row and opens a new one.
+HISTORY_FIELDS = FACE_FIELDS + ["back"]
+
+# The subset whose change means the card now plays differently from how it
+# was printed - what errata means. Rarity, slot, subtypes, keywords and
+# umbrellas are classification and tagging, so a re-tag is not errata.
+ERRATA_FIELDS = ["type", "elements", "cost", "attack", "defense", "life",
+                 "thr_air", "thr_earth", "thr_fire", "thr_water",
+                 "rules_text", "back"]
 
 PRINTING_FIELDS = [
     "set_name", "set_code", "released_at",
@@ -73,10 +85,14 @@ CREATE TABLE cards (
     thr_water  INTEGER NOT NULL DEFAULT 0,
     rules_text TEXT NOT NULL DEFAULT '',
     back       TEXT,
-    -- Registry-owned: true once the card's text has been updated since it
+    -- Registry-owned: true once a gameplay field has changed since the card
     -- was printed. Seeded from the old upstream UPDATED: marker, set by
-    -- every observed rules_text change, corrected only through overrides.
-    errata     INTEGER NOT NULL DEFAULT 0
+    -- every observed change to an ERRATA_FIELDS column, corrected only
+    -- through overrides.
+    errata     INTEGER NOT NULL DEFAULT 0,
+    -- Registry-owned: a hand-picked representative printing, set only
+    -- through overrides. Null means the export's fixed rule chooses.
+    default_printing_id INTEGER REFERENCES printings(printing_id)
 );
 
 CREATE TABLE printings (
@@ -123,20 +139,23 @@ CREATE TABLE name_history (
 
 CREATE INDEX idx_name_history_name ON name_history(name);
 
--- Every text a card has played by. Upstream publishes only the current
--- text and no longer marks errata, so the registry records what it
--- observes: a sync that changes a card's rules_text closes the open row
--- and opens a new one. Consumers see that a card's wording changed, and
--- when, without the registry ruling on why.
-CREATE TABLE rules_history (
-    rules_text TEXT NOT NULL,
+-- Every state a card's gameplay face has been in: stats, thresholds,
+-- elements, text, back face - the HISTORY_FIELDS, as one JSON object.
+-- Upstream publishes only the current values and marks nothing, so the
+-- registry records what it observes: a sync that changes any of those
+-- fields closes the card's open row and opens a new one holding the whole
+-- new face. Consumers see what a card looked like on any date, and which
+-- printings were printed under which state, without the registry ruling
+-- on why it changed.
+CREATE TABLE card_history (
     card_id    INTEGER NOT NULL REFERENCES cards(card_id),
     valid_from TEXT NOT NULL,
     valid_to   TEXT,
-    UNIQUE (card_id, rules_text, valid_from)
+    face       TEXT NOT NULL,
+    UNIQUE (card_id, valid_from, face)
 );
 
-CREATE INDEX idx_rules_history_card ON rules_history(card_id);
+CREATE INDEX idx_card_history_card ON card_history(card_id);
 
 -- Identifier immutability, enforced at the engine level.
 CREATE TRIGGER cards_no_delete BEFORE DELETE ON cards
@@ -188,6 +207,14 @@ def decode_field(field, value):
     return value
 
 
+def face_of(card):
+    """The gameplay face of a card record (or a row), as the JSON text
+    card_history stores: HISTORY_FIELDS only, sorted keys, so equal faces
+    are equal strings."""
+    return json.dumps({field: card.get(field) for field in HISTORY_FIELDS},
+                      ensure_ascii=False, sort_keys=True)
+
+
 def open_db(path):
     con = sqlite3.connect(path)
     con.row_factory = sqlite3.Row
@@ -232,6 +259,9 @@ def load_registry_state(con):
         record = {field: decode_field(field, row[field]) for field in CARD_FIELDS}
         record["card_id"] = row["card_id"]
         record["errata"] = bool(row["errata"])
+        # Published form, so an override's value compares like for like.
+        record["default_printing_id"] = (format_printing_id(row["default_printing_id"])
+                                         if row["default_printing_id"] is not None else None)
         cards[row["name"]] = record
         card_names[row["card_id"]] = row["name"]
 

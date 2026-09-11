@@ -28,10 +28,12 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from . import SCHEMA_VERSION
-from .db import (CARD_FIELDS, PRINTING_FIELDS, allocate_id, encode_field,
-                 get_meta, init_db, load_registry_state, open_db)
+from .db import (CARD_FIELDS, ERRATA_FIELDS, HISTORY_FIELDS, PRINTING_FIELDS,
+                 allocate_id, decode_field, encode_field, face_of, get_meta,
+                 init_db, load_registry_state, open_db)
 from .diff import diff, is_noop, summarise
 from .export import write_export
+from .ids import id_number
 from .fetch import apply_overrides, build_snapshot, fetch_api, load_api_file, load_overrides
 
 PENDING_PATH = Path("review") / "pending.json"
@@ -84,28 +86,36 @@ def _apply_plan(con, plan, as_of):
             "VALUES (?, ?, ?, NULL)",
             (card["name"], card_id, as_of))
         cur.execute(
-            "INSERT INTO rules_history (rules_text, card_id, valid_from, valid_to) "
-            "VALUES (?, ?, ?, NULL)",
-            (card.get("rules_text") or "", card_id, as_of))
+            "INSERT INTO card_history (card_id, valid_from, valid_to, face) "
+            "VALUES (?, ?, NULL, ?)",
+            (card_id, as_of, face_of(card)))
 
     card_ids = {row["name"]: row["card_id"]
                 for row in con.execute("SELECT name, card_id FROM cards")}
 
     for update in plan["card_updates"]:
         for field, change in update["changes"].items():
+            value = change["new"]
+            if field == "default_printing_id" and value is not None:
+                value = id_number(value)
             cur.execute(f"UPDATE cards SET {field} = ? WHERE card_id = ?",
-                        (encode_field(field, change["new"]), update["card_id"]))
-            if field == "rules_text":
-                cur.execute(
-                    "UPDATE rules_history SET valid_to = ? "
-                    "WHERE card_id = ? AND valid_to IS NULL",
-                    (as_of, update["card_id"]))
-                cur.execute(
-                    "INSERT INTO rules_history (rules_text, card_id, valid_from, valid_to) "
-                    "VALUES (?, ?, ?, NULL)",
-                    (change["new"] or "", update["card_id"], as_of))
-                cur.execute("UPDATE cards SET errata = 1 WHERE card_id = ?",
-                            (update["card_id"],))
+                        (encode_field(field, value), update["card_id"]))
+        changed = set(update["changes"])
+        if changed & set(HISTORY_FIELDS):
+            row = con.execute("SELECT * FROM cards WHERE card_id = ?",
+                              (update["card_id"],)).fetchone()
+            face = face_of({f: decode_field(f, row[f]) for f in HISTORY_FIELDS})
+            cur.execute(
+                "UPDATE card_history SET valid_to = ? "
+                "WHERE card_id = ? AND valid_to IS NULL",
+                (as_of, update["card_id"]))
+            cur.execute(
+                "INSERT INTO card_history (card_id, valid_from, valid_to, face) "
+                "VALUES (?, ?, NULL, ?)",
+                (update["card_id"], as_of, face))
+        if changed & set(ERRATA_FIELDS):
+            cur.execute("UPDATE cards SET errata = 1 WHERE card_id = ?",
+                        (update["card_id"],))
 
     for printing in plan["new_printings"]:
         printing_id = allocate_id(con, "next_printing_id")

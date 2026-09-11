@@ -27,16 +27,16 @@ their printings, and newcomers alone are still genuinely new.
 
 import json
 
-from .db import CARD_FIELDS, PRINTING_FIELDS
+from .db import CARD_FIELDS, CARD_OWNED_FIELDS, PRINTING_FIELDS
 
 # Fields compared for "attributes changed" on matched records.
 # image_hash is registry-owned, never sourced from the API, so it is
-# excluded from printing comparison. errata is registry-owned too: an API
-# snapshot carries no value for it, so it only ever changes through an
-# override, which sets it on the snapshot explicitly.
+# excluded from printing comparison. The CARD_OWNED_FIELDS are registry-
+# owned too: an API snapshot carries no value for them, so they only ever
+# change through an override, which sets them on the snapshot explicitly.
 CARD_COMPARE = [f for f in CARD_FIELDS if f != "name"]
 PRINTING_COMPARE = [f for f in PRINTING_FIELDS if f not in ("slug", "image_hash")]
-OWNED_COMPARE = ["errata"]
+OWNED_COMPARE = list(CARD_OWNED_FIELDS)
 
 # Fields that upstream may serve as null without meaning "there is none":
 # a null here leaves the registry's value alone rather than erasing it.

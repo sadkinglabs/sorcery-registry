@@ -217,7 +217,7 @@ class EndToEndTest(unittest.TestCase):
         ])
 
         # Every card starts with one open name_history row carrying its name
-        # and one open rules_history row carrying its text.
+        # and one open card_history row carrying its gameplay face.
         self.assertEqual(export_one["header"]["name_history"], 2)
         by_name = {h["name"]: h for h in export_one["name_history"]}
         self.assertEqual(sorted(by_name), ["Apprentice Wizard", "Broken Site"])
@@ -225,11 +225,17 @@ class EndToEndTest(unittest.TestCase):
         for row in export_one["name_history"]:
             self.assertEqual(row["valid_from"], "2026-08-19")
             self.assertIsNone(row["valid_to"])
-        self.assertEqual(export_one["header"]["rules_history"], 2)
-        by_text = {h["rules_text"]: h for h in export_one["rules_history"]}
+        self.assertEqual(export_one["header"]["card_history"], 2)
+        by_text = {h["rules_text"]: h for h in export_one["card_history"]}
         self.assertEqual(by_text["Spellcaster\nGenesis → Draw a spell."]["codex_id"], wizard_id)
-        for row in export_one["rules_history"]:
+        for row in export_one["card_history"]:
             self.assertIsNone(row["valid_to"])
+            self.assertIn("cost", row)
+        # Derived: the representative printing (Booster, Standard wins over
+        # Foil) and whether each printing shows the current face (yes: the
+        # face has never changed).
+        self.assertEqual(wizard["default_printing_id"], "P000001")
+        self.assertTrue(all(p["printed_as_current"] for p in export_one["printings"]))
 
         # Second run, same data: a no-op, and the export is byte-identical.
         plan = diff(load_registry_state(con), snapshot)
@@ -328,53 +334,122 @@ class EndToEndTest(unittest.TestCase):
             con.execute("UPDATE printings SET card_id = 2 WHERE printing_id = 1")
 
 
-class RulesHistoryTest(unittest.TestCase):
-    """Upstream publishes only the current text and no longer marks errata;
-    the registry records every change it observes instead."""
+class CardHistoryTest(unittest.TestCase):
+    """Upstream publishes only the current values and marks nothing; the
+    registry records every state of a card's gameplay face it observes."""
 
-    def test_reworded_card_closes_and_opens_rows(self):
+    def populated(self):
         con = open_db(":memory:")
         init_db(con)
         apply_plan(con, diff(load_registry_state(con),
                              build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        return con
 
+    def rows_for(self, export, name):
+        card = next(c for c in export["cards"] if c["name"] == name)
+        return card, [h for h in export["card_history"] if h["codex_id"] == card["codex_id"]]
+
+    def test_reworded_card_closes_and_opens_rows(self):
+        con = self.populated()
         reworded = copy.deepcopy(RAW_API)
         reworded[0]["engine"]["rules"] = "Spellcaster\r\n\r\nGenesis → Draw two spells."
         plan = diff(load_registry_state(con), build_snapshot(reworded))
         self.assertEqual([u["name"] for u in plan["card_updates"]], ["Apprentice Wizard"])
         self.assertEqual(list(plan["card_updates"][0]["changes"]), ["rules_text"])
-        self.assertFalse(plan["card_renames"] or plan["ambiguous"])
         apply_plan(con, plan, "2026-09-01")
 
         export = build_export(con)
-        wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
+        wizard, rows = self.rows_for(export, "Apprentice Wizard")
         self.assertEqual(wizard["rules_text"], "Spellcaster\nGenesis → Draw two spells.")
-        # An observed rewording is what errata means now that upstream no
-        # longer marks it; the flag is set alongside the history row.
         self.assertTrue(wizard["errata"])
-        rows = [h for h in export["rules_history"] if h["codex_id"] == wizard["codex_id"]]
-        self.assertEqual(rows, [
-            {"rules_text": "Spellcaster\nGenesis → Draw a spell.",
-             "codex_id": wizard["codex_id"], "valid_from": "2026-08-19",
-             "valid_to": "2026-09-01"},
-            {"rules_text": "Spellcaster\nGenesis → Draw two spells.",
-             "codex_id": wizard["codex_id"], "valid_from": "2026-09-01",
-             "valid_to": None},
+        self.assertEqual([(r["valid_from"], r["valid_to"], r["rules_text"]) for r in rows], [
+            ("2026-08-19", "2026-09-01", "Spellcaster\nGenesis → Draw a spell."),
+            ("2026-09-01", None, "Spellcaster\nGenesis → Draw two spells."),
         ])
-        # The untouched card still has exactly its one open row.
-        broken = next(c for c in export["cards"] if c["name"] == "Broken Site")
-        self.assertEqual(len([h for h in export["rules_history"]
-                              if h["codex_id"] == broken["codex_id"]]), 1)
+        # Both rows carry the whole face, and the open row equals the card.
+        for row in rows:
+            self.assertEqual(row["cost"], 3)
+            self.assertEqual(row["keywords"], ["Spellcaster", "Genesis"])
+        for field in ("type", "cost", "attack", "defense", "elements", "rules_text", "back"):
+            self.assertEqual(rows[-1][field], wizard[field])
+        broken, broken_rows = self.rows_for(export, "Broken Site")
+        self.assertEqual(len(broken_rows), 1)
         self.assertFalse(broken["errata"])
-        # The same snapshot diffs to nothing: the flag is not compared
-        # against upstream, which has no value for it.
         self.assertTrue(is_noop(diff(load_registry_state(con), build_snapshot(reworded))))
 
+    def test_stat_change_is_recorded_and_is_errata(self):
+        # The Polar Bears case: a reprint changes cost and power.
+        con = self.populated()
+        buffed = copy.deepcopy(RAW_API)
+        buffed[0]["engine"]["cost"] = 4
+        buffed[0]["engine"]["attack"] = 3
+        plan = diff(load_registry_state(con), build_snapshot(buffed))
+        self.assertEqual(set(plan["card_updates"][0]["changes"]), {"cost", "attack"})
+        apply_plan(con, plan, "2026-09-01")
+
+        export = build_export(con)
+        wizard, rows = self.rows_for(export, "Apprentice Wizard")
+        self.assertTrue(wizard["errata"])
+        self.assertEqual([(r["valid_to"], r["cost"], r["attack"]) for r in rows],
+                         [("2026-09-01", 3, 1), (None, 4, 3)])
+        # Printings released before the new face were printed with the old
+        # values. With no up-to-date printing, the Booster Standard is still
+        # the default.
+        for printing in export["printings"]:
+            if printing["codex_id"] == wizard["codex_id"]:
+                self.assertFalse(printing["printed_as_current"])
+        self.assertEqual(wizard["default_printing_id"], "P000001")
+
+        # A reprint released afterwards shows the current face and becomes
+        # the default - even as a promo, since it is the only printing that
+        # shows what the card now is.
+        later = copy.deepcopy(buffed)
+        later[0]["printings"].append(upstream_printing(
+            "999-apprentice_wizard-op-f", "Promo", "999", "2026-10-01",
+            product="OrganizedPlay", finish="Foil"))
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(later)), "2026-10-01")
+        export = build_export(con)
+        wizard, _ = self.rows_for(export, "Apprentice Wizard")
+        flags = {p["slug"]: p["printed_as_current"] for p in export["printings"]
+                 if p["codex_id"] == wizard["codex_id"]}
+        self.assertEqual(flags, {"001-apprentice_wizard-b-s": False,
+                                 "001-apprentice_wizard-b-f": False,
+                                 "999-apprentice_wizard-op-f": True})
+        promo_id = next(p["printing_id"] for p in export["printings"]
+                        if p["slug"] == "999-apprentice_wizard-op-f")
+        self.assertEqual(wizard["default_printing_id"], promo_id)
+
+    def test_promo_never_outranks_a_booster_showing_the_same_face(self):
+        con = self.populated()
+        later = copy.deepcopy(RAW_API)
+        later[0]["printings"].append(upstream_printing(
+            "999-apprentice_wizard-op-f", "Promo", "999", "2026-10-01",
+            product="OrganizedPlay", finish="Foil"))
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(later)), "2026-10-01")
+        export = build_export(con)
+        wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
+        self.assertEqual(wizard["default_printing_id"], "P000001")
+
+    def test_retagging_is_history_but_not_errata(self):
+        con = self.populated()
+        retagged = copy.deepcopy(RAW_API)
+        retagged[0]["engine"]["keywords"] = ["Genesis", "Spellcaster", "Ward"]
+        retagged[0]["engine"]["rarity"] = "Elite"
+        plan = diff(load_registry_state(con), build_snapshot(retagged))
+        self.assertEqual(set(plan["card_updates"][0]["changes"]), {"keywords", "rarity"})
+        apply_plan(con, plan, "2026-09-01")
+        export = build_export(con)
+        wizard, rows = self.rows_for(export, "Apprentice Wizard")
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[-1]["rarity"], "Elite")
+        self.assertFalse(wizard["errata"])
+        # A re-tag is a new face state, so printings released before it are
+        # reported as showing older values - the history is literal.
+        self.assertFalse(any(p["printed_as_current"] for p in export["printings"]
+                             if p["codex_id"] == wizard["codex_id"]))
+
     def test_override_can_correct_the_flag(self):
-        con = open_db(":memory:")
-        init_db(con)
-        apply_plan(con, diff(load_registry_state(con),
-                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        con = self.populated()
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
         apply_overrides(snapshot, [{
             "match": {"card_name": "Broken Site"}, "set_fields": {"errata": True},
@@ -385,8 +460,56 @@ class RulesHistoryTest(unittest.TestCase):
         apply_plan(con, plan, "2026-09-01")
         export = build_export(con)
         self.assertTrue(next(c for c in export["cards"] if c["name"] == "Broken Site")["errata"])
-        # No text changed, so no history row was touched.
-        self.assertEqual(export["header"]["rules_history"], 2)
+        # No face field changed, so no history row was touched.
+        self.assertEqual(export["header"]["card_history"], 2)
+
+
+class DefaultPrintingTest(unittest.TestCase):
+    def test_override_pins_a_printing(self):
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        snapshot = build_snapshot(copy.deepcopy(RAW_API))
+        apply_overrides(snapshot, [{
+            "match": {"card_name": "Apprentice Wizard"},
+            "set_fields": {"default_printing_id": "P000002"},
+            "reason": "the foil is the art everyone knows"}])
+        plan = diff(load_registry_state(con), snapshot)
+        self.assertEqual(plan["card_updates"][0]["changes"],
+                         {"default_printing_id": {"old": None, "new": "P000002"}})
+        apply_plan(con, plan, "2026-09-01")
+        export = build_export(con)
+        wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
+        self.assertEqual(wizard["default_printing_id"], "P000002")
+        self.assertTrue(is_noop(diff(load_registry_state(con), snapshot)))
+        # A pin naming another card's printing is a validation error, and
+        # the export falls back to the rule rather than publish it.
+        from registry.validate import check_internal
+        con.execute("UPDATE cards SET default_printing_id = 3 WHERE card_id = 1")
+        errors = []
+        check_internal(con, errors)
+        self.assertTrue(any("not one of its printings" in e for e in errors), errors)
+        wizard = next(c for c in build_export(con)["cards"] if c["name"] == "Apprentice Wizard")
+        self.assertEqual(wizard["default_printing_id"], "P000001")
+
+    def test_rule_order(self):
+        from registry.export import default_printing
+        def p(pid, product="Booster", finish="Standard", released="2024-01-01",
+              retired=None, current=True):
+            return {"printing_id": pid, "product": product, "finish": finish,
+                    "released_at": released, "retired_at": retired,
+                    "printed_as_current": current}
+        self.assertEqual(default_printing([p(1, finish="Foil"), p(2)]), 2)
+        self.assertEqual(default_printing([p(1), p(2, product="BoxTopper", released="2025-01-01")]), 1)
+        self.assertEqual(default_printing([p(1), p(2, released="2025-01-01")]), 2)
+        self.assertEqual(default_printing([p(2), p(1)]), 1)
+        self.assertEqual(default_printing([p(1, retired="2026-01-01"), p(2, finish="Foil")]), 2)
+        self.assertEqual(default_printing([p(1, retired="2026-01-01")]), 1)
+        # Showing the current face outranks everything but retirement.
+        self.assertEqual(default_printing([p(1, current=False),
+                                           p(2, product="Dust", finish="Foil")]), 2)
+        self.assertIsNone(default_printing([]))
 
 
 class FrozenFlavourTextTest(unittest.TestCase):
@@ -437,7 +560,8 @@ class BackFaceRoundTripTest(unittest.TestCase):
         export = build_export(con)
         wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
         front_keys = [k for k in wizard if k not in ("codex_id", "name", "back", "errata",
-                                                     "set_codes", "printing_ids")]
+                                                     "set_codes", "printing_ids",
+                                                     "default_printing_id")]
         self.assertEqual(list(wizard["back"]), front_keys)
         self.assertEqual(wizard["back"]["life"], 20)
         printing = next(p for p in export["printings"]
@@ -448,83 +572,75 @@ class BackFaceRoundTripTest(unittest.TestCase):
 
 
 class MigrationTest(unittest.TestCase):
-    """The v6 -> v7 rebuild keeps every id and history row and re-encodes
-    only what the old API's shape forced on the data."""
+    """The v7 -> v8 rebuild keeps every id and history row and widens each
+    rules_history row into a full-face card_history row."""
 
-    V6_DDL = """
+    V7_DDL = """
     CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE cards (card_id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE,
-        type TEXT, rarity TEXT, subtypes TEXT, elements TEXT, cost INTEGER,
-        attack INTEGER, defence INTEGER, life INTEGER,
-        thr_air INTEGER NOT NULL DEFAULT 0, thr_earth INTEGER NOT NULL DEFAULT 0,
+        type TEXT, category TEXT, rarity TEXT, slot TEXT, subtypes TEXT, elements TEXT,
+        keywords TEXT, umbrellas TEXT, cost INTEGER, attack INTEGER, defense INTEGER,
+        life INTEGER, thr_air INTEGER NOT NULL DEFAULT 0, thr_earth INTEGER NOT NULL DEFAULT 0,
         thr_fire INTEGER NOT NULL DEFAULT 0, thr_water INTEGER NOT NULL DEFAULT 0,
-        rules_text TEXT NOT NULL DEFAULT '');
+        rules_text TEXT NOT NULL DEFAULT '', back TEXT, errata INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE printings (printing_id INTEGER PRIMARY KEY, card_id INTEGER NOT NULL,
-        set_name TEXT NOT NULL, released_at TEXT, set_number TEXT, product TEXT,
-        finish TEXT, slug TEXT NOT NULL UNIQUE, artist TEXT, flavour_text TEXT,
-        type_text TEXT, rarity TEXT, type TEXT, rules_text TEXT, cost INTEGER,
-        attack INTEGER, defence INTEGER, life INTEGER,
-        thr_air INTEGER NOT NULL DEFAULT 0, thr_earth INTEGER NOT NULL DEFAULT 0,
-        thr_fire INTEGER NOT NULL DEFAULT 0, thr_water INTEGER NOT NULL DEFAULT 0,
-        image_hash TEXT, retired_at TEXT);
+        set_name TEXT NOT NULL, set_code TEXT, released_at TEXT, product TEXT, finish TEXT,
+        slug TEXT NOT NULL UNIQUE, artist TEXT, artist_slug TEXT, flavour_text TEXT,
+        typeline TEXT, back TEXT, image_hash TEXT, retired_at TEXT);
     CREATE TABLE slug_history (slug TEXT NOT NULL, printing_id INTEGER NOT NULL,
         valid_from TEXT NOT NULL, valid_to TEXT);
     CREATE TABLE name_history (name TEXT NOT NULL, card_id INTEGER NOT NULL,
         valid_from TEXT NOT NULL, valid_to TEXT);
-    INSERT INTO meta VALUES ('schema_version', '6'), ('next_card_id', '8'),
+    CREATE TABLE rules_history (rules_text TEXT NOT NULL, card_id INTEGER NOT NULL,
+        valid_from TEXT NOT NULL, valid_to TEXT);
+    INSERT INTO meta VALUES ('schema_version', '7'), ('next_card_id', '8'),
                             ('next_printing_id', '12');
-    INSERT INTO cards VALUES (7, 'Daperyll Vampire', 'Minion', 'Exceptional',
-        'Undead, Beast', 'Earth, Water', 5, 4, 4, NULL, 0, 2, 0, 1,
-        'UPDATED: Airborne' || char(10) || 'Strike damage heals you.');
-    INSERT INTO printings VALUES (11, 7, 'Alpha', '2023-04-19', '001', 'Booster',
-        'Standard', '001-daperyll_vampire-b-s', 'An Artist', 'Flavour.', 'A typeline',
-        'Exceptional', 'Minion', 'old copy', 5, 4, 4, NULL, 0, 2, 0, 1, NULL, NULL);
-    INSERT INTO slug_history VALUES ('001-daperyll-vampire-b-s', 11, '2026-08-19', '2026-08-20');
-    INSERT INTO slug_history VALUES ('001-daperyll_vampire-b-s', 11, '2026-08-20', NULL);
-    INSERT INTO name_history VALUES ('Daperyll Vampire', 7, '2026-08-19', NULL);
+    INSERT INTO cards VALUES (7, 'Sir Lancelot', 'Minion', 'Spell', 'Unique', 'Unique',
+        '["Mortal"]', '["Earth"]', '["Lance"]', '["Knight"]', 4, 3, 3, NULL, 0, 2, 0, 0,
+        'Lance' || char(10) || 'Whenever he fights, untap him.', NULL, 1);
+    INSERT INTO printings VALUES (11, 7, 'Arthurian Legends', '004', '2024-10-04', 'Booster',
+        'Standard', '004-sir_lancelot-b-s', 'An Artist', 'an_artist', NULL, 'A typeline',
+        NULL, NULL, NULL);
+    INSERT INTO slug_history VALUES ('004-sir_lancelot-b-s', 11, '2026-08-19', NULL);
+    INSERT INTO name_history VALUES ('Sir Lancelot', 7, '2026-08-19', NULL);
+    INSERT INTO rules_history VALUES ('Lance' || char(10) || 'The first time he fights, untap him.',
+        7, '2026-09-09', '2026-09-09');
+    INSERT INTO rules_history VALUES ('Lance' || char(10) || 'Whenever he fights, untap him.',
+        7, '2026-09-09', NULL);
     """
 
-    def test_rebuild_keeps_ids_and_reencodes_fields(self):
-        from registry.migrate_v7 import migrate
+    def test_rebuild_widens_text_rows_into_face_rows(self):
+        from registry.migrate_v8 import migrate
         from registry.validate import check_internal
         old = open_db(":memory:")
-        old.executescript(self.V6_DDL)
+        old.executescript(self.V7_DDL)
         new = open_db(":memory:")
-        migrate(old, new, "2026-09-09")
+        migrate(old, new)
 
-        state = load_registry_state(new)
-        card = state["cards"]["Daperyll Vampire"]
-        self.assertEqual(card["card_id"], 7)
-        self.assertEqual(card["defense"], 4)
-        self.assertEqual(card["subtypes"], ["Undead", "Beast"])
-        self.assertEqual(card["elements"], ["Earth", "Water"])
-        self.assertEqual(card["rules_text"], "Airborne\nStrike damage heals you.")
-        # The old marker seeds the registry-owned flag before it is stripped.
-        self.assertTrue(card["errata"])
-        self.assertIsNone(card["category"])
-        printing = state["printings"]["001-daperyll_vampire-b-s"]
-        self.assertEqual(printing["printing_id"], 11)
-        self.assertEqual(printing["set_code"], "001")
-        self.assertEqual(printing["typeline"], "A typeline")
-        self.assertEqual(printing["flavour_text"], "Flavour.")
-        self.assertNotIn("rules_text", printing)
-        self.assertEqual(state["slug_owners"],
-                         {"001-daperyll-vampire-b-s": 11, "001-daperyll_vampire-b-s": 11})
+        export = build_export(new)
+        card = export["cards"][0]
+        self.assertEqual((card["codex_id"], card["name"], card["cost"], card["errata"]),
+                         ("C000007", "Sir Lancelot", 4, True))
+        self.assertEqual(export["printings"][0]["printing_id"], "P000011")
+        rows = export["card_history"]
+        self.assertEqual([(r["valid_to"], r["rules_text"].splitlines()[-1]) for r in rows],
+                         [("2026-09-09", "The first time he fights, untap him."),
+                          (None, "Whenever he fights, untap him.")])
+        # The old row got the card's face with its own text: exact, since
+        # nothing but text ever changed under v7.
+        for row in rows:
+            self.assertEqual((row["cost"], row["attack"], row["keywords"]), (4, 3, ["Lance"]))
         self.assertEqual(registry.db.get_meta(new, "next_card_id"), "8")
-        self.assertEqual(registry.db.get_meta(new, "next_printing_id"), "12")
-        rows = new.execute("SELECT rules_text, valid_from, valid_to FROM rules_history").fetchall()
-        self.assertEqual([tuple(r) for r in rows],
-                         [("Airborne\nStrike damage heals you.", "2026-09-09", None)])
         errors = []
         check_internal(new, errors)
         self.assertEqual(errors, [])
 
-    def test_refuses_a_database_that_is_not_v6(self):
-        from registry.migrate_v7 import migrate
+    def test_refuses_a_database_that_is_not_v7(self):
+        from registry.migrate_v8 import migrate
         old = open_db(":memory:")
         init_db(old)
         with self.assertRaises(ValueError):
-            migrate(old, open_db(":memory:"), "2026-09-09")
+            migrate(old, open_db(":memory:"))
 
 
 class ExportArtifactsTest(unittest.TestCase):
@@ -590,13 +706,13 @@ class HistoryValidationTest(unittest.TestCase):
         check_internal(con, errors)
         self.assertTrue(any("open name_history rows" in e for e in errors), errors)
 
-    def test_rules_history_must_agree_with_the_card(self):
+    def test_card_history_must_agree_with_the_card(self):
         from registry.validate import check_internal
         con = self.populated()
-        con.execute("UPDATE cards SET rules_text = 'edited by hand' WHERE card_id = 1")
+        con.execute("UPDATE cards SET cost = 9 WHERE card_id = 1")
         errors = []
         check_internal(con, errors)
-        self.assertTrue(any("open rules_history row" in e for e in errors), errors)
+        self.assertTrue(any("open card_history row" in e for e in errors), errors)
 
 
 class SnapshotArtifactTest(unittest.TestCase):
@@ -695,7 +811,7 @@ class ManifestTest(unittest.TestCase):
         self.assertEqual(manifest["dataset_version"], "v0.0.0-test")
         self.assertEqual(manifest["schema_version"], header["schema_version"])
         for key in ("sets", "cards", "printings", "slug_history", "name_history",
-                    "rules_history"):
+                    "card_history"):
             self.assertEqual(manifest["counts"][key], header[key])
         self.assertEqual([a["name"] for a in manifest["artifacts"]],
                          ["registry.json", "registry.sqlite", "registry.schema.json"])

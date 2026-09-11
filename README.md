@@ -72,17 +72,20 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
                        "subtypes": ["Mortal"], "elements": ["Air"], "keywords": ["Genesis", "Spellcaster"],
                        "umbrellas": [], "cost": 3, "attack": 1, "defense": 1, "life": null,
                        "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
-                       "rules_text": "Spellcaster\nGenesis → Draw a spell.", "back": null,
+                       "rules_text": "Spellcaster\nGenesis → Draw a spell.", "back": null, "errata": false,
                        "set_codes": ["001", "002", "999"],
-                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"] } ],
+                       "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"],
+                       "default_printing_id": "P000002" } ],
   "printings":     [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
                        "set_name": "Alpha", "set_code": "001", "released_at": "2023-06-22",
                        "product": "Booster", "finish": "Standard", "slug": "001-apprentice_wizard-b-s",
                        "artist": "Ossi Hiekkala", "artist_slug": "ossi_hiekkala", "flavour_text": "",
-                       "typeline": "An Ordinary Mortal new to power", "back": null, ... } ],
+                       "typeline": "An Ordinary Mortal new to power", "back": null,
+                       "printed_as_current": true, ... } ],
   "slug_history":  [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ],
   "name_history":  [ { "name": "...", "codex_id": "C000001", "valid_from": "2026-08-19", "valid_to": null } ],
-  "rules_history": [ { "rules_text": "...", "codex_id": "C000001", "valid_from": "2026-09-09", "valid_to": null } ]
+  "card_history":  [ { "codex_id": "C000001", "valid_from": "2026-09-09", "valid_to": null,
+                       "type": "Minion", ..., "cost": 3, "attack": 1, ..., "rules_text": "...", "back": null } ]
 }
 ```
 
@@ -97,7 +100,8 @@ Practical notes:
 - **Printings are readable on their own.** Each printing carries `card_name`, derived at export time from the card its `codex_id` points at, so a printing record never needs a join just to be understood. It's a convenience copy: the card record stays the source of truth for card-level data.
 - **Each card lists its printings.** `printing_ids` on a card is the reverse of each printing's `codex_id` - derived at export time from the printings table, so the two can never disagree, and CI proves it. The list is sorted and only ever grows.
 - **The `sets` section is the set catalogue.** One record per set with its official code, name, release date, and distinct-card and printing counts - the authoritative answer to "how many cards are in set X", which the official data states nowhere. A set's `released_at` is the earliest date any of its printings reached the public; each printing carries its own. Each card also lists its `set_codes`; for products and finishes, follow its `printing_ids`.
-- **`errata` and `rules_history` are the registry's own record of updated cards.** Upstream publishes only the current text and no longer marks errata (the old API prefixed updated text with `UPDATED:`; the rebuilt one does not). The registry keeps the flag itself: `errata` is `true` once a card's text has been updated since it was printed - seeded from the old marker, and set whenever a sync observes a card's `rules_text` change. Each such change also lands in `rules_history`: the previous text is closed with a `valid_to` date and the new text opens a row, so you can see what the wording was and when it changed. Every card has exactly one open row, which equals its `rules_text`. Corrections to the flag go through [`data/overrides.json`](data/overrides.json) like any other.
+- **`card_history` and `errata` are the registry's own record of updated cards.** Upstream publishes only the current values and marks nothing (the old API prefixed updated text with `UPDATED:`; the rebuilt one does not). So the registry records what it observes: `card_history` holds every state a card's gameplay face has been in - type, elements, cost, attack, defense, life, thresholds, rules text, keywords, back face - one row per state with `valid_from`/`valid_to`. A reprint that changes a card's cost or power is recorded exactly like a rewording: the old face closes, the new face opens. Every card has exactly one open row, which equals the card record. `errata` is `true` once any *gameplay* field has changed since the card was printed (a re-tag of keywords, subtypes, rarity or slot is history but not errata) - seeded from the old marker, set by observed changes, corrected only through [`data/overrides.json`](data/overrides.json).
+- **Which printings show the current values?** Each printing carries `printed_as_current`: `true` when it was released on or after the current face took effect (or the face never changed), `false` for a printing that physically shows older values. Each card carries `default_printing_id`, a representative printing chosen by a fixed rule - not retired, showing the card's current face over older values, Booster over other products, Standard over other finishes, most recent release, lowest id - so every consumer picks the same one; a reprint that changed a card's stats becomes its default even if it is a promo, and otherwise a promo never outranks a Booster printing. Want a different policy? The full `printings` list is there; ignore the field. Think the rule picked wrong for one card? Pin another of its printings through [`data/overrides.json`](data/overrides.json) with a reason, and the pin wins.
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.
@@ -143,7 +147,7 @@ The official API occasionally ships errors (at the time of writing, 17 Gothic ca
 
 ## How updates happen
 
-A sync script fetches the official API, diffs it against the registry, and classifies every difference. New cards get new IDs. Attribute changes update in place (a change to a card's rules text also lands in `rules_history`). Slug renames are matched conservatively (name, rules text, set, product, finish) - and anything that does not resolve to an unambiguous one-to-one match is quarantined for human review instead of guessed at, because a wrong guess would silently fork one card into two IDs. Every fetch over the network is snapshotted locally before anything is diffed, so the dry run that shows the plan and the run that applies it can be guaranteed to have seen identical data. Syncs are run manually (or via the manually-triggered GitHub Action) and land as pull requests, never as direct pushes.
+A sync script fetches the official API, diffs it against the registry, and classifies every difference. New cards get new IDs. Attribute changes update in place (a change to any gameplay field of a card also lands in `card_history`). Slug renames are matched conservatively (name, rules text, set, product, finish) - and anything that does not resolve to an unambiguous one-to-one match is quarantined for human review instead of guessed at, because a wrong guess would silently fork one card into two IDs. Every fetch over the network is snapshotted locally before anything is diffed, so the dry run that shows the plan and the run that applies it can be guaranteed to have seen identical data. Syncs are run manually (or via the manually-triggered GitHub Action) and land as pull requests, never as direct pushes.
 
 A weekly workflow dry-runs the sync against the live API and files an `upstream-drift` issue the moment the official data stops matching the registry - new cards, changed attributes, ambiguous renames, or a payload the adapter can no longer read. It applies nothing; it exists so that an upstream change is a notification, not a surprise.
 

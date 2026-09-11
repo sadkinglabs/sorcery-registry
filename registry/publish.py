@@ -18,7 +18,7 @@ Layout (every path relative to the version root the uploader chooses):
     index.json                  discovery: versions, counts, endpoint patterns
     registry.json               the full export, byte for byte, + .sha256
     schema.json                 the export's JSON Schema
-    cards/{codex_id}.json       the card, its printings (summaries), its histories
+    cards/{codex_id}.json       the card, its printings (summaries), its history
     printings/{printing_id}.json  the printing and its slug history
     slugs/{slug}.json           any slug that has ever existed -> its ids
     sets.json                   the set catalogue
@@ -26,7 +26,7 @@ Layout (every path relative to the version root the uploader chooses):
     index/cards.json            compact card list for client-side search
     index/printings.json        compact printing list
     index/slugs.json            slug -> printing_id, every slug ever
-    history/slugs.json, history/names.json, history/rules.json
+    history/slugs.json, history/names.json, history/cards.json
 """
 
 import argparse
@@ -40,11 +40,12 @@ from .export import EXPORT_PATH, SCHEMA_PATH, checksum_path
 DIST_PATH = Path("dist")
 
 PRINTING_SUMMARY = ("printing_id", "slug", "set_code", "set_name", "released_at",
-                    "product", "finish", "retired_at")
+                    "product", "finish", "printed_as_current", "retired_at")
 CARD_INDEX = ("codex_id", "name", "type", "category", "rarity", "elements",
-              "keywords", "subtypes", "cost", "set_codes")
+              "keywords", "subtypes", "cost", "errata", "set_codes",
+              "default_printing_id")
 PRINTING_INDEX = ("printing_id", "codex_id", "slug", "set_code", "product",
-                  "finish", "retired_at")
+                  "finish", "printed_as_current", "retired_at")
 
 # Object keys become URL path segments; anything outside this set would
 # need escaping, and a key that needs escaping is not a stable address.
@@ -64,7 +65,7 @@ ENDPOINTS = {
     "slugs_index": "index/slugs.json",
     "slug_history": "history/slugs.json",
     "name_history": "history/names.json",
-    "rules_history": "history/rules.json",
+    "card_history": "history/cards.json",
 }
 
 
@@ -85,9 +86,9 @@ def build_objects(export, dataset_version=None):
     names_by_card = {}
     for row in export["name_history"]:
         names_by_card.setdefault(row["codex_id"], []).append(row)
-    rules_by_card = {}
-    for row in export["rules_history"]:
-        rules_by_card.setdefault(row["codex_id"], []).append(row)
+    history_by_card = {}
+    for row in export["card_history"]:
+        history_by_card.setdefault(row["codex_id"], []).append(row)
 
     objects = {}
 
@@ -100,9 +101,9 @@ def build_objects(export, dataset_version=None):
         record["name_history"] = [
             {k: r[k] for k in ("name", "valid_from", "valid_to")}
             for r in names_by_card.get(codex_id, [])]
-        record["rules_history"] = [
-            {k: r[k] for k in ("rules_text", "valid_from", "valid_to")}
-            for r in rules_by_card.get(codex_id, [])]
+        record["card_history"] = [
+            {k: v for k, v in r.items() if k != "codex_id"}
+            for r in history_by_card.get(codex_id, [])]
         objects[f"cards/{codex_id}.json"] = record
 
     printing_by_id = {}
@@ -172,7 +173,7 @@ def build_objects(export, dataset_version=None):
     objects["index/slugs.json"] = dict(sorted(owners.items()))
     objects["history/slugs.json"] = export["slug_history"]
     objects["history/names.json"] = export["name_history"]
-    objects["history/rules.json"] = export["rules_history"]
+    objects["history/cards.json"] = export["card_history"]
 
     header = export["header"]
     objects["index.json"] = {
@@ -180,7 +181,7 @@ def build_objects(export, dataset_version=None):
         "dataset_version": dataset_version,
         "source": header["source"],
         "counts": {k: header[k] for k in ("sets", "cards", "printings", "slug_history",
-                                          "name_history", "rules_history")},
+                                          "name_history", "card_history")},
         "endpoints": dict(ENDPOINTS),
     }
 

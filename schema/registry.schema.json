@@ -218,7 +218,7 @@
         "name_history": {
           "type": "integer"
         },
-        "rules_history": {
+        "card_history": {
           "type": "integer"
         }
       },
@@ -230,7 +230,7 @@
         "printings",
         "slug_history",
         "name_history",
-        "rules_history"
+        "card_history"
       ],
       "additionalProperties": false,
       "description": "Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a byte-identical file."
@@ -404,7 +404,7 @@
           },
           "errata": {
             "type": "boolean",
-            "description": "Registry-owned: true once the card's text has been updated since it was printed. Seeded from the old upstream UPDATED: marker; set whenever a sync observes rules_text change (see rules_history); corrected only through data/overrides.json. Upstream itself does not publish this."
+            "description": "Registry-owned: true once any gameplay field of the card (type, elements, cost, attack, defense, life, thresholds, rules_text, back) has changed since it was printed. Seeded from the old upstream UPDATED: marker; set whenever a sync observes such a change (see card_history); corrected only through data/overrides.json. Rarity, slot, subtypes, keywords and umbrellas are classification, so a change to them is not errata."
           },
           "set_codes": {
             "type": "array",
@@ -419,6 +419,17 @@
               "$ref": "#/$defs/printingId"
             },
             "description": "Derived, sorted, and it only ever grows."
+          },
+          "default_printing_id": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/printingId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Derived: the representative printing, by a fixed rule so every consumer picks the same one - not retired, showing the card's current face (printed_as_current) over older values, Booster over other products, Standard over other finishes, most recently released, lowest id. A reprint that changed the card's stats therefore becomes the default even when it is a promo; otherwise a promo never outranks a Booster printing. A registry maintainer can pin a different printing through data/overrides.json, with a reason. null only for a card with no printings."
           }
         },
         "required": [
@@ -444,7 +455,8 @@
           "back",
           "errata",
           "set_codes",
-          "printing_ids"
+          "printing_ids",
+          "default_printing_id"
         ],
         "additionalProperties": false,
         "description": "One record per card as a game piece; reprints share one record."
@@ -551,6 +563,13 @@
             ],
             "description": "Reserved for a future authoritative art reference; currently always null."
           },
+          "printed_as_current": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Derived: whether the values physically printed on this printing equal the card's current gameplay face - true when the printing was released on or after the current face took effect, or when the card's face has never changed. null when the printing has no release date."
+          },
           "retired_at": {
             "anyOf": [
               {
@@ -579,6 +598,7 @@
           "typeline",
           "back",
           "image_hash",
+          "printed_as_current",
           "retired_at"
         ],
         "additionalProperties": false,
@@ -655,14 +675,11 @@
         "description": "Every name a card has ever carried. valid_to null = the current name. Unlike slugs, a name is not owned: two cards may hold the same name at different times."
       }
     },
-    "rules_history": {
+    "card_history": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "rules_text": {
-            "type": "string"
-          },
           "codex_id": {
             "$ref": "#/$defs/codexId"
           },
@@ -678,16 +695,141 @@
                 "type": "null"
               }
             ]
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Observed values: Artifact, Aura, Avatar, Magic, Minion, Site."
+          },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Coarser grouping: Spell (Minion, Magic, Artifact, Aura), Site, Avatar, Token."
+          },
+          "rarity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The rarity printed on the card. Observed values: Ordinary, Exceptional, Elite, Unique; null on Avatars and some tokens."
+          },
+          "slot": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The rarity slot the card is distributed in. Agrees with rarity except for Avatars (no printed rarity) and tokens."
+          },
+          "subtypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "In upstream's order, e.g. [\"Beast\", \"Spirit\"]."
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "In upstream's order. [\"None\"] means colourless (Artifacts, Avatars, most Sites)."
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ability keywords the card carries (Airborne, Genesis, Spellcaster, ...), as upstream tags them."
+          },
+          "umbrellas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Cross-subtype groupings rules text refers to (Evil, Knight, Royalty)."
+          },
+          "cost": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Mana cost. null for Sites and Avatars, and for X costs."
+          },
+          "attack": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "defense": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "life": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Only Avatars have a life value."
+          },
+          "thr_air": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_earth": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_fire": {
+            "$ref": "#/$defs/threshold"
+          },
+          "thr_water": {
+            "$ref": "#/$defs/threshold"
+          },
+          "rules_text": {
+            "type": "string",
+            "description": "Current text the card plays by, applying to every printing. Canonicalised: \\n line endings, no trailing whitespace, one line per ability. Changes are recorded in rules_history."
+          },
+          "back": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/face"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
-          "rules_text",
           "codex_id",
           "valid_from",
-          "valid_to"
+          "valid_to",
+          "type",
+          "category",
+          "rarity",
+          "slot",
+          "subtypes",
+          "elements",
+          "keywords",
+          "umbrellas",
+          "cost",
+          "attack",
+          "defense",
+          "life",
+          "thr_air",
+          "thr_earth",
+          "thr_fire",
+          "thr_water",
+          "rules_text",
+          "back"
         ],
         "additionalProperties": false,
-        "description": "Every text a card has played by, as observed by syncs. valid_to null = the current text. A closed row means the card's wording changed on valid_to; the registry records the change and does not rule on why."
+        "description": "Every state a card's gameplay face has been in, as observed by syncs: the face's fields flattened into the row. valid_to null = the current face, which equals the card record. A closed row is how the card played until valid_to; a printing released within a row's dates was printed with that row's values. Seeded with every card's face on 2026-09-09."
       }
     }
   },
@@ -698,7 +840,7 @@
     "printings",
     "slug_history",
     "name_history",
-    "rules_history"
+    "card_history"
   ],
   "additionalProperties": false
 }
