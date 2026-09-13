@@ -9,6 +9,9 @@ name: drift
 # read the payload at all - it opens (or updates) one issue labelled
 # upstream-drift with the plan, and keeps the raw payload as an artifact so
 # the run can be reproduced with --from-file. It never applies anything.
+# One request per run: the publisher rate-limits /api/cards at 30 requests
+# a minute and asks consumers to poll intermittently and host the data
+# themselves; weekly is well inside both.
 
 on:
   schedule:

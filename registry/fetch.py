@@ -16,13 +16,30 @@ backend's own minting ids, regenerated whenever the data is re-imported
 Data corrections from data/overrides.json are applied here, after
 canonicalisation and before anything is diffed or stored, so the registry
 holds the corrected truth and the corrections themselves live in git.
+
+Every payload is checked against the publisher's published contract
+(schema/upstream-cards.schema.json, their CardAPIDTO) before it is read:
+a field the adapter depends on going missing or changing type stops the
+sync with the path of the offending element, rather than being flattened
+into wrong data. New fields and new vocabulary values pass through.
+
+Conduct toward the publisher: their API is rate limited (30 requests a
+minute on /api/cards) and their guidance is to poll intermittently and
+host the data yourself, which is exactly what this registry is. Every
+request identifies itself with USER_AGENT; nothing in this repository
+loops over upstream - a sync is one request, the weekly drift check is
+one request.
 """
 
 import json
 
-from . import API_URL
+from . import API_URL, SCHEMA_VERSION, SITE_BASE
 from .canon import canon_text, released_date
+from .contract import check_contract
 from .db import CARD_FIELDS, CARD_OWNED_FIELDS, FACE_FIELDS, PRINTING_FIELDS
+
+USER_AGENT = (f"sorcery-registry/schema{SCHEMA_VERSION} (+{SITE_BASE}; "
+              f"https://github.com/sadkinglabs/sorcery-registry)")
 
 CARD_NUMERIC = ["cost", "attack", "defense", "life"]
 THRESHOLD_KEYS = [("thr_air", "air"), ("thr_earth", "earth"),
@@ -31,9 +48,15 @@ LIST_KEYS = [("subtypes", "subtypes"), ("elements", "elements"),
              ("keywords", "keywords"), ("umbrellas", "umbrellas")]
 
 
-def fetch_api(url=API_URL):
+def _get(url, **kwargs):
+    """The one place HTTP happens, so tests can replace it."""
     import requests
-    response = requests.get(url, timeout=120)
+    return requests.get(url, **kwargs)
+
+
+def fetch_api(url=API_URL):
+    response = _get(url, timeout=120, headers={"User-Agent": USER_AGENT,
+                                                "Accept": "application/json"})
     response.raise_for_status()
     return response.json()
 
@@ -87,6 +110,7 @@ def build_snapshot(raw_cards):
     """Flatten the raw API list. Fails loudly on duplicate card names or
     duplicate slugs: both would undermine identity matching, so a run must
     stop rather than pick a winner silently."""
+    check_contract(raw_cards)
     cards = {}
     printings = {}
     for entry in raw_cards:
