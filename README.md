@@ -110,7 +110,7 @@ Practical notes:
 
 ## For AI agents (MCP)
 
-The registry ships an [MCP](https://modelcontextprotocol.io) server, so AI assistants (Claude, Cursor, and anything else that speaks MCP) can query it directly instead of guessing at slugs or parsing them with string logic. It runs locally on your machine - there is still no hosted service - and reads the published export, so answers always reflect the current registry.
+The registry ships an [MCP](https://modelcontextprotocol.io) server, so AI assistants (Claude, Cursor, and anything else that speaks MCP) can query it directly instead of guessing at slugs or parsing them with string logic. It runs locally on your machine - there is still no hosted service - and reads the export of the **newest tagged release** (resolved through GitHub's `releases/latest` redirect, never whatever happens to be on `main`), so answers always reflect a released registry. Outside a checkout the export is cached in `~/.cache/sorcery-registry` for 24 hours, then revalidated against the release's `registry.json.sha256` with two small requests and only re-downloaded when the digest changed; when offline, the stale cache is served rather than failing.
 
 With [uv](https://docs.astral.sh/uv/) installed, add this to your MCP configuration (for Claude Desktop: `claude_desktop_config.json`; for Claude Code: `.mcp.json`) and you're done - no clone, no install:
 

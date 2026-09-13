@@ -17,8 +17,11 @@ Run it locally (each user runs their own copy; there is no hosted service):
 Data source, first match wins:
     1. $SORCERY_REGISTRY_JSON - a local path or URL to a registry.json
     2. ./export/registry.json - when run from a repo checkout
-    3. the published export on GitHub, cached for 24h in ~/.cache/sorcery-registry
-       (a stale cache is used when offline rather than failing)
+    3. the export of the newest GitHub *release* (never whatever is on
+       main), cached in ~/.cache/sorcery-registry. The cache is trusted for
+       24h; after that it is revalidated against the release's published
+       .sha256 (two small requests) and only re-downloaded when the digest
+       differs. A stale cache is used when offline rather than failing.
 """
 
 import hashlib
@@ -27,8 +30,9 @@ import os
 import time
 from pathlib import Path
 
-EXPORT_URL = ("https://raw.githubusercontent.com/sadkinglabs/sorcery-registry"
-              "/main/export/registry.json")
+REPO = "sadkinglabs/sorcery-registry"
+LATEST_RELEASE_URL = f"https://github.com/{REPO}/releases/latest"
+RAW_EXPORT_URL = f"https://raw.githubusercontent.com/{REPO}/{{tag}}/export/registry.json"
 CACHE_PATH = Path.home() / ".cache" / "sorcery-registry" / "registry.json"
 CACHE_TTL_SECONDS = 24 * 3600
 
@@ -41,45 +45,76 @@ def load_registry():
     override = os.environ.get("SORCERY_REGISTRY_JSON")
     if override:
         if override.startswith(("http://", "https://")):
-            return _fetch(override)
+            return json.loads(_fetch_bytes(override))
         return json.loads(Path(override).read_text(encoding="utf-8"))
 
     local = Path("export") / "registry.json"
     if local.exists():
         return json.loads(local.read_text(encoding="utf-8"))
 
-    if CACHE_PATH.exists() and time.time() - CACHE_PATH.stat().st_mtime < CACHE_TTL_SECONDS:
-        return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
-    if CACHE_PATH.exists() and _cache_still_current():
-        # The published .sha256 matches our cached bytes: revalidated with
-        # a ~100 byte fetch instead of re-downloading the whole export.
-        os.utime(CACHE_PATH)
-        return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+    return json.loads(load_published(CACHE_PATH))
+
+
+def load_published(cache_path=CACHE_PATH):
+    """Return the bytes of the newest released export, from the cache when
+    it is fresh or still matches the release's checksum, from GitHub
+    otherwise. The cache holds the served bytes verbatim - never a
+    re-serialisation - so its SHA-256 is comparable with the published
+    registry.json.sha256."""
+    if cache_path.exists() and time.time() - cache_path.stat().st_mtime < CACHE_TTL_SECONDS:
+        return cache_path.read_bytes()
     try:
-        data = _fetch(EXPORT_URL)
+        url = export_url(latest_release_tag())
+        if cache_path.exists() and _cache_still_current(cache_path, url):
+            # The published .sha256 matches our cached bytes: revalidated
+            # with a ~100 byte fetch instead of re-downloading the export.
+            os.utime(cache_path)
+            return cache_path.read_bytes()
+        data = _fetch_bytes(url)
     except Exception:
-        if CACHE_PATH.exists():  # offline: stale beats nothing
-            return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+        if cache_path.exists():  # offline: stale beats nothing
+            return cache_path.read_bytes()
         raise
-    CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CACHE_PATH.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_bytes(data)
     return data
 
 
-def _fetch(url):
+def latest_release_tag():
+    """The tag of the newest GitHub release, read from the redirect that
+    github.com/<repo>/releases/latest answers with (no API, no token, and
+    cacheable by any proxy). Raises when there is no release to point at."""
+    response = _get(LATEST_RELEASE_URL, timeout=10, allow_redirects=False)
+    location = response.headers.get("Location", "")
+    marker = "/releases/tag/"
+    if marker not in location:
+        raise RuntimeError(f"no release found behind {LATEST_RELEASE_URL} "
+                           f"(status {response.status_code}, location {location!r})")
+    return location.rstrip("/").rsplit(marker, 1)[1]
+
+
+def export_url(tag):
+    return RAW_EXPORT_URL.format(tag=tag)
+
+
+def _get(url, **kwargs):
+    """The one place HTTP happens, so tests can replace it."""
     import requests
-    response = requests.get(url, timeout=60)
+    return requests.get(url, **kwargs)
+
+
+def _fetch_bytes(url):
+    response = _get(url, timeout=60)
     response.raise_for_status()
-    return response.json()
+    return response.content
 
 
-def _cache_still_current():
+def _cache_still_current(cache_path, url):
     try:
-        import requests
-        response = requests.get(EXPORT_URL + ".sha256", timeout=10)
+        response = _get(url + ".sha256", timeout=10)
         response.raise_for_status()
         published = response.text.split()[0]
-        cached = hashlib.sha256(CACHE_PATH.read_bytes()).hexdigest()
+        cached = hashlib.sha256(cache_path.read_bytes()).hexdigest()
         return published == cached
     except Exception:
         return False
