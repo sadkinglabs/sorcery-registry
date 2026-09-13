@@ -20,7 +20,7 @@ All paths below are relative to a release root or the major alias.
 
 ## Discovery
 
-`index.json` - what exists: `schema_version`, `dataset_version`, record counts, the `endpoints` map below with `{placeholder}` templates, and where things live: `base_url` (the absolute root these objects were uploaded to, an immutable release root) and `latest_url` (the moving major alias that always redirects to the newest release); both null in a local `dist/`. `manifest` names `manifest.json` when the release manifest was copied into the root. Fetch this first.
+`index.json` - what exists: `schema_version`, `dataset_version`, record counts, the `endpoints` map below with `{placeholder}` templates, and where things live: `base_url` (the absolute root these objects were uploaded to, an immutable release root) and `latest_url` (the moving major alias that always redirects to the newest release); both null in a local `dist/`. `manifest` names `manifest.json` when the release manifest was copied into the root; `terms` links the usage terms ([`docs/usage.md`](usage.md): what is free to use, what belongs to Erik's Curiosa, what we ask of clients). Fetch this first.
 
 ## Records carry their own addresses
 

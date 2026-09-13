@@ -177,4 +177,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for running the pipeline yourself and for
 
 ## Licence
 
-The code in this repository is MIT licensed. The card data itself belongs to Erik's Curiosa; this project only republishes what the official public API already serves, restructured for stability.
+The code in this repository is MIT licensed; the identifiers, structure and derived data the registry adds are CC0 - free for any use, including commercial, attribution requested. The card data itself belongs to Erik's Curiosa; this project republishes what the official public API already serves, restructured for stability, and hosts the card images as that API's guidance asks, with credit. [`docs/usage.md`](docs/usage.md) spells out what is whose and what we ask of automated clients (fetch in bulk, cache, poll `versions.json`, identify yourself).

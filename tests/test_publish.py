@@ -112,6 +112,7 @@ class ObjectsTest(unittest.TestCase):
         self.assertIsNone(root["base_url"])
         self.assertIsNone(root["latest_url"])
         self.assertIsNone(root["manifest"])
+        self.assertTrue(root["terms"].endswith("docs/usage.md"))
         for pattern in ENDPOINTS.values():
             # Every pattern is either a concrete object or a template whose
             # concrete instances exist.
