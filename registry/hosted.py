@@ -99,11 +99,13 @@ def _request(url, method="GET", data=None, headers=None, timeout=30):
 
 
 def _status(url, method="HEAD"):
+    """(status, headers) with header names lower-cased: servers differ in
+    case (Content-Type, content-type) and the checks must not."""
     try:
         with _request(url, method) as response:
-            return response.status, dict(response.headers)
+            return response.status, {k.lower(): v for k, v in response.headers.items()}
     except urllib.error.HTTPError as error:
-        return error.code, dict(error.headers)
+        return error.code, {k.lower(): v for k, v in error.headers.items()}
 
 
 def _read(url):
@@ -152,8 +154,8 @@ def verify_root(base_url, tag, dist):
         status, headers = _status(f"{root}/{path}", method="GET")
         if status != 200:
             problems.append(f"{status} {root}/{path}")
-        elif path.endswith(".json") and "application/json" not in headers.get("Content-Type", ""):
-            problems.append(f"{root}/{path} served as {headers.get('Content-Type')!r}")
+        elif path.endswith(".json") and "application/json" not in headers.get("content-type", ""):
+            problems.append(f"{root}/{path} served as {headers.get('content-type')!r}")
 
     if problems:
         print("::error::the release root does not serve what was built:")
@@ -200,12 +202,12 @@ def flip_alias(base_url, major, tag, versions_path, zone, rule_id, attempts=20):
     want = f"{base_url.rstrip('/')}/{tag}/index.json"
     for _ in range(attempts):
         status, headers = _status(probe, method="GET")
-        if status == 302 and headers.get("Location") == want:
+        if status == 302 and headers.get("location") == want:
             print(f"{major} alias now redirects to {tag}")
             return 0
         time.sleep(3)
     print(f"::error::{probe} does not redirect to {want} (last: {status} "
-          f"{headers.get('Location')!r})")
+          f"{headers.get('location')!r})")
     return 1
 
 
