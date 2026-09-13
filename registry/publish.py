@@ -1,7 +1,10 @@
 """Publish the export as one object per thing: the files behind the API's URLs.
 
     python -m registry.publish [--export export/registry.json] [--out dist]
-                               [--dataset-version v2.0.0]
+                               [--dataset-version v3.1.0]
+                               [--base-url https://api.kairosarchive.net/v3.1.0]
+                               [--latest-url https://api.kairosarchive.net/v3]
+                               [--manifest manifest.json]
 
 The registry's data is a few thousand records with permanent keys that
 change a handful of times a year, so the API needs no server: every
@@ -15,7 +18,9 @@ same export produces byte-identical files.
 
 Layout (every path relative to the version root the uploader chooses):
 
-    index.json                  discovery: versions, counts, endpoint patterns
+    index.json                  discovery: versions, counts, endpoint patterns,
+                                and where this root and the moving alias live
+    manifest.json               the release manifest, when --manifest is given
     registry.json               the full export, byte for byte, + .sha256
     schema.json                 the export's JSON Schema
     cards/{codex_id}.json       the card, its printings (summaries), its history
@@ -74,8 +79,14 @@ def render(obj):
     return json.dumps(obj, ensure_ascii=False, separators=(",", ":")) + "\n"
 
 
-def build_objects(export, dataset_version=None):
-    """Every object the API serves, as {path: json-able}. Pure: no files."""
+def build_objects(export, dataset_version=None, base_url=None, latest_url=None,
+                  manifest=False):
+    """Every object the API serves, as {path: json-able}. Pure: no files.
+
+    base_url is the absolute root these objects are uploaded to (an
+    immutable release root); latest_url the moving major alias that always
+    redirects to the newest release. Both are advertised in index.json so a
+    consumer holding any copy can find its origin and the current data."""
     cards = {c["codex_id"]: c for c in export["cards"]}
     printings_by_card = {}
     for printing in export["printings"]:
@@ -145,6 +156,8 @@ def build_objects(export, dataset_version=None):
             "product": printing["product"],
             "finish": printing["finish"],
             "retired_at": printing["retired_at"],
+            "api_url": printing.get("api_url"),
+            "kairos_url": printing.get("kairos_url"),
         }
 
     objects["sets.json"] = export["sets"]
@@ -179,6 +192,9 @@ def build_objects(export, dataset_version=None):
     objects["index.json"] = {
         "schema_version": header["schema_version"],
         "dataset_version": dataset_version,
+        "base_url": base_url,
+        "latest_url": latest_url,
+        "manifest": "manifest.json" if manifest else None,
         "source": header["source"],
         "counts": {k: header[k] for k in ("sets", "cards", "printings", "slug_history",
                                           "name_history", "card_history")},
@@ -196,10 +212,12 @@ def _looks_like_dist(path):
 
 
 def write_dist(export_path=EXPORT_PATH, schema_path=SCHEMA_PATH, out=DIST_PATH,
-               dataset_version=None):
+               dataset_version=None, base_url=None, latest_url=None, manifest_path=None):
     export_path, schema_path, out = Path(export_path), Path(schema_path), Path(out)
+    manifest_path = Path(manifest_path) if manifest_path else None
     export_bytes = export_path.read_bytes()
-    objects = build_objects(json.loads(export_bytes.decode("utf-8")), dataset_version)
+    objects = build_objects(json.loads(export_bytes.decode("utf-8")), dataset_version,
+                            base_url, latest_url, manifest=manifest_path is not None)
 
     if out.exists():
         if not _looks_like_dist(out):
@@ -216,7 +234,10 @@ def write_dist(export_path=EXPORT_PATH, schema_path=SCHEMA_PATH, out=DIST_PATH,
     (out / ENDPOINTS["export"]).write_bytes(export_bytes)
     (out / ENDPOINTS["checksum"]).write_bytes(checksum_path(export_path).read_bytes())
     (out / ENDPOINTS["schema"]).write_bytes(schema_path.read_bytes())
-    return len(objects) + 3
+    if manifest_path is None:
+        return len(objects) + 3
+    (out / "manifest.json").write_bytes(manifest_path.read_bytes())
+    return len(objects) + 4
 
 
 def main():
@@ -225,8 +246,17 @@ def main():
     parser.add_argument("--schema", default=str(SCHEMA_PATH))
     parser.add_argument("--out", default=str(DIST_PATH))
     parser.add_argument("--dataset-version", default=None)
+    parser.add_argument("--base-url", default=None,
+                        help="absolute URL of the root these objects are served from")
+    parser.add_argument("--latest-url", default=None,
+                        help="absolute URL of the moving major alias (e.g. .../v3)")
+    parser.add_argument("--manifest", default=None,
+                        help="release manifest to copy into the root as manifest.json")
     args = parser.parse_args()
-    count = write_dist(args.export, args.schema, args.out, args.dataset_version)
+    count = write_dist(args.export, args.schema, args.out, args.dataset_version,
+                       args.base_url.rstrip("/") if args.base_url else None,
+                       args.latest_url.rstrip("/") if args.latest_url else None,
+                       args.manifest)
     print(f"wrote {count} objects to {args.out}")
 
 

@@ -179,16 +179,69 @@
             "null"
           ],
           "description": "The flavour typeline printed under the name, e.g. 'An Ordinary Mortal new to power'."
+        },
+        "image_urls": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/imageUrls"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Derived: the back face's own image renditions; null while the registry holds none (always null today)."
         }
       },
       "required": [
         "artist",
         "artist_slug",
         "flavour_text",
-        "typeline"
+        "typeline",
+        "image_urls"
       ],
       "additionalProperties": false,
       "description": "The physical facts that differ per face of a double-faced printing."
+    },
+    "imageUrls": {
+      "type": "object",
+      "properties": {
+        "small": {
+          "type": "string",
+          "format": "uri",
+          "description": "146x204 WebP: search results, lists."
+        },
+        "normal": {
+          "type": "string",
+          "format": "uri",
+          "description": "488x680 WebP: card pages."
+        },
+        "large": {
+          "type": "string",
+          "format": "uri",
+          "description": "672x936 WebP: click-through."
+        },
+        "original": {
+          "type": "string",
+          "format": "uri",
+          "description": "The publisher's file, untouched."
+        }
+      },
+      "required": [
+        "small",
+        "normal",
+        "large",
+        "original"
+      ],
+      "additionalProperties": false,
+      "description": "Addresses of one face's image renditions. Object names are self-describing - {printing_id}.{key}.{rendition}.{ext}, '.back' before the rendition for a back face - where key is the art-version key: it changes when the art or the encoding recipe changes, so the bytes at a name never change. Card content and images are (c) Erik's Curiosa, served for archive, identification and site function."
+    },
+    "imageStatus": {
+      "type": "string",
+      "enum": [
+        "missing",
+        "ok"
+      ],
+      "description": "missing: the registry holds no image for this face (image_urls null). ok: every rendition in image_urls is served."
     }
   },
   "type": "object",
@@ -269,6 +322,22 @@
           },
           "printings": {
             "type": "integer"
+          },
+          "api_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Derived: this set's JSON object on api.kairosarchive.net; null only for a set without a code."
+          },
+          "kairos_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Derived: this set's page on kairosarchive.net."
           }
         },
         "required": [
@@ -276,7 +345,9 @@
           "set_name",
           "released_at",
           "cards",
-          "printings"
+          "printings",
+          "api_url",
+          "kairos_url"
         ],
         "additionalProperties": false,
         "description": "Derived catalogue of the sets themselves, with distinct-card and printing counts."
@@ -430,6 +501,31 @@
               }
             ],
             "description": "Derived: the representative printing, by a fixed rule so every consumer picks the same one - not retired, showing the card's current face (printed_as_current) over older values, Booster over other products, Standard over other finishes, most recently released, lowest id. A reprint that changed the card's stats therefore becomes the default even when it is a promo; otherwise a promo never outranks a Booster printing. A registry maintainer can pin a different printing through data/overrides.json, with a reason. null only for a card with no printings."
+          },
+          "api_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Derived: this card's JSON object on api.kairosarchive.net, under the moving major alias (/v3/ always redirects to the newest verified v3.x release), so the address leads to the current record from any copy."
+          },
+          "kairos_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Derived: this card's page on kairosarchive.net."
+          },
+          "image_urls": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/imageUrls"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Derived: the image of the card's default_printing_id (its front face), null while that printing has no image."
+          },
+          "image_status": {
+            "$ref": "#/$defs/imageStatus",
+            "description": "Derived: the default printing's image_status."
           }
         },
         "required": [
@@ -456,7 +552,11 @@
           "errata",
           "set_codes",
           "printing_ids",
-          "default_printing_id"
+          "default_printing_id",
+          "api_url",
+          "kairos_url",
+          "image_urls",
+          "image_status"
         ],
         "additionalProperties": false,
         "description": "One record per card as a game piece; reprints share one record."
@@ -561,7 +661,7 @@
               "string",
               "null"
             ],
-            "description": "Reserved for a future authoritative art reference; currently always null."
+            "description": "Registry-owned art-version key of this printing's front image, set by the image pipeline; null until then. image_urls is derived from it."
           },
           "printed_as_current": {
             "type": [
@@ -580,6 +680,30 @@
               }
             ],
             "description": "Set when the printing vanished upstream. Retired printings keep their rows and ids forever."
+          },
+          "api_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Derived: this printing's JSON object on api.kairosarchive.net, under the moving major alias."
+          },
+          "kairos_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Derived: this printing's page on kairosarchive.net."
+          },
+          "image_urls": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/imageUrls"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Derived from image_hash: the front face's image renditions, null while the registry holds none."
+          },
+          "image_status": {
+            "$ref": "#/$defs/imageStatus"
           }
         },
         "required": [
@@ -599,7 +723,11 @@
           "back",
           "image_hash",
           "printed_as_current",
-          "retired_at"
+          "retired_at",
+          "api_url",
+          "kairos_url",
+          "image_urls",
+          "image_status"
         ],
         "additionalProperties": false,
         "description": "One record per physical print: a specific set, product and finish. Gameplay data is on the card it points at."

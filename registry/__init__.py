@@ -33,5 +33,18 @@ API slug demoted to an ordinary, mutable column.
 # a rewording. errata now means any gameplay field changed since printing.
 # Export gains derived default_printing_id on cards and printed_as_current
 # on printings.
-SCHEMA_VERSION = 8
+# v9: every card, printing and set record carries the addresses it lives
+# at - api_url (its JSON object on api.kairosarchive.net), kairos_url (its
+# page on kairosarchive.net) - and printings and cards carry image_urls /
+# image_status (null / "missing" until the image pipeline fills
+# image_hash). All derived at export time from the ids, never stored. No
+# database change.
+SCHEMA_VERSION = 9
 API_URL = "https://api.sorcerytcg.com/api/cards"
+
+# Where the published records live. api_url on every record points at the
+# moving major alias (/v3/ is always the newest verified v3.x release), so
+# a record fetched from any release root leads to the current record.
+API_BASE = "https://api.kairosarchive.net/v3"
+SITE_BASE = "https://kairosarchive.net"
+IMAGE_BASE = "https://api.kairosarchive.net/images"
