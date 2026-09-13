@@ -54,13 +54,24 @@ If you need local play pieces, mint IDs in your own namespace and **do not use t
 
 ## What this is not
 
-- Not a hosted service. There is no server and no endpoint; you consume a file (or run the bundled MCP server locally - see below).
+- Not a live service. The data is files - one export, or one object per thing on `api.kairosarchive.net` - computed at release time; there is no query endpoint (run the bundled MCP server locally for questions, see below).
 - No prices, no rulings, no legality data. Images are on their way: every record already carries `image_urls` (null until the image pipeline lands) so the shape is settled.
 - Not a second opinion on card data. Attributes mirror the official API, with a short, public list of corrections for confirmed upstream errors (see [`data/overrides.json`](data/overrides.json)).
 
 ## Using the data
 
 Everything you need is one file: [`export/registry.json`](export/registry.json). Grab it, vendor it, or read it straight from the repo. It is deterministically ordered, so diffing two versions shows you exactly what changed and nothing else.
+
+### Hosted
+
+The same data is served, one object per thing, from **`https://api.kairosarchive.net`** - see [`docs/api.md`](docs/api.md) for every URL. The short version:
+
+- **Pin a release** and it never changes: `https://api.kairosarchive.net/v3.1.0/registry.json` (and `cards/C000230.json`, `printings/P000937.json`, `slugs/{slug}.json`, `sets/006.json`, the indexes) - immutable, cache forever.
+- **Follow the major alias** for the newest data of a shape you understand: `https://api.kairosarchive.net/v3/…` redirects to the newest verified v3.x root. A breaking change is a new major alias; nothing breaks in place.
+- **Poll `https://api.kairosarchive.net/versions.json`** (60 s cache; hourly is plenty) to learn when a release exists and the digest of its `registry.json`; a release is listed only after the CDN has been verified serving it.
+- Every release is also mirrored here as a tagged GitHub release, so `raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json` is the same bytes.
+
+No keys, no signup; rate limits exist only as a tripwire against runaway crawlers (fetch `registry.json` or the indexes rather than crawling objects one by one).
 
 ```jsonc
 {

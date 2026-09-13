@@ -23,6 +23,11 @@ jobs:
       - name: Tests
         run: python -m unittest discover -s tests -v
 
+      - name: The publisher produces the release objects
+        run: |
+          python -m registry.publish --dataset-version vX.Y.Z --out "$RUNNER_TEMP/dist" \
+            --base-url https://api.kairosarchive.net/vX.Y.Z --latest-url https://api.kairosarchive.net/v3
+
       - name: MCP server builds and registers its tools
         run: |
           python - <<'EOF'

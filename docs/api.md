@@ -2,9 +2,21 @@
 
 The registry is published as one object per thing, so that every card, printing, slug and set has an address and the common questions are one HTTP request each. The objects are produced from the export by `python -m registry.publish` (into `dist/`, never committed) and uploaded at release time; a CDN in front of the bucket serves them. There is no server: every answer was computed at release time.
 
-**Status: the objects are produced; hosting is not yet switched on.** When it is, the base URL and the version scheme will be documented here and in the README.
+## Where it lives
 
-All paths below are relative to a version root. The plan is two roots per major version: an immutable one per release (`/v2.0.0/…`, cache forever) and a moving one (`/v2/…`, the latest v2.x, short cache). A consumer picks how much change they want to see; a breaking change is a new major root, so nothing breaks in place.
+Base URL: **`https://api.kairosarchive.net`** (Cloudflare R2 behind the zone's CDN; no server, no keys, no signup). Every release is also mirrored on GitHub as a tagged release (`raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json`).
+
+| URL | What | Cache |
+|---|---|---|
+| `/versions.json` | the discovery document: `base_url`, `latest` per major (`{"v3": "v3.1.0"}`), and every `releases[]` entry with its `tag`, `schema_version`, `released_at` and the `sha256` of its `registry.json` | 60 s |
+| `/v3.1.0/…` (one root per release) | the objects below, **immutable**: the bytes at a published path never change, so pin a root and cache it forever | 1 year, `immutable` |
+| `/v3/…` (one alias per major) | a `302` to the same path under the newest verified v3.x root | the redirect target changes on release; the target is immutable |
+
+Pick how much change you want to see. **Pin a release** (`/v3.1.0/`) and nothing you fetch ever changes under you; **follow the alias** (`/v3/`) and you always get the newest data of a shape you already understand; **poll `versions.json`** (≤ hourly is plenty; the data changes a few times a year) to learn when a new release exists and what its digest is. A breaking change to the shape is a new major - a new alias (`/v4/`) - so nothing breaks in place, and the previous major keeps its alias and its roots.
+
+A release appears in `versions.json`, and the alias moves, only after the release workflow has verified byte for byte that the CDN serves the new root; `latest` only ever moves forward. Each root also carries `manifest.json` (the release manifest: counts, artifact digests) and a `RELEASED` marker (the `registry.json` digest and the workflow run that verified it), so a root without the marker is a partial upload, never a release. CORS allows `GET`/`HEAD` from any origin, so a browser can fetch the objects directly.
+
+All paths below are relative to a release root or the major alias.
 
 ## Discovery
 

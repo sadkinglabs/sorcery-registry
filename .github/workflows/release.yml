@@ -1,13 +1,32 @@
 name: release
 
 # Publishes a data release. Two ways in, one path out:
-#   - push an annotated tag (v1.2.0, v2.0.0, ...): its message is the notes;
+#   - push an annotated tag (v3.1.0, v4.0.0, ...): its message is the notes;
 #   - run the workflow by hand with a version and notes: the workflow creates
 #     that annotated tag on the chosen ref first.
 # Either way it then proves the invariants on the tagged commit, builds the
-# release manifest and creates the GitHub release with the tag message as its
-# notes and the manifest attached. The manifest is never committed; this is
-# the only place it is produced for publication.
+# release manifest and the published objects, and - once hosting is
+# configured (vars.R2_BUCKET) - uploads the release to its own immutable
+# root on api.kairosarchive.net, verifies byte for byte what the CDN serves,
+# marks the root RELEASED, lists it in versions.json and points the moving
+# major alias (/v3/) at it. Only then is the GitHub release created, with the
+# tag message as its notes and the manifest attached. Before hosting is
+# configured the hosted steps are skipped with a warning and the release is
+# GitHub-only.
+#
+# Guarantees this file enforces:
+#   - bytes at a published path never change: a root that already carries a
+#     different registry.json.sha256 fails the run; a root already marked
+#     RELEASED is not re-uploaded (a re-run after a GitHub-side failure just
+#     redoes the pointers and the release);
+#   - nothing is listed in versions.json, and the alias never moves, until the
+#     CDN has been seen serving the release;
+#   - the alias only moves forward (versions.json decides), and it moves in
+#     one operation, so no client ever sees a mixed dataset;
+#   - two releases cannot interleave (concurrency group);
+#   - secrets reach the shell only through env:.
+# The aws CLI is used purely as the standard S3-compatible client for R2;
+# no AWS account or service is involved anywhere.
 
 on:
   push:
@@ -15,7 +34,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Tag to create and release, e.g. v2.0.0"
+        description: "Tag to create and release, e.g. v3.1.0"
         required: true
       notes:
         description: "Release notes (Markdown). Become the tag message."
@@ -23,6 +42,25 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  R2_BUCKET: ${{ vars.R2_BUCKET }}
+  REGISTRY_BASE_URL: ${{ vars.REGISTRY_BASE_URL }}
+  CF_ZONE_ID: ${{ vars.CF_ZONE_ID }}
+  CF_REDIRECT_RULE_ID: ${{ vars.CF_REDIRECT_RULE_ID }}
+  # The aws CLI as an R2 client: credentials and endpoint from secrets; R2
+  # does not implement the newer default request checksums, so ask for them
+  # only where the protocol requires them.
+  AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  AWS_ENDPOINT_URL: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+  AWS_DEFAULT_REGION: auto
+  AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+  AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
 
 jobs:
   release:
@@ -38,7 +76,7 @@ jobs:
           VERSION: ${{ inputs.version }}
           NOTES: ${{ inputs.notes }}
         run: |
-          case "$VERSION" in v[0-9]*) ;; *) echo "::error::version must look like v2.0.0"; exit 1;; esac
+          case "$VERSION" in v[0-9]*) ;; *) echo "::error::version must look like v3.1.0"; exit 1;; esac
           git config user.name "registry-release"
           git config user.email "actions@github.com"
           printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
@@ -65,9 +103,107 @@ jobs:
       - name: Build the manifest
         run: python -m registry.manifest --dataset-version "$TAG" --out manifest.json
 
+      - name: Build the published objects
+        run: |
+          MAJOR="${TAG%%.*}"
+          echo "MAJOR=$MAJOR" >> "$GITHUB_ENV"
+          if [ -n "$R2_BUCKET" ]; then
+            python -m registry.publish --dataset-version "$TAG" --manifest manifest.json \
+              --base-url "$REGISTRY_BASE_URL/$TAG" --latest-url "$REGISTRY_BASE_URL/$MAJOR" --out dist
+          else
+            python -m registry.publish --dataset-version "$TAG" --manifest manifest.json --out dist
+          fi
+
+      - name: Hosting is not configured
+        if: env.R2_BUCKET == ''
+        run: |
+          echo "::warning::vars.R2_BUCKET is not set: publishing to GitHub only. See CONTRIBUTING, 'Hosting' for the variables and secrets that switch the domain on."
+
+      # ---- hosted steps: everything below runs only once hosting is configured
+
+      - name: Immutability check
+        if: env.R2_BUCKET != ''
+        run: |
+          if aws s3api head-object --bucket "$R2_BUCKET" --key "$TAG/RELEASED" > /dev/null 2>&1; then
+            echo "::notice::$TAG is already released on the domain; skipping upload and verification, redoing the pointers"
+            echo "ALREADY_RELEASED=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          if aws s3 cp "s3://$R2_BUCKET/$TAG/registry.json.sha256" "$RUNNER_TEMP/remote.sha256" > /dev/null 2>&1; then
+            if ! cmp -s "$RUNNER_TEMP/remote.sha256" dist/registry.json.sha256; then
+              echo "::error::$TAG already exists on the domain with a different registry.json; bytes at a published path never change. Release a new version instead."
+              exit 1
+            fi
+            echo "::notice::resuming a partial upload of $TAG (same bytes)"
+          fi
+
+      - name: Upload the release root (immutable)
+        if: env.R2_BUCKET != '' && env.ALREADY_RELEASED != 'true'
+        run: |
+          # JSON objects get their content type from the extension; the
+          # checksum file is text.
+          aws s3 sync dist "s3://$R2_BUCKET/$TAG/" --no-progress \
+            --exclude "registry.json.sha256" \
+            --cache-control "public, max-age=31536000, immutable"
+          aws s3 cp dist/registry.json.sha256 "s3://$R2_BUCKET/$TAG/registry.json.sha256" \
+            --content-type "text/plain; charset=utf-8" \
+            --cache-control "public, max-age=31536000, immutable"
+          cat > "$RUNNER_TEMP/cors.json" <<'JSON'
+          {"CORSRules": [{"AllowedOrigins": ["*"], "AllowedMethods": ["GET", "HEAD"],
+                          "AllowedHeaders": ["*"], "ExposeHeaders": ["ETag"],
+                          "MaxAgeSeconds": 86400}]}
+          JSON
+          aws s3api put-bucket-cors --bucket "$R2_BUCKET" --cors-configuration "file://$RUNNER_TEMP/cors.json"
+
+      - name: Every referenced image is served
+        if: env.R2_BUCKET != '' && env.ALREADY_RELEASED != 'true'
+        run: python -m registry.hosted check-images --export dist/registry.json
+
+      - name: Verify what the CDN serves, then mark the root released
+        if: env.R2_BUCKET != '' && env.ALREADY_RELEASED != 'true'
+        run: |
+          python -m registry.hosted verify-root --base-url "$REGISTRY_BASE_URL" --tag "$TAG" --dist dist
+          {
+            echo "sha256 $(cut -d' ' -f1 dist/registry.json.sha256)"
+            echo "run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > "$RUNNER_TEMP/RELEASED"
+          aws s3 cp "$RUNNER_TEMP/RELEASED" "s3://$R2_BUCKET/$TAG/RELEASED" \
+            --content-type "text/plain; charset=utf-8" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: List the release in versions.json
+        if: env.R2_BUCKET != ''
+        run: |
+          aws s3 cp "s3://$R2_BUCKET/versions.json" "$RUNNER_TEMP/previous.json" > /dev/null 2>&1 \
+            || : > "$RUNNER_TEMP/previous.json"
+          python -m registry.versions --add "$TAG" --sha256 "$(cut -d' ' -f1 dist/registry.json.sha256)" \
+            --base-url "$REGISTRY_BASE_URL" --previous "$RUNNER_TEMP/previous.json" --out versions.json
+          cat versions.json
+          aws s3 cp versions.json "s3://$R2_BUCKET/versions.json" \
+            --content-type "application/json" --cache-control "public, max-age=60"
+
+      - name: Point the major alias at the release
+        if: env.R2_BUCKET != ''
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          python -m registry.hosted flip-alias --base-url "$REGISTRY_BASE_URL" --major "$MAJOR" \
+            --tag "$TAG" --versions versions.json --zone "$CF_ZONE_ID" --rule-id "$CF_REDIRECT_RULE_ID"
+
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$TAG" manifest.json \
             --title "$TAG" --notes-from-tag --verify-tag
+
+      - name: Rebuild the website
+        if: env.R2_BUCKET != ''
+        env:
+          PAGES_DEPLOY_HOOK: ${{ secrets.PAGES_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$PAGES_DEPLOY_HOOK" ]; then
+            echo "no PAGES_DEPLOY_HOOK secret: the website is not wired up yet"
+            exit 0
+          fi
+          curl -fsS -X POST "$PAGES_DEPLOY_HOOK" > /dev/null && echo "website rebuild requested"
