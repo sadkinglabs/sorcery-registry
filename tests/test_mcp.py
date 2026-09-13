@@ -282,41 +282,63 @@ class _Response:
         if self.status_code >= 400:
             raise RuntimeError(f"HTTP {self.status_code}")
 
+    def json(self):
+        return json.loads(self.content)
+
 
 class PublishedExportTest(unittest.TestCase):
-    """The loader must serve the newest *release*, cache the served bytes
-    verbatim (so the cache can be revalidated against the published
-    checksum), and degrade to a stale cache when offline."""
+    """The loader must serve the newest *verified release* - the domain's
+    versions.json names it - cache the served bytes verbatim (so the cache
+    revalidates against the published digest), fall back to the same
+    release on GitHub, and degrade to a stale cache when offline."""
 
-    TAG = "v3.0.0"
+    TAG = "v3.1.0"
     # Deliberately not what json.dumps would produce: the trailing newline
     # and the spacing are what the real export has, and what a
     # re-serialising cache would lose.
-    SERVED = b'{"header": {"schema_version": 8}, "cards": [],\n "printings": [], "slug_history": []}\n'
+    SERVED = b'{"header": {"schema_version": 9}, "cards": [],\n "printings": [], "slug_history": []}\n'
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.cache = Path(self.tmp.name) / "cache" / "registry.json"
         self.calls = []
         self.online = True
+        self.domain_up = True          # versions.json answers
+        self.domain_serves = True      # the release root answers
+        self.domain_bytes = None       # what the release root serves (default: SERVED)
+        self.github_tag = self.TAG     # what releases/latest points at
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def _digest(self):
+        return hashlib.sha256(self.SERVED).hexdigest()
 
     def _fake_get(self, url, **kwargs):
         self.calls.append(url)
         if not self.online:
             raise ConnectionError("offline")
+        root = f"{mcp_server.REGISTRY_BASE}/{self.TAG}"
+        if url == mcp_server.VERSIONS_URL:
+            if not self.domain_up:
+                return _Response(503)
+            doc = {"base_url": mcp_server.REGISTRY_BASE, "latest": {"v3": self.TAG},
+                   "releases": [{"tag": self.TAG, "schema_version": 9,
+                                 "released_at": "2026-09-14", "sha256": self._digest()}]}
+            return _Response(200, json.dumps(doc).encode())
+        if url == f"{root}/registry.json":
+            if not self.domain_serves:
+                return _Response(500)
+            return _Response(200, self.domain_bytes or self.SERVED)
         if url == mcp_server.LATEST_RELEASE_URL:
             self.assertFalse(kwargs.get("allow_redirects", True))
             return _Response(302, headers={
-                "Location": f"https://github.com/{mcp_server.REPO}/releases/tag/{self.TAG}"})
+                "Location": f"https://github.com/{mcp_server.REPO}/releases/tag/{self.github_tag}"})
         export = mcp_server.export_url(self.TAG)
         if url == export:
             return _Response(200, self.SERVED)
         if url == export + ".sha256":
-            digest = hashlib.sha256(self.SERVED).hexdigest()
-            return _Response(200, f"{digest}  registry.json\n".encode())
+            return _Response(200, f"{self._digest()}  registry.json\n".encode())
         return _Response(404)
 
     def _load(self):
@@ -327,15 +349,17 @@ class PublishedExportTest(unittest.TestCase):
         old = time.time() - mcp_server.CACHE_TTL_SECONDS - 60
         os.utime(self.cache, (old, old))
 
-    def test_first_run_fetches_the_latest_release_and_caches_bytes_verbatim(self):
+    @property
+    def domain_url(self):
+        return f"{mcp_server.REGISTRY_BASE}/{self.TAG}/registry.json"
+
+    def test_first_run_reads_the_domains_verified_release_and_caches_bytes_verbatim(self):
         data = self._load()
         self.assertEqual(data, self.SERVED)
         self.assertEqual(self.cache.read_bytes(), self.SERVED)
-        self.assertEqual(self.calls, [mcp_server.LATEST_RELEASE_URL,
-                                      mcp_server.export_url(self.TAG)])
-        self.assertIn(f"/{self.TAG}/export/registry.json", self.calls[1])
-        self.assertNotIn("/main/", self.calls[1])
-        self.assertEqual(json.loads(data)["header"]["schema_version"], 8)
+        self.assertEqual(self.calls, [mcp_server.VERSIONS_URL, self.domain_url])
+        self.assertIn(f"/{self.TAG}/", self.calls[1])   # an immutable root, never an alias
+        self.assertEqual(json.loads(data)["header"]["schema_version"], 9)
 
     def test_fresh_cache_is_served_without_any_request(self):
         self._load()
@@ -343,27 +367,49 @@ class PublishedExportTest(unittest.TestCase):
         self.assertEqual(self._load(), self.SERVED)
         self.assertEqual(self.calls, [])
 
-    def test_expired_cache_matching_the_checksum_is_revalidated_not_redownloaded(self):
+    def test_expired_cache_matching_the_published_digest_is_revalidated_with_one_request(self):
         self._load()
         self._age_cache()
         self.calls.clear()
         self.assertEqual(self._load(), self.SERVED)
-        self.assertEqual(self.calls, [mcp_server.LATEST_RELEASE_URL,
-                                      mcp_server.export_url(self.TAG) + ".sha256"])
+        self.assertEqual(self.calls, [mcp_server.VERSIONS_URL])
         # Revalidation refreshes the TTL so the next run is request-free.
         self.assertLess(time.time() - self.cache.stat().st_mtime, 60)
 
-    def test_expired_cache_with_a_different_checksum_is_refetched(self):
+    def test_a_new_release_is_downloaded_from_its_own_root(self):
         self._load()
         self._age_cache()
-        self.TAG = "v3.1.0"
-        self.SERVED = b'{"header": {"schema_version": 9}, "cards": []}\n'
+        self.TAG = "v3.2.0"
+        self.SERVED = b'{"header": {"schema_version": 9}, "cards": [1]}\n'
         self.calls.clear()
         self.assertEqual(self._load(), self.SERVED)
-        self.assertEqual(self.calls, [mcp_server.LATEST_RELEASE_URL,
-                                      mcp_server.export_url("v3.1.0") + ".sha256",
-                                      mcp_server.export_url("v3.1.0")])
+        self.assertEqual(self.calls, [mcp_server.VERSIONS_URL,
+                                      f"{mcp_server.REGISTRY_BASE}/v3.2.0/registry.json"])
         self.assertEqual(self.cache.read_bytes(), self.SERVED)
+
+    def test_domain_root_failure_falls_back_to_the_same_release_on_github(self):
+        self.domain_serves = False
+        self.github_tag = "v9.9.9"  # must not matter: the tag comes from versions.json
+        self.assertEqual(self._load(), self.SERVED)
+        self.assertEqual(self.calls, [mcp_server.VERSIONS_URL, self.domain_url,
+                                      mcp_server.export_url(self.TAG) + ".sha256",
+                                      mcp_server.export_url(self.TAG)])
+        self.assertNotIn(mcp_server.LATEST_RELEASE_URL, self.calls)
+        for url in self.calls:
+            self.assertNotIn("/main/", url)
+
+    def test_without_versions_json_the_newest_github_release_is_used(self):
+        self.domain_up = False
+        self.assertEqual(self._load(), self.SERVED)
+        self.assertEqual(self.calls, [mcp_server.VERSIONS_URL, mcp_server.LATEST_RELEASE_URL,
+                                      mcp_server.export_url(self.TAG) + ".sha256",
+                                      mcp_server.export_url(self.TAG)])
+
+    def test_bytes_that_do_not_match_the_digest_are_never_cached(self):
+        self.domain_bytes = self.SERVED[:-10]  # a truncated transfer
+        self.assertEqual(self._load(), self.SERVED)
+        self.assertEqual(self.cache.read_bytes(), self.SERVED)
+        self.assertIn(mcp_server.export_url(self.TAG), self.calls)  # came from GitHub
 
     def test_offline_serves_the_stale_cache(self):
         self._load()
@@ -373,16 +419,23 @@ class PublishedExportTest(unittest.TestCase):
 
     def test_offline_without_a_cache_raises(self):
         self.online = False
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(RuntimeError):
             self._load()
 
-    def test_no_release_is_an_error_not_a_fallback_to_main(self):
+    def test_no_release_anywhere_is_an_error_not_a_fallback_to_main(self):
+        self.domain_up = False
+
         def no_release(url, **kwargs):
-            return _Response(302, headers={
-                "Location": f"https://github.com/{mcp_server.REPO}/releases"})
+            self.calls.append(url)
+            if url == mcp_server.LATEST_RELEASE_URL:
+                return _Response(302, headers={
+                    "Location": f"https://github.com/{mcp_server.REPO}/releases"})
+            return _Response(503)
         with mock.patch.object(mcp_server, "_get", no_release):
             with self.assertRaises(RuntimeError):
                 mcp_server.load_published(self.cache)
+        for url in self.calls:
+            self.assertNotIn("/main/", url)
 
 
 if __name__ == "__main__":
