@@ -108,6 +108,10 @@ class ObjectsTest(unittest.TestCase):
         self.assertEqual(self.objects["history/cards.json"], self.export["card_history"])
         self.assertEqual(self.objects["index/cards.json"][0]["default_printing_id"], "P000001")
         self.assertEqual(root["endpoints"], ENDPOINTS)
+        # Without an upload target the discovery fields exist and are null.
+        self.assertIsNone(root["base_url"])
+        self.assertIsNone(root["latest_url"])
+        self.assertIsNone(root["manifest"])
         for pattern in ENDPOINTS.values():
             # Every pattern is either a concrete object or a template whose
             # concrete instances exist.
@@ -115,6 +119,25 @@ class ObjectsTest(unittest.TestCase):
             self.assertTrue(pattern in self.objects or pattern in ("registry.json",
                             "registry.json.sha256", "schema.json") or "{" in pattern,
                             concrete)
+
+    def test_objects_say_where_they_and_the_current_data_live(self):
+        objects = build_objects(self.export, "v3.1.0",
+                                base_url="https://api.kairosarchive.net/v3.1.0",
+                                latest_url="https://api.kairosarchive.net/v3",
+                                manifest=True)
+        root = objects["index.json"]
+        self.assertEqual(root["base_url"], "https://api.kairosarchive.net/v3.1.0")
+        self.assertEqual(root["latest_url"], "https://api.kairosarchive.net/v3")
+        self.assertEqual(root["manifest"], "manifest.json")
+        # Records carry the addresses the export gave them: the moving
+        # alias, so a copy from any release root leads to the current record.
+        card = objects["cards/C000001.json"]
+        self.assertEqual(card["api_url"], "https://api.kairosarchive.net/v3/cards/C000001.json")
+        self.assertEqual(card["kairos_url"], "https://kairosarchive.net/cards/C000001")
+        old_slug = objects["slugs/001-apprentice_wizard-b-f.json"]
+        self.assertEqual(old_slug["api_url"],
+                         "https://api.kairosarchive.net/v3/printings/P000002.json")
+        self.assertEqual(old_slug["kairos_url"], "https://kairosarchive.net/printings/P000002")
 
     def test_corrupt_slug_ownership_is_refused(self):
         export = copy.deepcopy(self.export)
@@ -145,6 +168,25 @@ class DistTest(unittest.TestCase):
             stated = (out / "registry.json.sha256").read_text().split()[0]
             self.assertEqual(stated, hashlib.sha256((out / "registry.json").read_bytes()).hexdigest())
             self.assertEqual(json.loads((out / "index.json").read_text())["dataset_version"], "v9.9.9")
+
+    def test_manifest_is_copied_into_the_root_when_given(self):
+        con = registry_after_rename()
+        schema = Path(__file__).resolve().parent.parent / "schema" / "registry.schema.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            export_path = Path(tmp) / "registry.json"
+            write_export(con, export_path)
+            manifest = Path(tmp) / "manifest.json"
+            manifest.write_text('{"dataset_version": "v3.1.0"}\n')
+            out = Path(tmp) / "dist"
+            count = write_dist(export_path, schema, out, "v3.1.0",
+                               "https://api.kairosarchive.net/v3.1.0",
+                               "https://api.kairosarchive.net/v3", manifest)
+            files = [p for p in out.rglob("*") if p.is_file()]
+            self.assertEqual(len(files), count)
+            self.assertEqual((out / "manifest.json").read_bytes(), manifest.read_bytes())
+            root = json.loads((out / "index.json").read_text())
+            self.assertEqual(root["manifest"], "manifest.json")
+            self.assertEqual(root["base_url"], "https://api.kairosarchive.net/v3.1.0")
 
     def test_refuses_to_wipe_a_directory_that_is_not_a_dist(self):
         con = registry_after_rename()

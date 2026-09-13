@@ -8,7 +8,11 @@ All paths below are relative to a version root. The plan is two roots per major 
 
 ## Discovery
 
-`index.json` - what exists: `schema_version`, `dataset_version`, record counts, and the `endpoints` map below with `{placeholder}` templates. Fetch this first.
+`index.json` - what exists: `schema_version`, `dataset_version`, record counts, the `endpoints` map below with `{placeholder}` templates, and where things live: `base_url` (the absolute root these objects were uploaded to, an immutable release root) and `latest_url` (the moving major alias that always redirects to the newest release); both null in a local `dist/`. `manifest` names `manifest.json` when the release manifest was copied into the root. Fetch this first.
+
+## Records carry their own addresses
+
+Every card, printing and set record - in the export, in the per-object files, in the indexes - carries `api_url` and `kairos_url`, and cards and printings carry `image_urls` and `image_status`; slug objects carry the resolved printing's `api_url` and `kairos_url`. `api_url` is the **current-record URL**: it points at the moving major alias, so a consumer reading a historical release root and following `api_url` leaves that snapshot by design and lands on the current record; a consumer that wants the snapshot uses the paths of the root it fetched. The addresses are derived from the ids at export time and CI proves each one names the record it sits on.
 
 ## The export itself
 
@@ -22,7 +26,7 @@ All paths below are relative to a version root. The plan is two roots per major 
 |---|---|---|
 | `cards/{codex_id}.json` | one card | the card record from the export (including `default_printing_id`), plus `printings` (a summary of each: `printing_id`, `slug`, `set_code`, `set_name`, `released_at`, `product`, `finish`, `printed_as_current`, `retired_at`), `name_history` and `card_history` (that card's rows) |
 | `printings/{printing_id}.json` | one physical print | the printing record, plus `slug_history` (that printing's rows) |
-| `slugs/{slug}.json` | "what is this slug?" for **any slug that has ever existed** | `slug`, `printing_id`, `codex_id`, `card_name`, `current_slug`, `is_current`, `valid_from`, `valid_to`, `set_code`, `set_name`, `product`, `finish`, `retired_at` |
+| `slugs/{slug}.json` | "what is this slug?" for **any slug that has ever existed** | `slug`, `printing_id`, `codex_id`, `card_name`, `current_slug`, `is_current`, `valid_from`, `valid_to`, `set_code`, `set_name`, `product`, `finish`, `retired_at`, `api_url`, `kairos_url` (the printing's) |
 | `sets.json` | the set catalogue | the export's `sets` section |
 | `sets/{set_code}.json` | one set and everything in it | the set entry, plus `cards`: `{codex_id, name, printing_ids}` for every card in the set, ordered by name (the official data has no collector numbers), with only that set's printings |
 

@@ -55,7 +55,7 @@ If you need local play pieces, mint IDs in your own namespace and **do not use t
 ## What this is not
 
 - Not a hosted service. There is no server and no endpoint; you consume a file (or run the bundled MCP server locally - see below).
-- No images, no prices, no rulings, no legality data.
+- No prices, no rulings, no legality data. Images are on their way: every record already carries `image_urls` (null until the image pipeline lands) so the shape is settled.
 - Not a second opinion on card data. Attributes mirror the official API, with a short, public list of corrections for confirmed upstream errors (see [`data/overrides.json`](data/overrides.json)).
 
 ## Using the data
@@ -64,9 +64,11 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 
 ```jsonc
 {
-  "header":        { "schema_version": 7, "source": "...", "sets": 6, "cards": 1100, ... },
+  "header":        { "schema_version": 9, "source": "...", "sets": 6, "cards": 1100, ... },
   "sets":          [ { "set_code": "001", "set_name": "Alpha", "released_at": "2023-06-22",
-                       "cards": 407, "printings": 817 }, ... ],
+                       "cards": 407, "printings": 817,
+                       "api_url": "https://api.kairosarchive.net/v3/sets/001.json",
+                       "kairos_url": "https://kairosarchive.net/sets/001" }, ... ],
   "cards":         [ { "codex_id": "C000001", "name": "Apprentice Wizard",
                        "type": "Minion", "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
                        "subtypes": ["Mortal"], "elements": ["Air"], "keywords": ["Genesis", "Spellcaster"],
@@ -75,13 +77,19 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
                        "rules_text": "Spellcaster\nGenesis → Draw a spell.", "back": null, "errata": false,
                        "set_codes": ["001", "002", "999"],
                        "printing_ids": ["P000001", "P000002", "P000003", "P000004", "P000005", "P000006"],
-                       "default_printing_id": "P000002" } ],
+                       "default_printing_id": "P000002",
+                       "api_url": "https://api.kairosarchive.net/v3/cards/C000001.json",
+                       "kairos_url": "https://kairosarchive.net/cards/C000001",
+                       "image_urls": null, "image_status": "missing" } ],
   "printings":     [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
                        "set_name": "Alpha", "set_code": "001", "released_at": "2023-06-22",
                        "product": "Booster", "finish": "Standard", "slug": "001-apprentice_wizard-b-s",
                        "artist": "Ossi Hiekkala", "artist_slug": "ossi_hiekkala", "flavour_text": "",
                        "typeline": "An Ordinary Mortal new to power", "back": null,
-                       "printed_as_current": true, ... } ],
+                       "printed_as_current": true, "retired_at": null,
+                       "api_url": "https://api.kairosarchive.net/v3/printings/P000001.json",
+                       "kairos_url": "https://kairosarchive.net/printings/P000001",
+                       "image_urls": null, "image_status": "missing" } ],
   "slug_history":  [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ],
   "name_history":  [ { "name": "...", "codex_id": "C000001", "valid_from": "2026-08-19", "valid_to": null } ],
   "card_history":  [ { "codex_id": "C000001", "valid_from": "2026-09-09", "valid_to": null,
@@ -102,6 +110,7 @@ Practical notes:
 - **The `sets` section is the set catalogue.** One record per set with its official code, name, release date, and distinct-card and printing counts - the authoritative answer to "how many cards are in set X", which the official data states nowhere. A set's `released_at` is the earliest date any of its printings reached the public; each printing carries its own. Each card also lists its `set_codes`; for products and finishes, follow its `printing_ids`.
 - **`card_history` and `errata` are the registry's own record of updated cards.** Upstream publishes only the current values and marks nothing (the old API prefixed updated text with `UPDATED:`; the rebuilt one does not). So the registry records what it observes: `card_history` holds every state a card's gameplay face has been in - type, elements, cost, attack, defense, life, thresholds, rules text, keywords, back face - one row per state with `valid_from`/`valid_to`. A reprint that changes a card's cost or power is recorded exactly like a rewording: the old face closes, the new face opens. Every card has exactly one open row, which equals the card record. `errata` is `true` once any *gameplay* field has changed since the card was printed (a re-tag of keywords, subtypes, rarity or slot is history but not errata) - seeded from the old marker, set by observed changes, corrected only through [`data/overrides.json`](data/overrides.json).
 - **Which printings show the current values?** Each printing carries `printed_as_current`: `true` when it was released on or after the current face took effect - or entered the registry with it, as a reprint carrying a change does - and `false` for a printing that physically shows older values (`true` for everything while a card's face has never changed). Each card carries `default_printing_id`, a representative printing chosen by a fixed rule - not retired, showing the card's current face over older values, Booster over other products, Standard over other finishes, most recent release, lowest id - so every consumer picks the same one; a reprint that changed a card's stats becomes its default even if it is a promo, and otherwise a promo never outranks a Booster printing. Want a different policy? The full `printings` list is there; ignore the field. Think the rule picked wrong for one card? Pin another of its printings through [`data/overrides.json`](data/overrides.json) with a reason, and the pin wins.
+- **Every record says where it lives.** Cards, printings and sets carry `api_url` (the record's own JSON object on `api.kairosarchive.net`) and `kairos_url` (its page on `kairosarchive.net`), derived from the id at export time so they can never name a different record - CI checks that too. `api_url` points at the moving major alias (`/v3/`), which always redirects to the newest verified v3.x release: follow it from any copy, however old, and you reach the current record. A consumer that wants the snapshot it fetched uses that release root's paths instead. Printings (and cards, through their default printing) also carry `image_urls` - the four renditions `small`, `normal`, `large`, `original` - and `image_status`, `missing` until the registry holds the image and `ok` once every rendition is served. The committed `registry.json` therefore contains `kairosarchive.net` addresses, and the GitHub mirror points at the domain by design.
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.

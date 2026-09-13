@@ -14,8 +14,10 @@ Checks, in order:
  5. Every card has exactly one open name_history row and exactly one open
     card_history row, and each agrees with the card's columns.
  6. Regenerating the export from the database is byte-identical to the
-    committed export file (nobody edited one without the other), and each
-    card's derived printing_ids list agrees with the printings table.
+    committed export file (nobody edited one without the other), each
+    card's derived printing_ids list agrees with the printings table, and
+    every record's api_url / kairos_url names that record's own id (and
+    image_urls is present exactly when image_status says so).
  7. With --against REF: every codex_id and printing_id present in that
     commit's export still exists, printings still point at the same
     card, no card's printing_ids list shrank, the counters have not
@@ -188,6 +190,45 @@ def check_export_matches(con, export_path, errors):
                           f"disagrees with the printings table {sorted(actual)}")
         if card["printing_ids"] != sorted(card["printing_ids"]):
             errors.append(f"card {card['codex_id']}: printing_ids is not sorted")
+    check_addresses(export, errors)
+
+
+def check_addresses(export, errors):
+    """Every record's addresses point at that record and nothing else, and
+    the image fields agree with each other. Pure, so it can run on any
+    export - the committed one, a tampered one in a test."""
+    def check(kind, record, key, own_id):
+        for field in ("api_url", "kairos_url"):
+            url = record.get(field)
+            if own_id is None:
+                if url is not None:
+                    errors.append(f"{kind} without a {key} carries {field} {url!r}")
+                continue
+            if not isinstance(url, str) or f"/{own_id}" not in url:
+                errors.append(f"{kind} {own_id}: {field} {url!r} does not name it")
+            elif not url.endswith(own_id) and not url.endswith(f"{own_id}.json"):
+                errors.append(f"{kind} {own_id}: {field} {url!r} does not end at it")
+
+    def check_image(kind, own_id, record):
+        has_urls = record.get("image_urls") is not None
+        status = record.get("image_status")
+        if has_urls != (status == "ok"):
+            errors.append(f"{kind} {own_id}: image_status {status!r} disagrees with "
+                          f"image_urls being {'present' if has_urls else 'null'}")
+        if has_urls and not all(own_id in url for url in record["image_urls"].values()):
+            errors.append(f"{kind} {own_id}: image_urls do not name it")
+
+    for card in export["cards"]:
+        check("card", card, "codex_id", card["codex_id"])
+        if card.get("default_printing_id") is not None:
+            check_image("card", card["default_printing_id"], card)
+        elif card.get("image_urls") is not None:
+            errors.append(f"card {card['codex_id']}: image_urls without a default printing")
+    for printing in export["printings"]:
+        check("printing", printing, "printing_id", printing["printing_id"])
+        check_image("printing", printing["printing_id"], printing)
+    for set_entry in export["sets"]:
+        check("set", set_entry, "set_code", set_entry["set_code"])
 
 
 def check_against_ref(con, ref, export_path, errors):
