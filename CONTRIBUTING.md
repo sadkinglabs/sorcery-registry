@@ -60,9 +60,27 @@ When a new set drops, this is the whole flow. Existing IDs never change; a set r
    git push origin vX.Y.0
    ```
 
-   The `release` workflow does the rest: it re-runs the tests and invariants on the tagged commit, builds the manifest (`python -m registry.manifest --dataset-version vX.Y.0 --out manifest.json`, should you want it locally), and publishes the GitHub release with the tag message as its notes and the manifest attached. Where pushing tags is not possible (some tooling can push branches but not tags), run the same workflow by hand from the Actions tab with the version and the notes as inputs: it creates the annotated tag on `main` itself and continues identically.
+   The `release` workflow does the rest: it re-runs the tests and invariants on the tagged commit, builds the manifest (`python -m registry.manifest --dataset-version vX.Y.0 --out manifest.json`, should you want it locally) and the published objects (`python -m registry.publish`), uploads the release to its own immutable root on `api.kairosarchive.net`, verifies byte for byte what the CDN serves, marks the root `RELEASED`, lists it in `versions.json`, points the `/vX/` alias at it, and only then publishes the GitHub release with the tag message as its notes and the manifest attached (see "Hosting" below for what each step guarantees). Where pushing tags is not possible (some tooling can push branches but not tags), run the same workflow by hand from the Actions tab with the version and the notes as inputs: it creates the annotated tag on `main` itself and continues identically.
 
 8. Never run the first sync of a new set through the GitHub Action - it applies with `--yes`. The Action is for routine re-syncs once the drop has been reviewed by a human once.
+
+## Hosting
+
+The domain is Cloudflare only: an R2 bucket (`sorcery-registry`) with the custom domain `api.kairosarchive.net`, a cache rule (eligible for cache, edge TTL "respect origin" - Cloudflare does not cache JSON by default), a Single Redirect rule for the major alias (`/v3/*` → `/v3.1.0/*`, whose target the workflow rewrites on every release), a generous per-IP rate rule as a tripwire, and no Bot Fight Mode (it challenges API clients). The `aws` CLI in the workflow is only the standard S3-compatible client for R2; there is no AWS account or service anywhere.
+
+The workflow switches the hosted steps on when these repository **variables** exist: `R2_BUCKET` (`sorcery-registry`), `REGISTRY_BASE_URL` (`https://api.kairosarchive.net`), `CF_ZONE_ID`, `CF_REDIRECT_RULE_ID` (the alias rule's id). It needs these **secrets**: `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID` (an R2 API token with Object Read & Write on the bucket), `CF_API_TOKEN` (a Cloudflare API token scoped to the zone with *Single Redirect: Edit*), and optionally `PAGES_DEPLOY_HOOK` (the website's deploy hook, rebuilt after every release). Without `R2_BUCKET` the workflow warns and releases to GitHub only.
+
+What the hosted steps guarantee, in order (`.github/workflows/release.yml`, helpers in `registry/hosted.py`):
+
+1. **Immutability.** A root already marked `RELEASED` is not re-uploaded (a re-run after a GitHub-side failure only redoes the pointers and the release). A root that already carries a *different* `registry.json.sha256` fails the run: bytes at a published path never change - release a new version instead.
+2. **Upload** of `dist/` to `/<tag>/` with a one-year immutable cache header, plus the bucket's CORS (`GET`/`HEAD` from any origin).
+3. **Every `image_urls` value in the export answers `HEAD 200`** through the CDN, so no published record ever references an image that is not served.
+4. **Verification by bytes**: the served `registry.json` hashes to the committed digest, `index.json` names the tag and the root, a card object and a slug object answer as JSON. Only then is `RELEASED` written (the digest and the run URL).
+5. **`versions.json`** is rebuilt from the one currently served plus this release (`python -m registry.versions`; newest first, `latest` per major only moves forward, a changed digest for a listed tag is refused) and uploaded with a 60-second cache.
+6. **The alias flips** - the redirect rule's target becomes `/<tag>/` - only if `versions.json` now names this tag as the newest of its major, and the workflow confirms the alias redirects there before continuing. One operation, so no client ever sees a mixed dataset.
+7. The GitHub release, then the website rebuild.
+
+A failed run leaves at most a partial root without `RELEASED` - never listed, never aliased, harmless - and re-running the same tag resumes it (same bytes) or refuses it (different bytes). Two releases cannot interleave: the workflow runs in a concurrency group.
 
 ## When a sync is ambiguous
 

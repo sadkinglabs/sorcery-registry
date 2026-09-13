@@ -13,6 +13,15 @@ Purely additive; nothing was renamed, removed or retyped, and **no identifier ch
 
 A consumer that validates against the schema needs the v3.1 schema (the fields are required); one that reads fields by name needs nothing. Published objects: `index.json` gained `base_url`, `latest_url` and `manifest`; slug objects gained the resolved printing's `api_url` and `kairos_url`.
 
+v3.1.0 is also the first release served from the domain. Where to pin, from that release on:
+
+| | GitHub (every release) | Domain (v3.1.0 onward) |
+|---|---|---|
+| the export, pinned | `https://raw.githubusercontent.com/sadkinglabs/sorcery-registry/v3.1.0/export/registry.json` | `https://api.kairosarchive.net/v3.1.0/registry.json` |
+| its checksum | `…/v3.1.0/export/registry.json.sha256` | `https://api.kairosarchive.net/v3.1.0/registry.json.sha256` |
+| the schema | `…/v3.1.0/schema/registry.schema.json` | `https://api.kairosarchive.net/v3.1.0/schema.json` |
+| newest of the major | `github.com/sadkinglabs/sorcery-registry/releases/latest` (redirect) | `https://api.kairosarchive.net/versions.json` → `latest.v3`, or the `/v3/` alias |
+
 ## v2.0 → v3.0 (schema 7 → 8)
 
 Prompted by upstream announcing reprints that change existing cards' cost and power. v2.0 recorded only rules-text changes; v3.0 records the whole gameplay face. **No identifier changed.**
