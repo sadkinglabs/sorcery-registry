@@ -48,3 +48,5 @@ API_URL = "https://api.sorcerytcg.com/api/cards"
 API_BASE = "https://api.kairosarchive.net/v3"
 SITE_BASE = "https://kairosarchive.net"
 IMAGE_BASE = "https://api.kairosarchive.net/images"
+# The usage terms (docs/usage.md), advertised by index.json as "terms".
+TERMS_URL = "https://github.com/sadkinglabs/sorcery-registry/blob/main/docs/usage.md"

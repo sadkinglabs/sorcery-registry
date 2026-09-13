@@ -19,7 +19,8 @@ same export produces byte-identical files.
 Layout (every path relative to the version root the uploader chooses):
 
     index.json                  discovery: versions, counts, endpoint patterns,
-                                and where this root and the moving alias live
+                                where this root and the moving alias live,
+                                and the usage terms
     manifest.json               the release manifest, when --manifest is given
     registry.json               the full export, byte for byte, + .sha256
     schema.json                 the export's JSON Schema
@@ -40,6 +41,7 @@ import re
 import shutil
 from pathlib import Path
 
+from . import TERMS_URL
 from .export import EXPORT_PATH, SCHEMA_PATH, checksum_path
 
 DIST_PATH = Path("dist")
@@ -196,6 +198,7 @@ def build_objects(export, dataset_version=None, base_url=None, latest_url=None,
         "latest_url": latest_url,
         "manifest": "manifest.json" if manifest else None,
         "source": header["source"],
+        "terms": TERMS_URL,
         "counts": {k: header[k] for k in ("sets", "cards", "printings", "slug_history",
                                           "name_history", "card_history")},
         "endpoints": dict(ENDPOINTS),
