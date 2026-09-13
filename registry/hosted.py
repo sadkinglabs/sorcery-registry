@@ -3,7 +3,7 @@
     python -m registry.hosted check-images --export dist/registry.json
     python -m registry.hosted verify-root --base-url URL --tag vX.Y.Z --dist dist
     python -m registry.hosted flip-alias --base-url URL --major v3 --tag vX.Y.Z \
-        --versions versions.json --zone ZONE_ID --rule-id RULE_ID
+        --versions versions.json --zone ZONE_ID [--rule-id RULE_ID]
 
 Everything here runs after `dist/` has been uploaded to the release root
 and before the GitHub release is created, in this order:
@@ -20,7 +20,9 @@ and before the GitHub release is created, in this order:
                  the zone's Single Redirect rule, but only when
                  versions.json says the release is the newest of its major
                  - never backwards - and then confirm the alias redirects
-                 there. The Cloudflare API token is read from CF_API_TOKEN.
+                 there. The rule is found by its id when one is given,
+                 otherwise by its name in the dashboard ("v3 alias"). The
+                 Cloudflare API token is read from CF_API_TOKEN.
 
 The pure parts (which URLs to check, the rule body, whether to flip) are
 functions with tests; the network parts use only the standard library.
@@ -59,6 +61,21 @@ def image_urls_in(export):
 def should_flip(versions_doc, major, tag):
     """The alias moves only to the newest listed release of its major."""
     return versions_doc.get("latest", {}).get(major) == tag
+
+
+def alias_rule_name(major):
+    """The description the owner gives the alias rule in the dashboard, so
+    the workflow can find it without its internal id: 'v3 alias'."""
+    return f"{major} alias"
+
+
+def find_rule(rules, major, rule_id=None):
+    """The alias rule among a ruleset's rules: by id when one is given,
+    otherwise by its description (case and surrounding space ignored)."""
+    if rule_id:
+        return next((r for r in rules if r.get("id") == rule_id), None)
+    wanted = alias_rule_name(major).lower()
+    return next((r for r in rules if (r.get("description") or "").strip().lower() == wanted), None)
 
 
 def redirect_rule(base_url, major, tag, description=None):
@@ -190,13 +207,14 @@ def flip_alias(base_url, major, tag, versions_path, zone, rule_id, attempts=20):
         return 1
     entrypoint = _cf("GET", f"/zones/{zone}/rulesets/phases/http_request_dynamic_redirect/entrypoint",
                      token)
-    current = next((r for r in entrypoint.get("rules", []) if r["id"] == rule_id), None)
+    current = find_rule(entrypoint.get("rules", []), major, rule_id)
     if current is None:
-        print(f"::error::rule {rule_id} is not in the zone's dynamic redirect ruleset "
-              f"{entrypoint['id']}")
+        what = f"rule {rule_id}" if rule_id else f"a rule named {alias_rule_name(major)!r}"
+        print(f"::error::{what} is not in the zone's redirect ruleset {entrypoint['id']}; "
+              f"found: {[r.get('description') for r in entrypoint.get('rules', [])]}")
         return 1
     rule = redirect_rule(base_url, major, tag, current.get("description"))
-    _cf("PATCH", f"/zones/{zone}/rulesets/{entrypoint['id']}/rules/{rule_id}", token, rule)
+    _cf("PATCH", f"/zones/{zone}/rulesets/{entrypoint['id']}/rules/{current['id']}", token, rule)
 
     probe = f"{base_url.rstrip('/')}/{major}/index.json"
     want = f"{base_url.rstrip('/')}/{tag}/index.json"
@@ -226,7 +244,7 @@ def main(argv=None):
     p.add_argument("--tag", required=True)
     p.add_argument("--versions", required=True)
     p.add_argument("--zone", required=True)
-    p.add_argument("--rule-id", required=True)
+    p.add_argument("--rule-id", default=None, help="optional: otherwise the rule named '<major> alias'")
     args = parser.parse_args(argv)
     if args.command == "check-images":
         return check_images(args.export)

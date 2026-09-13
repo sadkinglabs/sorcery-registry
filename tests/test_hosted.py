@@ -2,7 +2,7 @@
 
 import unittest
 
-from registry.hosted import image_urls_in, redirect_rule, should_flip
+from registry.hosted import find_rule, image_urls_in, redirect_rule, should_flip
 
 
 class HostedTest(unittest.TestCase):
@@ -23,6 +23,17 @@ class HostedTest(unittest.TestCase):
         self.assertFalse(should_flip(doc, "v3", "v3.1.0"))   # an older re-run
         self.assertFalse(should_flip(doc, "v4", "v4.0.0"))   # not listed at all
         self.assertFalse(should_flip({}, "v3", "v3.2.0"))
+
+    def test_alias_rule_is_found_by_id_or_by_its_dashboard_name(self):
+        rules = [{"id": "aaa", "description": "www redirect"},
+                 {"id": "bbb", "description": " V3 Alias "},
+                 {"id": "ccc", "description": "v4 alias"}]
+        self.assertEqual(find_rule(rules, "v3")["id"], "bbb")
+        self.assertEqual(find_rule(rules, "v4")["id"], "ccc")
+        self.assertEqual(find_rule(rules, "v3", "aaa")["id"], "aaa")
+        self.assertIsNone(find_rule(rules, "v5"))
+        self.assertIsNone(find_rule(rules, "v3", "zzz"))
+        self.assertEqual(find_rule(rules, "v3", "")["id"], "bbb")  # an empty variable
 
     def test_redirect_rule_keeps_the_path_after_the_major(self):
         rule = redirect_rule("https://api.kairosarchive.net/", "v3", "v3.1.0")
