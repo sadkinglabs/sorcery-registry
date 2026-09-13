@@ -211,9 +211,13 @@ class EndToEndTest(unittest.TestCase):
         self.assertEqual(export_one["header"]["sets"], 2)
         self.assertEqual(export_one["sets"], [
             {"set_code": "001", "set_name": "Alpha",
-             "released_at": "2023-06-22", "cards": 1, "printings": 2},
+             "released_at": "2023-06-22", "cards": 1, "printings": 2,
+             "api_url": "https://api.kairosarchive.net/v3/sets/001.json",
+             "kairos_url": "https://kairosarchive.net/sets/001"},
             {"set_code": "010", "set_name": "Gothic",
-             "released_at": "2026-05-01", "cards": 1, "printings": 1},
+             "released_at": "2026-05-01", "cards": 1, "printings": 1,
+             "api_url": "https://api.kairosarchive.net/v3/sets/010.json",
+             "kairos_url": "https://kairosarchive.net/sets/010"},
         ])
 
         # Every card starts with one open name_history row carrying its name
@@ -589,86 +593,30 @@ class BackFaceRoundTripTest(unittest.TestCase):
         wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
         front_keys = [k for k in wizard if k not in ("codex_id", "name", "back", "errata",
                                                      "set_codes", "printing_ids",
-                                                     "default_printing_id")]
+                                                     "default_printing_id", "api_url",
+                                                     "kairos_url", "image_urls",
+                                                     "image_status")]
         self.assertEqual(list(wizard["back"]), front_keys)
         self.assertEqual(wizard["back"]["life"], 20)
         printing = next(p for p in export["printings"]
                         if p["slug"] == "001-apprentice_wizard-b-s")
         self.assertEqual(list(printing["back"]),
-                         ["artist", "artist_slug", "flavour_text", "typeline"])
+                         ["artist", "artist_slug", "flavour_text", "typeline", "image_urls"])
         self.assertEqual(printing["back"]["artist_slug"], "bryon_wackwitz")
 
 
 class MigrationTest(unittest.TestCase):
-    """The v7 -> v8 rebuild keeps every id and history row and widens each
-    rules_history row into a full-face card_history row."""
-
-    V7_DDL = """
-    CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-    CREATE TABLE cards (card_id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE,
-        type TEXT, category TEXT, rarity TEXT, slot TEXT, subtypes TEXT, elements TEXT,
-        keywords TEXT, umbrellas TEXT, cost INTEGER, attack INTEGER, defense INTEGER,
-        life INTEGER, thr_air INTEGER NOT NULL DEFAULT 0, thr_earth INTEGER NOT NULL DEFAULT 0,
-        thr_fire INTEGER NOT NULL DEFAULT 0, thr_water INTEGER NOT NULL DEFAULT 0,
-        rules_text TEXT NOT NULL DEFAULT '', back TEXT, errata INTEGER NOT NULL DEFAULT 0);
-    CREATE TABLE printings (printing_id INTEGER PRIMARY KEY, card_id INTEGER NOT NULL,
-        set_name TEXT NOT NULL, set_code TEXT, released_at TEXT, product TEXT, finish TEXT,
-        slug TEXT NOT NULL UNIQUE, artist TEXT, artist_slug TEXT, flavour_text TEXT,
-        typeline TEXT, back TEXT, image_hash TEXT, retired_at TEXT);
-    CREATE TABLE slug_history (slug TEXT NOT NULL, printing_id INTEGER NOT NULL,
-        valid_from TEXT NOT NULL, valid_to TEXT);
-    CREATE TABLE name_history (name TEXT NOT NULL, card_id INTEGER NOT NULL,
-        valid_from TEXT NOT NULL, valid_to TEXT);
-    CREATE TABLE rules_history (rules_text TEXT NOT NULL, card_id INTEGER NOT NULL,
-        valid_from TEXT NOT NULL, valid_to TEXT);
-    INSERT INTO meta VALUES ('schema_version', '7'), ('next_card_id', '8'),
-                            ('next_printing_id', '12');
-    INSERT INTO cards VALUES (7, 'Sir Lancelot', 'Minion', 'Spell', 'Unique', 'Unique',
-        '["Mortal"]', '["Earth"]', '["Lance"]', '["Knight"]', 4, 3, 3, NULL, 0, 2, 0, 0,
-        'Lance' || char(10) || 'Whenever he fights, untap him.', NULL, 1);
-    INSERT INTO printings VALUES (11, 7, 'Arthurian Legends', '004', '2024-10-04', 'Booster',
-        'Standard', '004-sir_lancelot-b-s', 'An Artist', 'an_artist', NULL, 'A typeline',
-        NULL, NULL, NULL);
-    INSERT INTO slug_history VALUES ('004-sir_lancelot-b-s', 11, '2026-08-19', NULL);
-    INSERT INTO name_history VALUES ('Sir Lancelot', 7, '2026-08-19', NULL);
-    INSERT INTO rules_history VALUES ('Lance' || char(10) || 'The first time he fights, untap him.',
-        7, '2026-09-09', '2026-09-09');
-    INSERT INTO rules_history VALUES ('Lance' || char(10) || 'Whenever he fights, untap him.',
-        7, '2026-09-09', NULL);
-    """
-
-    def test_rebuild_widens_text_rows_into_face_rows(self):
-        from registry.migrate_v8 import migrate
-        from registry.validate import check_internal
-        old = open_db(":memory:")
-        old.executescript(self.V7_DDL)
-        new = open_db(":memory:")
-        migrate(old, new)
-
-        export = build_export(new)
-        card = export["cards"][0]
-        self.assertEqual((card["codex_id"], card["name"], card["cost"], card["errata"]),
-                         ("C000007", "Sir Lancelot", 4, True))
-        self.assertEqual(export["printings"][0]["printing_id"], "P000011")
-        rows = export["card_history"]
-        self.assertEqual([(r["valid_to"], r["rules_text"].splitlines()[-1]) for r in rows],
-                         [("2026-09-09", "The first time he fights, untap him."),
-                          (None, "Whenever he fights, untap him.")])
-        # The old row got the card's face with its own text: exact, since
-        # nothing but text ever changed under v7.
-        for row in rows:
-            self.assertEqual((row["cost"], row["attack"], row["keywords"]), (4, 3, ["Lance"]))
-        self.assertEqual(registry.db.get_meta(new, "next_card_id"), "8")
-        errors = []
-        check_internal(new, errors)
-        self.assertEqual(errors, [])
-
-    def test_refuses_a_database_that_is_not_v7(self):
-        from registry.migrate_v8 import migrate
-        old = open_db(":memory:")
-        init_db(old)
+    def test_v9_records_the_version_and_refuses_anything_but_v8(self):
+        from registry.db import get_meta, set_meta
+        from registry.migrate_v9 import migrate
+        con = open_db(":memory:")
+        init_db(con)
+        set_meta(con, "schema_version", "8")
+        migrate(con)
+        self.assertEqual(get_meta(con, "schema_version"), "9")
         with self.assertRaises(ValueError):
-            migrate(old, open_db(":memory:"))
+            migrate(con)
+
 
 
 class ExportArtifactsTest(unittest.TestCase):
@@ -711,6 +659,120 @@ class ExportArtifactsTest(unittest.TestCase):
         export = json.loads(render(build_export(con)))
         errors = list(jsonschema.Draft202012Validator(schema).iter_errors(export))
         self.assertEqual(errors, [], [e.message for e in errors[:3]])
+
+
+class RecordAddressesTest(unittest.TestCase):
+    """Every record says where it lives (schema 9). The addresses are
+    derived from the ids at export time, so they can never disagree with
+    the record they sit on."""
+
+    def _export(self, overrides=None):
+        con = open_db(":memory:")
+        init_db(con)
+        snapshot = build_snapshot(copy.deepcopy(RAW_API))
+        if overrides:
+            apply_overrides(snapshot, overrides)
+        apply_plan(con, diff(load_registry_state(con), snapshot), "2026-08-19")
+        return build_export(con)
+
+    def test_cards_printings_and_sets_carry_their_addresses(self):
+        export = self._export()
+        card = export["cards"][0]
+        self.assertEqual(card["api_url"], "https://api.kairosarchive.net/v3/cards/C000001.json")
+        self.assertEqual(card["kairos_url"], "https://kairosarchive.net/cards/C000001")
+        printing = export["printings"][1]
+        self.assertEqual(printing["api_url"],
+                         "https://api.kairosarchive.net/v3/printings/P000002.json")
+        self.assertEqual(printing["kairos_url"], "https://kairosarchive.net/printings/P000002")
+        alpha = export["sets"][0]
+        self.assertEqual(alpha["api_url"], "https://api.kairosarchive.net/v3/sets/001.json")
+        self.assertEqual(alpha["kairos_url"], "https://kairosarchive.net/sets/001")
+        # The api_url points at the moving major alias, never a release root.
+        self.assertIn("/v3/", card["api_url"])
+        self.assertNotRegex(card["api_url"], r"/v3\.\d")
+
+    def test_without_an_image_the_fields_exist_and_say_so(self):
+        export = self._export()
+        for record in export["cards"] + export["printings"]:
+            self.assertIsNone(record["image_urls"])
+            self.assertEqual(record["image_status"], "missing")
+
+    def test_image_urls_are_self_describing_and_derived_from_the_key(self):
+        from registry.export import image_urls
+        urls = image_urls("P000937", "ab12cd34ef56")
+        self.assertEqual(urls, {
+            "small": "https://api.kairosarchive.net/images/P000937.ab12cd34ef56.small.webp",
+            "normal": "https://api.kairosarchive.net/images/P000937.ab12cd34ef56.normal.webp",
+            "large": "https://api.kairosarchive.net/images/P000937.ab12cd34ef56.large.webp",
+            "original": "https://api.kairosarchive.net/images/P000937.ab12cd34ef56.original.png"})
+        back = image_urls("P000937", "9f8e7d6c5b4a", back=True)
+        self.assertEqual(back["normal"],
+                         "https://api.kairosarchive.net/images/P000937.9f8e7d6c5b4a.back.normal.webp")
+        self.assertIsNone(image_urls("P000937", None))
+
+    def test_a_card_carries_its_default_printings_image(self):
+        # image_hash is registry-owned; an override is the one way to set
+        # it outside the image pipeline, which is exactly what a test needs.
+        export = self._export([{"match": {"card_name": "Apprentice Wizard",
+                                          "set_name": "Alpha"},
+                                "set_fields": {"image_hash": "ab12cd34ef56"},
+                                "reason": "test"}])
+        printing = export["printings"][0]
+        self.assertEqual(printing["image_status"], "ok")
+        self.assertEqual(printing["image_urls"]["small"],
+                         "https://api.kairosarchive.net/images/P000001.ab12cd34ef56.small.webp")
+        card = export["cards"][0]
+        self.assertEqual(card["default_printing_id"], "P000001")
+        self.assertEqual(card["image_urls"], printing["image_urls"])
+        self.assertEqual(card["image_status"], "ok")
+        # The other card has no image, and says so on both levels.
+        self.assertEqual(export["cards"][1]["image_status"], "missing")
+
+    def test_back_face_of_a_printing_has_the_field(self):
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["engine"]["back"] = engine(type="Avatar", category="Avatar", rarity=None)
+        raw[0]["printings"][0]["meta"]["back"] = {
+            "finish": "Standard", "product": "Booster", "flavor": None,
+            "typeline": "Back", "artist": {"name": "B", "slug": "b"}}
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        printing = build_export(con)["printings"][0]
+        self.assertIn("image_urls", printing["back"])
+        self.assertIsNone(printing["back"]["image_urls"])
+        self.assertIsNone(build_export(con)["printings"][1]["back"])
+
+    def test_export_with_an_image_conforms_to_the_schema(self):
+        import json
+        from pathlib import Path
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema not installed")
+        schema_file = Path(__file__).resolve().parent.parent / "schema" / "registry.schema.json"
+        schema = json.loads(schema_file.read_text(encoding="utf-8"))
+        export = json.loads(render(self._export([{
+            "match": {"card_name": "Apprentice Wizard"},
+            "set_fields": {"image_hash": "ab12cd34ef56"}, "reason": "test"}])))
+        errors = list(jsonschema.Draft202012Validator(schema).iter_errors(export))
+        self.assertEqual(errors, [], [e.message for e in errors[:3]])
+
+    def test_validator_catches_addresses_that_name_another_record(self):
+        from registry.validate import check_addresses
+        export = self._export()
+        errors = []
+        check_addresses(export, errors)
+        self.assertEqual(errors, [])
+        tampered = copy.deepcopy(export)
+        tampered["cards"][0]["api_url"] = tampered["cards"][1]["api_url"]
+        tampered["printings"][0]["image_status"] = "ok"
+        tampered["sets"][0]["kairos_url"] = "https://kairosarchive.net/sets/002"
+        errors = []
+        check_addresses(tampered, errors)
+        self.assertEqual(len(errors), 3, errors)
+        self.assertIn("card C000001: api_url", errors[0])
+        self.assertIn("image_status 'ok' disagrees", errors[1])
+        self.assertIn("set 001: kairos_url", errors[2])
 
 
 class HistoryValidationTest(unittest.TestCase):

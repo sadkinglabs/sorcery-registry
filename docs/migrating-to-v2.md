@@ -1,4 +1,17 @@
-# Migrating to v3.0 (from v2.0) and to v2.0 (from v1.x)
+# Migrating to v3.1 (from v3.0), v3.0 (from v2.0) and v2.0 (from v1.x)
+
+## v3.0 → v3.1 (schema 8 → 9)
+
+Purely additive; nothing was renamed, removed or retyped, and **no identifier changed**. Every card, printing and set gained the addresses it lives at, derived from its id:
+
+| New field | On | Value |
+|---|---|---|
+| `api_url` | cards, printings, sets | the record's own JSON object on `api.kairosarchive.net`, under the moving `/v3/` alias (always the newest verified v3.x release) |
+| `kairos_url` | cards, printings, sets | the record's page on `kairosarchive.net` |
+| `image_urls` | cards, printings, `printings[].back` | `{small, normal, large, original}` renditions, or `null` while the registry holds no image (all null in v3.1; the image pipeline fills them in a later minor release without changing the shape) |
+| `image_status` | cards, printings | `missing` or `ok`; a card carries its `default_printing_id`'s |
+
+A consumer that validates against the schema needs the v3.1 schema (the fields are required); one that reads fields by name needs nothing. Published objects: `index.json` gained `base_url`, `latest_url` and `manifest`; slug objects gained the resolved printing's `api_url` and `kairos_url`.
 
 ## v2.0 → v3.0 (schema 7 → 8)
 
