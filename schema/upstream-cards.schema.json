@@ -1,0 +1,427 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/sadkinglabs/sorcery-registry/main/schema/upstream-cards.schema.json",
+  "title": "Official Sorcery API: GET /api/cards",
+  "description": "The registry's reading of the publisher's CardAPIDTO contract (schema/upstream-cards.dto.ts, copied from https://api.sorcerytcg.com). Structure and types only: every vocabulary the DTO closes (type, rarity, product, finish, subtypes, keywords, ...) is left open here, because a new official value is data the registry should record, not a reason to stop. A missing or retyped field the adapter reads IS a reason to stop: registry.fetch.build_snapshot checks every payload against this file and refuses to sync one that no longer fits. Unknown extra fields are tolerated everywhere (additionalProperties true); the id fields upstream mints are neither required nor read.",
+  "$defs": {
+    "face": {
+      "type": "object",
+      "required": [
+        "type",
+        "category",
+        "rarity",
+        "slot",
+        "rules",
+        "cost",
+        "attack",
+        "defense",
+        "life",
+        "water",
+        "earth",
+        "fire",
+        "air",
+        "elements",
+        "subtypes",
+        "keywords",
+        "umbrellas"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "rarity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "slot": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rules": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cost": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "attack": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "defense": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "life": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "water": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "earth": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "fire": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "air": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subtypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "umbrellas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "printingFace": {
+      "type": "object",
+      "required": [
+        "finish",
+        "product",
+        "typeline",
+        "flavor",
+        "artist"
+      ],
+      "properties": {
+        "finish": {
+          "type": "string"
+        },
+        "product": {
+          "type": "string"
+        },
+        "typeline": {
+          "type": "string"
+        },
+        "flavor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "artist": {
+          "type": "object",
+          "required": [
+            "name",
+            "slug"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "slug": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "name",
+      "engine",
+      "printings"
+    ],
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "slug": {
+        "type": "string"
+      },
+      "engine": {
+        "type": "object",
+        "required": [
+          "type",
+          "category",
+          "rarity",
+          "slot",
+          "rules",
+          "cost",
+          "attack",
+          "defense",
+          "life",
+          "water",
+          "earth",
+          "fire",
+          "air",
+          "elements",
+          "subtypes",
+          "keywords",
+          "umbrellas",
+          "back"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "rarity": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slot": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rules": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cost": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "attack": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "defense": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "life": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "water": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "earth": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "fire": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "air": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subtypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "umbrellas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "back": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/face"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": true
+      },
+      "printings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "slug",
+            "printedAt",
+            "set",
+            "meta"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "slug": {
+              "type": "string"
+            },
+            "printedAt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "set": {
+              "type": "object",
+              "required": [
+                "name",
+                "code"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "releasedAt": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            },
+            "meta": {
+              "type": "object",
+              "required": [
+                "finish",
+                "product",
+                "typeline",
+                "flavor",
+                "artist",
+                "back"
+              ],
+              "properties": {
+                "finish": {
+                  "type": "string"
+                },
+                "product": {
+                  "type": "string"
+                },
+                "typeline": {
+                  "type": "string"
+                },
+                "flavor": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "artist": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "slug"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "slug": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "back": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/printingFace"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      }
+    },
+    "additionalProperties": true
+  }
+}

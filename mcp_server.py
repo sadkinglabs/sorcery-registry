@@ -17,11 +17,17 @@ Run it locally (each user runs their own copy; there is no hosted service):
 Data source, first match wins:
     1. $SORCERY_REGISTRY_JSON - a local path or URL to a registry.json
     2. ./export/registry.json - when run from a repo checkout
-    3. the export of the newest GitHub *release* (never whatever is on
-       main), cached in ~/.cache/sorcery-registry. The cache is trusted for
-       24h; after that it is revalidated against the release's published
-       .sha256 (two small requests) and only re-downloaded when the digest
-       differs. A stale cache is used when offline rather than failing.
+    3. the newest verified release on api.kairosarchive.net: versions.json
+       names it (latest.v3) with the digest of its registry.json, which is
+       fetched from that release's immutable root. If the domain is
+       unreachable, the same release (or, without versions.json, the
+       newest GitHub release) is read from raw.githubusercontent.com -
+       always a tagged release, never main. Cached in
+       ~/.cache/sorcery-registry: trusted for 24h, then revalidated
+       against the published digest (one small request) and only
+       re-downloaded when it changed; a stale cache beats nothing when
+       offline. Downloaded bytes are verified against the digest before
+       they are cached.
 """
 
 import hashlib
@@ -31,6 +37,9 @@ import time
 from pathlib import Path
 
 REPO = "sadkinglabs/sorcery-registry"
+REGISTRY_BASE = "https://api.kairosarchive.net"
+VERSIONS_URL = f"{REGISTRY_BASE}/versions.json"
+MAJOR = "v3"  # the export shape this server understands
 LATEST_RELEASE_URL = f"https://github.com/{REPO}/releases/latest"
 RAW_EXPORT_URL = f"https://raw.githubusercontent.com/{REPO}/{{tag}}/export/registry.json"
 CACHE_PATH = Path.home() / ".cache" / "sorcery-registry" / "registry.json"
@@ -56,28 +65,68 @@ def load_registry():
 
 
 def load_published(cache_path=CACHE_PATH):
-    """Return the bytes of the newest released export, from the cache when
-    it is fresh or still matches the release's checksum, from GitHub
-    otherwise. The cache holds the served bytes verbatim - never a
-    re-serialisation - so its SHA-256 is comparable with the published
-    registry.json.sha256."""
+    """Return the bytes of the newest released export: from the cache when
+    it is fresh or still matches the published digest, otherwise from the
+    first source that serves bytes matching that digest. The cache holds
+    the served bytes verbatim - never a re-serialisation - so its SHA-256
+    is comparable with what the registry publishes."""
     if cache_path.exists() and time.time() - cache_path.stat().st_mtime < CACHE_TTL_SECONDS:
         return cache_path.read_bytes()
+    cached = hashlib.sha256(cache_path.read_bytes()).hexdigest() if cache_path.exists() else None
+    failures = []
+    for url, digest in _sources(failures):
+        try:
+            if digest is None:  # GitHub only publishes a checksum file
+                digest = _published_digest(url)
+            if cached is not None and cached == digest:
+                # Revalidated with a small request instead of a download.
+                os.utime(cache_path)
+                return cache_path.read_bytes()
+            data = _fetch_bytes(url)
+            actual = hashlib.sha256(data).hexdigest()
+            if actual != digest:
+                raise RuntimeError(f"{url} served digest {actual}, expected {digest}")
+        except Exception as error:  # try the next source
+            failures.append(f"{url}: {error}")
+            continue
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_bytes(data)
+        return data
+    if cache_path.exists():  # offline: stale beats nothing
+        return cache_path.read_bytes()
+    raise RuntimeError("no source served the registry export:\n  " + "\n  ".join(failures))
+
+
+def _sources(failures):
+    """(url, digest-or-None) for the newest release, most authoritative
+    first: the domain's verified release root, then the same tag on
+    GitHub; without versions.json, GitHub's newest release. Lazy, so a
+    source that answers is the only one contacted; resolution failures
+    are appended to `failures` for the final error message."""
+    tag = None
     try:
-        url = export_url(latest_release_tag())
-        if cache_path.exists() and _cache_still_current(cache_path, url):
-            # The published .sha256 matches our cached bytes: revalidated
-            # with a ~100 byte fetch instead of re-downloading the export.
-            os.utime(cache_path)
-            return cache_path.read_bytes()
-        data = _fetch_bytes(url)
-    except Exception:
-        if cache_path.exists():  # offline: stale beats nothing
-            return cache_path.read_bytes()
-        raise
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_bytes(data)
-    return data
+        tag, base_url, digest = resolve_latest()
+        yield f"{base_url}/{tag}/registry.json", digest
+    except Exception as error:
+        failures.append(f"{VERSIONS_URL}: {error}")
+    if tag is None:
+        try:
+            tag = latest_release_tag()
+        except Exception as error:
+            failures.append(f"{LATEST_RELEASE_URL}: {error}")
+            return
+    yield export_url(tag), None
+
+
+def resolve_latest(url=VERSIONS_URL, major=MAJOR):
+    """(tag, base_url, sha256) of the newest verified release of `major`,
+    from the domain's discovery document."""
+    response = _get(url, timeout=10)
+    response.raise_for_status()
+    doc = response.json()
+    tag = doc["latest"][major]
+    release = next(r for r in doc["releases"] if r["tag"] == tag)
+    return tag, doc["base_url"].rstrip("/"), release["sha256"]
 
 
 def latest_release_tag():
@@ -109,15 +158,11 @@ def _fetch_bytes(url):
     return response.content
 
 
-def _cache_still_current(cache_path, url):
-    try:
-        response = _get(url + ".sha256", timeout=10)
-        response.raise_for_status()
-        published = response.text.split()[0]
-        cached = hashlib.sha256(cache_path.read_bytes()).hexdigest()
-        return published == cached
-    except Exception:
-        return False
+def _published_digest(url):
+    """The sha256sum-format checksum file published next to an export."""
+    response = _get(url + ".sha256", timeout=10)
+    response.raise_for_status()
+    return response.text.split()[0]
 
 
 ID_WIDTH = 6
