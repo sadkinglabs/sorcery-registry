@@ -77,11 +77,21 @@ jobs:
           NOTES: ${{ inputs.notes }}
         run: |
           case "$VERSION" in v[0-9]*) ;; *) echo "::error::version must look like v3.1.0"; exit 1;; esac
-          git config user.name "registry-release"
-          git config user.email "actions@github.com"
-          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
-          git tag -a "$VERSION" -F "$RUNNER_TEMP/notes.md"
-          git push origin "refs/tags/$VERSION"
+          if git rev-parse -q --verify "refs/tags/$VERSION^{commit}" > /dev/null; then
+            # A re-run after a failure: the tag already exists. Reuse it only
+            # if it names this very commit; anything else is a different release.
+            if [ "$(git rev-parse "$VERSION^{commit}")" != "$(git rev-parse HEAD)" ]; then
+              echo "::error::tag $VERSION already exists and points at another commit"
+              exit 1
+            fi
+            echo "::notice::tag $VERSION already exists at HEAD; reusing it"
+          else
+            git config user.name "registry-release"
+            git config user.email "actions@github.com"
+            printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
+            git tag -a "$VERSION" -F "$RUNNER_TEMP/notes.md"
+            git push origin "refs/tags/$VERSION"
+          fi
           echo "TAG=$VERSION" >> "$GITHUB_ENV"
 
       - name: Use the pushed tag
@@ -148,20 +158,31 @@ jobs:
       - name: Upload the release root (immutable)
         if: env.R2_BUCKET != '' && env.ALREADY_RELEASED != 'true'
         run: |
+          # Thousands of small objects: raise the client's parallelism. When
+          # resuming a partial upload, compare by size only - a fresh checkout
+          # gives every file a new mtime, and the immutability check above has
+          # already proved the export behind these objects is the same bytes.
+          aws configure set default.s3.max_concurrent_requests 64
+          aws configure set default.s3.max_queue_size 10000
           # JSON objects get their content type from the extension; the
           # checksum file is text.
-          aws s3 sync dist "s3://$R2_BUCKET/$TAG/" --no-progress \
+          aws s3 sync dist "s3://$R2_BUCKET/$TAG/" --no-progress --size-only \
             --exclude "registry.json.sha256" \
-            --cache-control "public, max-age=31536000, immutable"
+            --cache-control "public, max-age=31536000, immutable" | tail -n 3
           aws s3 cp dist/registry.json.sha256 "s3://$R2_BUCKET/$TAG/registry.json.sha256" \
             --content-type "text/plain; charset=utf-8" \
             --cache-control "public, max-age=31536000, immutable"
+          # CORS is a bucket setting, which an Object Read & Write token may
+          # not change; the release does not depend on it, so a refusal is a
+          # warning and the setting is made once in the dashboard instead.
           cat > "$RUNNER_TEMP/cors.json" <<'JSON'
           {"CORSRules": [{"AllowedOrigins": ["*"], "AllowedMethods": ["GET", "HEAD"],
                           "AllowedHeaders": ["*"], "ExposeHeaders": ["ETag"],
                           "MaxAgeSeconds": 86400}]}
           JSON
-          aws s3api put-bucket-cors --bucket "$R2_BUCKET" --cors-configuration "file://$RUNNER_TEMP/cors.json"
+          if ! aws s3api put-bucket-cors --bucket "$R2_BUCKET" --cors-configuration "file://$RUNNER_TEMP/cors.json" 2> "$RUNNER_TEMP/cors.err"; then
+            echo "::warning::could not set the bucket's CORS policy ($(tr -d '\n' < "$RUNNER_TEMP/cors.err")). Set it once in the dashboard: R2 > $R2_BUCKET > Settings > CORS policy, see CONTRIBUTING 'Hosting'."
+          fi
 
       - name: Every referenced image is served
         if: env.R2_BUCKET != '' && env.ALREADY_RELEASED != 'true'
