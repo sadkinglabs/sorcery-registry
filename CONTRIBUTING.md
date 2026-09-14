@@ -97,6 +97,24 @@ The publisher's guidance is "host images yourself; download released card images
 
 What the registry holds is [`data/images.json`](data/images.json), registry-owned data in git like the overrides: per printing and face, the Drive file (id, name, MD5, dimensions), the art-version key, the recipe, and the size of every rendered object. The export derives `image_hash`, `image_urls` and `image_status` from it; the database is not involved, and the validator checks that every held face is exactly what the export publishes. Files the naming rule cannot place are decided by hand in `data/image-decisions.json` (`assign` a file to a printing and face, or `ignore` it), each with a reason - the registry never guesses, and never invents a printing from an image file.
 
+**Running the image sync from your own machine** (the whole folder at once, no per-address limit): in the Drive web UI, download the publisher's folder as a zip and unpack it anywhere. Then, in a checkout of this repository with Python 3.10+:
+
+```bash
+pip install pillow jsonschema
+python -m registry.images list --out review/image-listing.json          # needs GDRIVE_API_KEY in the environment (a handful of requests)
+python -m registry.images fetch --listing review/image-listing.json \
+    --source-dir "/path/to/unpacked folder" --limit 0                   # reads the files instead of downloading them
+export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... AWS_DEFAULT_REGION=auto \
+       AWS_ENDPOINT_URL=https://<account id>.r2.cloudflarestorage.com \
+       AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+python -m registry.images upload --work work/images --bucket sorcery-registry   # aws CLI, as the R2 client
+python -m registry.images verify                                                # every held object served through the CDN
+python -m registry.export && python -m registry.validate --against origin/main
+git checkout -b images/$(date -u +%Y-%m-%d) && git add data/images.json export/ && git commit -m "images: ..." && git push -u origin HEAD
+```
+
+Then open the pull request. The R2 values are the same ones the release workflow holds as secrets; keep them in your shell session only. `data/images.json` is saved after every file, so an interrupted run resumes.
+
 The renditions are Scryfall's (small 146×204, normal 488×680, large 672×936 WebP, plus the untouched original). Everything that determines the rendered bytes is `RENDITION_RECIPE` in `registry/images.py`: bump it when the sizes, quality or resampling change, and the next sync re-renders every image under a new key, so no published address ever changes bytes. The publisher's files come in two resolutions; the low one (380×531) is upscaled by decision and flagged `image_status: lowres`.
 
 ## When a sync is ambiguous
