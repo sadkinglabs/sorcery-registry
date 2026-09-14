@@ -878,22 +878,56 @@ def cmd_adopt(args):
     return 0
 
 
-VERIFY_WORKERS = 16
+VERIFY_WORKERS = 8
+# The zone's own rate rule refuses an address above 200 requests per 10
+# seconds (a tripwire against crawlers, see CONTRIBUTING). Verification
+# is a crawler by design, so it paces itself well under that.
+VERIFY_PER_SECOND = 15
+RATE_LIMITED_WAIT = 11  # the rule blocks for 10 seconds
 
 
-def verify_objects(objects, status=None, workers=VERIFY_WORKERS):
-    """HEAD every object through the CDN, several at a time (these are
-    our own addresses on our own CDN; tens of thousands one by one would
-    not fit a job). Returns the problems, in object order."""
+class Pacer:
+    """Spaces calls evenly at a global rate across threads."""
+
+    def __init__(self, per_second, clock=time.monotonic, sleep=time.sleep):
+        import threading
+        self.interval = 1.0 / per_second
+        self.clock, self.sleep = clock, sleep
+        self.lock = threading.Lock()
+        self.next_slot = 0.0
+
+    def wait(self):
+        with self.lock:
+            now = self.clock()
+            slot = max(now, self.next_slot)
+            self.next_slot = slot + self.interval
+        if slot > now:
+            self.sleep(slot - now)
+
+
+def verify_objects(objects, status=None, workers=VERIFY_WORKERS, per_second=VERIFY_PER_SECOND,
+                   sleep=time.sleep, clock=time.monotonic, attempts=3):
+    """HEAD every object through the CDN, a few at a time and paced under
+    the edge's rate rule (these are our own addresses; tens of thousands
+    one by one would not fit a job, and a burst gets the address blocked
+    for ten seconds). A 429 is waited out and retried. Returns the
+    problems, in object order."""
     from concurrent.futures import ThreadPoolExecutor
     if status is None:
         from .hosted import _status
         status = _status
+    pacer = Pacer(per_second, clock=clock, sleep=sleep)
 
     def check(item):
         name, size = item
         url = f"{IMAGE_BASE}/{name}"
-        code, headers = status(url)
+        for attempt in range(1, attempts + 1):
+            pacer.wait()
+            code, headers = status(url)
+            if code == 429 and attempt < attempts:
+                sleep(RATE_LIMITED_WAIT)
+                continue
+            break
         if code != 200:
             return f"{code} {url}"
         if headers.get("content-length") and int(headers["content-length"]) != size:

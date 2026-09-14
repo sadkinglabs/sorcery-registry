@@ -597,11 +597,37 @@ class VerifyTest(unittest.TestCase):
             if url.endswith("c.png"):
                 return 200, {"content-length": "31"}
             return 200, {"content-length": "10"}
-        problems = verify_objects(objects, status=status, workers=4)
+        problems = verify_objects(objects, status=status, workers=4, sleep=lambda s: None)
         self.assertEqual(len(seen), 3)
         self.assertEqual(len(problems), 2)
         self.assertTrue(problems[0].startswith("404 "))
         self.assertIn("served 31 bytes, rendered 30", problems[1])
+
+    def test_requests_are_paced_under_the_edge_rate_rule(self):
+        from registry.images import Pacer
+        now = [100.0]
+        slept = []
+        pacer = Pacer(per_second=10, clock=lambda: now[0], sleep=slept.append)
+        pacer.wait()                    # first call: no wait
+        pacer.wait(); pacer.wait()      # then one slot of 0.1 s each
+        self.assertEqual([round(s, 6) for s in slept], [0.1, 0.2])
+        now[0] = 200.0                  # long after the last slot: no wait again
+        pacer.wait()
+        self.assertEqual(len(slept), 2)
+
+    def test_a_rate_limited_answer_is_waited_out_and_retried(self):
+        from registry.images import RATE_LIMITED_WAIT, verify_objects
+        answers = iter([(429, {}), (429, {}), (200, {"content-length": "10"})])
+        slept = []
+        problems = verify_objects([("a.webp", 10)], status=lambda url: next(answers), workers=1,
+                                  sleep=slept.append)
+        self.assertEqual(problems, [])
+        self.assertEqual(slept.count(RATE_LIMITED_WAIT), 2)
+        # and a 429 that never clears is reported, not looped on forever
+        problems = verify_objects([("b.webp", 10)], status=lambda url: (429, {}), workers=1,
+                                  sleep=lambda s: None)
+        self.assertEqual(len(problems), 1)
+        self.assertTrue(problems[0].startswith("429 "))
 
 
 class AdoptTest(unittest.TestCase):
