@@ -436,6 +436,30 @@ class BlockDetectionTest(unittest.TestCase):
             self.assertEqual(len(calls), 3 + 3 * 2)
 
 
+class ProgressTest(unittest.TestCase):
+    def test_progress_line_reports_rate_and_time_left(self):
+        from registry.images import progress_line
+        line = progress_line(200, 3000, 4, elapsed=120.0)
+        self.assertEqual(line, "progress: 200/3000 handled, 196 fetched, 4 failed, "
+                               "2.0 min elapsed, 100/min, about 28 min left")
+        self.assertIn("about 0 min left", progress_line(0, 10, 0, elapsed=0.0))  # no division by zero
+
+    def test_checkpoints_every_n_files_and_at_the_end(self):
+        from pathlib import Path
+        from registry.images import fetch_many
+        entries = [{"id": f"f{i}", "name": f"n{i}", "md5": "m", "printing_id": f"P{i:06d}", "face": "front"}
+                   for i in range(7)]
+        lines = []
+        ticks = iter(range(100))
+        failures = fetch_many(entries, "K", Path("unused"), {"recipe": 1, "printings": {}}, Path("unused"),
+                              get_bytes=lambda url: (_ for _ in ()).throw(ValueError("no")),
+                              sleep=lambda s: None, log=lambda line, **k: lines.append(line),
+                              max_consecutive_failures=99, clock=lambda: next(ticks), progress_every=3)
+        self.assertEqual(len(failures), 7)
+        progress = [line for line in lines if line.startswith("progress:")]
+        self.assertEqual([p.split(" ")[1] for p in progress], ["3/7", "6/7", "7/7"])
+
+
 class LocalSourceTest(unittest.TestCase):
     def test_a_local_copy_of_the_folder_replaces_the_download(self):
         try:
