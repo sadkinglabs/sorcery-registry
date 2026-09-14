@@ -107,6 +107,14 @@ jobs:
         run: |
           MAJOR="${TAG%%.*}"
           echo "MAJOR=$MAJOR" >> "$GITHUB_ENV"
+          # The base URL variable is accepted with or without a scheme or a
+          # trailing slash; everything downstream needs the canonical form.
+          if [ -n "$REGISTRY_BASE_URL" ]; then
+            case "$REGISTRY_BASE_URL" in http://*|https://*) ;; *) REGISTRY_BASE_URL="https://$REGISTRY_BASE_URL";; esac
+            REGISTRY_BASE_URL="${REGISTRY_BASE_URL%/}"
+            echo "REGISTRY_BASE_URL=$REGISTRY_BASE_URL" >> "$GITHUB_ENV"
+            echo "base url: $REGISTRY_BASE_URL"
+          fi
           if [ -n "$R2_BUCKET" ]; then
             python -m registry.publish --dataset-version "$TAG" --manifest manifest.json \
               --base-url "$REGISTRY_BASE_URL/$TAG" --latest-url "$REGISTRY_BASE_URL/$MAJOR" --out dist
