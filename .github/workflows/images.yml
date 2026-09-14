@@ -95,6 +95,15 @@ jobs:
           LIMIT: ${{ inputs.limit }}
         run: python -m registry.images fetch --listing review/image-listing.json --work work/images --limit "${LIMIT:-0}"
 
+      - name: Keep the failure report, if any
+        if: inputs.mode == 'sync' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-failures
+          path: review/image-failures.json
+          if-no-files-found: ignore
+          retention-days: 30
+
       - name: Upload the rendered objects
         if: inputs.mode == 'sync'
         run: python -m registry.images upload --work work/images --bucket "$R2_BUCKET"

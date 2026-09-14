@@ -99,13 +99,57 @@ def _get_json(url):
         raise RuntimeError(f"Drive API {error.code} for {_redact(url)}: {body}") from None
 
 
+class DriveError(RuntimeError):
+    """An HTTP failure from Drive, with the reason Google gives (e.g.
+    userRateLimitExceeded, downloadQuotaExceeded) when the body is JSON."""
+
+    def __init__(self, code, url, body=b""):
+        self.code = code
+        self.reason = None
+        text = body[:600].decode("utf-8", "replace")
+        try:
+            errors = json.loads(text).get("error", {}).get("errors", [])
+            self.reason = errors[0].get("reason") if errors else None
+        except (ValueError, AttributeError):
+            pass
+        super().__init__(f"Drive API {code} ({self.reason or 'no reason given'}) for "
+                         f"{_redact(url)}: {text[:200]!r}")
+
+
+# Google throttles anonymous downloads; these come back on a good day
+# after a pause. Anything else is a real answer.
+RETRIABLE_REASONS = {"userRateLimitExceeded", "rateLimitExceeded", "quotaExceeded",
+                     "backendError", "internalError"}
+
+
 def _get_bytes(url):
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=300) as response:
             return response.read()
     except urllib.error.HTTPError as error:
-        raise RuntimeError(f"Drive API {error.code} for {_redact(url)}") from None
+        raise DriveError(error.code, url, error.read() or b"") from None
+
+
+def retriable(error):
+    if isinstance(error, DriveError):
+        return error.code == 429 or error.code >= 500 or (
+            error.code == 403 and error.reason in RETRIABLE_REASONS)
+    return isinstance(error, (urllib.error.URLError, TimeoutError, ConnectionError))
+
+
+def get_with_retry(url, get_bytes=_get_bytes, attempts=6, sleep=time.sleep, log=print):
+    """Fetch, backing off 2, 4, 8, 16, 32 seconds on throttling and
+    transient failures; anything else is raised at once."""
+    for attempt in range(1, attempts + 1):
+        try:
+            return get_bytes(url)
+        except Exception as error:
+            if not retriable(error) or attempt == attempts:
+                raise
+            delay = 2 ** attempt
+            log(f"  retry {attempt}/{attempts - 1} in {delay}s: {error}", flush=True)
+            sleep(delay)
 
 
 def download_url(file_id, api_key):
@@ -412,7 +456,7 @@ def cmd_list(args):
 def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None):
     """Download one mapped file, render it, write the objects under `work`
     and record the source in `state` (not yet saved)."""
-    original = get_bytes(download_url(entry["id"], api_key))
+    original = get_with_retry(download_url(entry["id"], api_key), get_bytes)
     md5 = hashlib.md5(original).hexdigest()
     if entry.get("md5") and md5 != entry["md5"]:
         raise RuntimeError(f"{entry['name']}: downloaded MD5 {md5} differs from the listing's "
@@ -445,6 +489,29 @@ def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None):
     return key
 
 
+def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
+               pause=0.5, sleep=time.sleep, log=print):
+    """Fetch every entry in turn. A file that fails after its retries is
+    recorded and skipped - the run goes on, the state holds only what
+    succeeded, and the next run tries the failure again - because one
+    bad answer from Google must not discard hundreds of good ones."""
+    failures = []
+    for index, entry in enumerate(todo, 1):
+        try:
+            key = fetch_one(entry, api_key, work, state, get_bytes=get_bytes)
+        except Exception as error:  # noqa: BLE001 - recorded, not swallowed
+            failures.append({"name": entry["name"], "printing_id": entry["printing_id"],
+                             "face": entry["face"], "error": str(error)})
+            log(f"[{index}/{len(todo)}] FAILED {entry['name']}: {error}", flush=True)
+            sleep(pause)
+            continue
+        save_images(state, images_path)  # progress survives an interrupted run
+        log(f"[{index}/{len(todo)}] {entry['printing_id']} {entry['face']} <- {entry['name']} -> {key}",
+            flush=True)
+        sleep(pause)
+    return failures
+
+
 def cmd_fetch(args):
     api_key = _need_key()
     listing = json.loads(Path(args.listing).read_text(encoding="utf-8"))
@@ -457,12 +524,20 @@ def cmd_fetch(args):
         todo = [e for e in todo if e["printing_id"] in args.only]
     if args.limit:
         todo = todo[:args.limit]
-    print(f"{len(todo)} image(s) to fetch")
-    for index, entry in enumerate(todo, 1):
-        key = fetch_one(entry, api_key, args.work, state)
-        save_images(state, args.images)  # progress survives an interrupted run
-        print(f"[{index}/{len(todo)}] {entry['printing_id']} {entry['face']} <- {entry['name']} -> {key}")
-        time.sleep(args.pause)
+    print(f"{len(todo)} image(s) to fetch", flush=True)
+    failures = fetch_many(todo, api_key, args.work, state, args.images, pause=args.pause)
+    fetched = len(todo) - len(failures)
+    print(f"fetched {fetched}, failed {len(failures)}", flush=True)
+    if failures:
+        report = Path(args.failures)
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps(failures, indent=2) + "\n", encoding="utf-8")
+        reasons = Counter(f["error"].split(" for ")[0] for f in failures)
+        print("failures by kind: " + "; ".join(f"{k}: {n}" for k, n in reasons.most_common()))
+        print(f"::warning::{len(failures)} image(s) could not be fetched this run (see {report}); "
+              f"they are retried on the next run")
+        if args.strict or fetched == 0:
+            return 1
     return 0
 
 
@@ -518,7 +593,9 @@ def main(argv=None):
     p.add_argument("--work", default=str(WORK_PATH))
     p.add_argument("--limit", type=int, default=0, help="at most N images this run (0: all)")
     p.add_argument("--only", nargs="*", default=None, help="printing ids to restrict to")
-    p.add_argument("--pause", type=float, default=0.2)
+    p.add_argument("--pause", type=float, default=0.5)
+    p.add_argument("--failures", default="review/image-failures.json")
+    p.add_argument("--strict", action="store_true", help="exit 1 if any file failed")
     p.set_defaults(run=cmd_fetch)
 
     p = sub.add_parser("upload", help="copy the rendered objects into the bucket")

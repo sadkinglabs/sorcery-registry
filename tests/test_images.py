@@ -305,3 +305,73 @@ class FetchStateTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 fetch_one(entry, "KEY", Path(tmp), {"recipe": RENDITION_RECIPE, "printings": {}},
                           get_bytes=lambda url: _png(10, 14))
+
+
+class ResilienceTest(unittest.TestCase):
+    def _drive_error(self, code, reason):
+        from registry.images import DriveError
+        import json as _json
+        body = _json.dumps({"error": {"errors": [{"reason": reason}]}}).encode()
+        return DriveError(code, "https://x/files/1?alt=media&key=SECRET", body)
+
+    def test_throttling_is_retried_with_backoff_and_the_key_stays_out_of_messages(self):
+        from registry.images import get_with_retry
+        answers = [self._drive_error(403, "userRateLimitExceeded"),
+                   self._drive_error(429, "rateLimitExceeded"), b"bytes"]
+        slept, logged = [], []
+
+        def fake(url):
+            answer = answers.pop(0)
+            if isinstance(answer, Exception):
+                raise answer
+            return answer
+        self.assertEqual(get_with_retry("u", fake, sleep=slept.append, log=lambda m, **k: logged.append(m)), b"bytes")
+        self.assertEqual(slept, [2, 4])
+        self.assertIn("userRateLimitExceeded", logged[0])
+        self.assertNotIn("SECRET", " ".join(logged))
+
+    def test_a_real_refusal_is_not_retried(self):
+        from registry.images import DriveError, get_with_retry
+        calls = []
+
+        def fake(url):
+            calls.append(url)
+            raise self._drive_error(403, "downloadQuotaExceeded")
+        with self.assertRaises(DriveError) as caught:
+            get_with_retry("u", fake, sleep=lambda s: None, log=lambda *a, **k: None)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(caught.exception.reason, "downloadQuotaExceeded")
+
+    def test_retries_give_up_eventually(self):
+        from registry.images import DriveError, get_with_retry
+        with self.assertRaises(DriveError):
+            get_with_retry("u", lambda url: (_ for _ in ()).throw(self._drive_error(503, "backendError")),
+                           attempts=3, sleep=lambda s: None, log=lambda *a, **k: None)
+
+    def test_one_failing_file_does_not_stop_the_run(self):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow not installed")
+        import hashlib, tempfile
+        from pathlib import Path
+        from registry.images import RENDITION_RECIPE, fetch_many, load_images
+        good = _png(20, 28)
+        entries = [
+            {"id": "a", "name": "001-a-b-s.png", "md5": hashlib.md5(good).hexdigest(), "printing_id": "P1", "face": "front"},
+            {"id": "b", "name": "001-b-b-s.png", "md5": "x", "printing_id": "P2", "face": "front"},
+            {"id": "c", "name": "001-c-b-s.png", "md5": hashlib.md5(good).hexdigest(), "printing_id": "P3", "face": "front"},
+        ]
+
+        def fake(url):
+            if "/b?" in url:
+                raise self._drive_error(403, "downloadQuotaExceeded")
+            return good
+        with tempfile.TemporaryDirectory() as tmp:
+            state = {"recipe": RENDITION_RECIPE, "printings": {}}
+            failures = fetch_many(entries, "K", Path(tmp) / "w", state, Path(tmp) / "images.json",
+                                  get_bytes=fake, sleep=lambda s: None, log=lambda *a, **k: None)
+            self.assertEqual([f["name"] for f in failures], ["001-b-b-s.png"])
+            self.assertIn("downloadQuotaExceeded", failures[0]["error"])
+            held = load_images(Path(tmp) / "images.json")
+            self.assertEqual(sorted(held["printings"]), ["P1", "P3"])
