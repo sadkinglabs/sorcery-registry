@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A pull request opened by another workflow's token (the images sync)
+  # does not trigger this one - GitHub's rule against workflows that
+  # trigger workflows - so that workflow dispatches it on its branch.
+  workflow_dispatch:
 
 jobs:
   validate:
