@@ -1,0 +1,45 @@
+name: images
+
+# Card images, step one: list the publisher's public image folder from a
+# runner and commit the listing to a review branch, so the naming,
+# formats, sizes and any subfolders are seen before a single image is
+# downloaded. Read-only toward Google (a plain API key can only read what
+# is public; secret GDRIVE_API_KEY). Never writes to main.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: List the public folder and map files to printings
+        env:
+          GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
+        run: python -m registry.images list --out review/image-listing.json
+
+      - name: Keep the listing as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-listing
+          path: review/image-listing.json
+          retention-days: 30
+
+      - name: Commit the listing to the review branch
+        run: |
+          git config user.name "registry-images"
+          git config user.email "actions@github.com"
+          git checkout -q -B review/image-listing
+          git add -f review/image-listing.json
+          git commit -q -m "images: folder listing of $(date -u +%Y-%m-%d)"
+          git push --force origin review/image-listing
+          echo "listing committed to branch review/image-listing"
