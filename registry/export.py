@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 
 from . import API_BASE, API_URL, IMAGE_BASE, SCHEMA_VERSION, SITE_BASE
+from .images import load_images
 from .db import (CARD_FIELDS, FACE_FIELDS, HISTORY_FIELDS, PRINTING_FACE_FIELDS,
                  PRINTING_FIELDS, decode_field, open_db)
 from .ids import format_card_id, format_printing_id
@@ -32,15 +33,14 @@ def _face(value, fields):
     return {field: value.get(field) for field in fields}
 
 
-# Renditions of a card image and the extension each is served with. The
-# three sized ones are WebP; "original" is the publisher's file untouched.
-# Object names are self-describing - {printing_id}.{key}.{rendition}.{ext},
-# with ".back" before the rendition for a back face - where key is the
-# art-version key the image pipeline stores in image_hash. The names never
+# Renditions of a card image: the three sized ones are WebP, "original"
+# is the publisher's file untouched (its own extension). Object names are
+# self-describing - {printing_id}.{key}.{rendition}.{ext}, with ".back"
+# before the rendition for a back face - where key is the art-version key
+# recorded in data/images.json by the image pipeline. The names never
 # carry a slug, and the bytes at a name never change: new art or a new
 # encoding recipe gets a new key.
-IMAGE_RENDITIONS = (("small", "webp"), ("normal", "webp"),
-                    ("large", "webp"), ("original", "png"))
+RENDITIONS = ("small", "normal", "large", "original")
 
 
 def card_urls(codex_id):
@@ -60,18 +60,30 @@ def set_urls(set_code):
             "kairos_url": f"{SITE_BASE}/sets/{set_code}"}
 
 
-def image_urls(printing_id, image_key, back=False):
+def image_urls(printing_id, image_key, back=False, original_ext="png"):
     """The addresses of one face's image renditions, or None while the
-    registry holds no image for it (image_hash null)."""
+    registry holds no image for it."""
     if image_key is None:
         return None
     face = ".back" if back else ""
-    return {rendition: f"{IMAGE_BASE}/{printing_id}.{image_key}{face}.{rendition}.{ext}"
-            for rendition, ext in IMAGE_RENDITIONS}
+    return {rendition: f"{IMAGE_BASE}/{printing_id}.{image_key}{face}.{rendition}."
+                       f"{original_ext if rendition == 'original' else 'webp'}"
+            for rendition in RENDITIONS}
 
 
-def image_status(image_key):
-    return "ok" if image_key is not None else "missing"
+def face_urls(printing_id, held, back=False):
+    """image_urls for one face as data/images.json records it (or None)."""
+    if not held:
+        return None
+    return image_urls(printing_id, held["key"], back, held.get("original_ext", "png"))
+
+
+def image_status(held):
+    """missing: no image held; lowres: held, but the source was too small
+    for the large rendition and was upscaled; ok: held at full size."""
+    if not held:
+        return "missing"
+    return "lowres" if held.get("lowres") else "ok"
 
 
 def default_printing(printings):
@@ -115,7 +127,10 @@ def printed_as_current(released_at, history, added_on=None):
     return released_at >= current["valid_from"]
 
 
-def build_export(con):
+def build_export(con, images=None):
+    """The export, from the database plus data/images.json (what images the
+    registry holds - registry-owned data kept in git, like overrides)."""
+    held_images = (images if images is not None else load_images()).get("printings", {})
     # Derived at export time from the printings table, never stored: the
     # reverse card -> printings link cannot drift from the forward one.
     printing_ids_by_card = {}
@@ -123,7 +138,7 @@ def build_export(con):
     printings_by_card = {}
     for row in con.execute(
             "SELECT card_id, printing_id, set_code, released_at, product, finish, "
-            "retired_at, image_hash FROM printings ORDER BY printing_id"):
+            "retired_at FROM printings ORDER BY printing_id"):
         printing_ids_by_card.setdefault(row["card_id"], []).append(
             format_printing_id(row["printing_id"]))
         printings_by_card.setdefault(row["card_id"], []).append(dict(row))
@@ -194,9 +209,10 @@ def build_export(con):
         # Where the record lives, and the image of its representative
         # printing - so a card answers "show me this card" on its own.
         record.update(card_urls(record["codex_id"]))
-        chosen_key = next((p["image_hash"] for p in own if p["printing_id"] == chosen), None)
-        record["image_urls"] = image_urls(record["default_printing_id"], chosen_key)
-        record["image_status"] = image_status(chosen_key)
+        chosen_front = (held_images.get(record["default_printing_id"], {}).get("front")
+                        if chosen is not None else None)
+        record["image_urls"] = face_urls(record["default_printing_id"], chosen_front)
+        record["image_status"] = image_status(chosen_front)
         cards.append(record)
 
     # card_name is derived from the cards table at export time, so a
@@ -217,13 +233,15 @@ def build_export(con):
             added_on.get(row["printing_id"]))
         record["retired_at"] = row["retired_at"]
         record.update(printing_urls(record["printing_id"]))
-        record["image_urls"] = image_urls(record["printing_id"], row["image_hash"])
-        record["image_status"] = image_status(row["image_hash"])
+        # What the registry holds for this printing's faces, from
+        # data/images.json; image_hash publishes the front's art-version key.
+        faces = held_images.get(record["printing_id"], {})
+        front, back = faces.get("front"), faces.get("back")
+        record["image_hash"] = front["key"] if front else None
+        record["image_urls"] = face_urls(record["printing_id"], front)
+        record["image_status"] = image_status(front)
         if record["back"] is not None:
-            # A back face's own image. The registry holds no back-face key
-            # yet (the image pipeline will add its column); until then the
-            # field exists and is null, so the shape is settled now.
-            record["back"]["image_urls"] = image_urls(record["printing_id"], None, back=True)
+            record["back"]["image_urls"] = face_urls(record["printing_id"], back, back=True)
         printings.append(record)
 
     slug_history = []

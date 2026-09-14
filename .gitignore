@@ -5,3 +5,5 @@ venv/
 manifest.json
 review/upstream-snapshot.json
 dist/
+work/
+review/image-listing.json

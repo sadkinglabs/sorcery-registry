@@ -1,19 +1,51 @@
 name: images
 
-# Card images, step one: list the publisher's public image folder from a
-# runner and commit the listing to a review branch, so the naming,
-# formats, sizes and any subfolders are seen before a single image is
-# downloaded. Read-only toward Google (a plain API key can only read what
-# is public; secret GDRIVE_API_KEY). Never writes to main.
+# Card images, from the publisher's public folder to the domain.
+#   list  - list the folder, map files to printings and faces, commit the
+#           listing to the review/image-listing branch. Read-only.
+#   sync  - list, then download what changed (new file, new MD5, new
+#           recipe), render the renditions, upload them to the bucket's
+#           images/ prefix (content-addressed: an existing name is never
+#           overwritten), verify every held object through the CDN, and
+#           open a pull request with data/images.json and the regenerated
+#           export. Nothing reaches main except through that PR, and no
+#           published record references an image until the release
+#           workflow has checked it again.
+# Toward Google: a plain API key (public files only), one request at a
+# time, identified. Toward the publisher: the same courtesy their API
+# asks for. The aws CLI is only the S3 client for R2.
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "list (review the folder) or sync (fetch, upload, verify, open a PR)"
+        type: choice
+        options: [list, sync]
+        default: list
+      limit:
+        description: "sync: at most this many images this run (0 = everything that changed)"
+        default: "0"
 
 permissions:
   contents: write
+  pull-requests: write
+
+concurrency:
+  group: images
+  cancel-in-progress: false
+
+env:
+  R2_BUCKET: ${{ vars.R2_BUCKET }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  AWS_ENDPOINT_URL: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+  AWS_DEFAULT_REGION: auto
+  AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+  AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
 
 jobs:
-  list:
+  images:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +53,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pillow jsonschema
 
       - name: List the public folder and map files to printings
         env:
@@ -35,6 +70,7 @@ jobs:
           retention-days: 30
 
       - name: Commit the listing to the review branch
+        if: inputs.mode == 'list'
         run: |
           git config user.name "registry-images"
           git config user.email "actions@github.com"
@@ -43,3 +79,52 @@ jobs:
           git commit -q -m "images: folder listing of $(date -u +%Y-%m-%d)"
           git push --force origin review/image-listing
           echo "listing committed to branch review/image-listing"
+
+      # ---- sync
+
+      - name: Hosting must be configured
+        if: inputs.mode == 'sync' && env.R2_BUCKET == ''
+        run: |
+          echo "::error::vars.R2_BUCKET is not set; images cannot be uploaded (see CONTRIBUTING, Hosting)"
+          exit 1
+
+      - name: Fetch what changed and render the renditions
+        if: inputs.mode == 'sync'
+        env:
+          GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
+          LIMIT: ${{ inputs.limit }}
+        run: python -m registry.images fetch --listing review/image-listing.json --work work/images --limit "${LIMIT:-0}"
+
+      - name: Upload the rendered objects
+        if: inputs.mode == 'sync'
+        run: python -m registry.images upload --work work/images --bucket "$R2_BUCKET"
+
+      - name: Verify every held object through the CDN
+        if: inputs.mode == 'sync'
+        run: python -m registry.images verify
+
+      - name: Regenerate the export and validate
+        if: inputs.mode == 'sync'
+        run: |
+          python -m registry.export
+          python -m registry.validate --against HEAD
+
+      - name: Open a pull request if anything changed
+        if: inputs.mode == 'sync'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- data/images.json export/; then
+            echo "no image changes"
+            exit 0
+          fi
+          BRANCH="images/$(date -u +%Y-%m-%d-%H%M)"
+          git config user.name "registry-images"
+          git config user.email "actions@github.com"
+          git checkout -b "$BRANCH"
+          git add data/images.json export/
+          held=$(python3 -c "import json; d=json.load(open('data/images.json')); print(sum(len(f) for f in d['printings'].values()))")
+          git commit -m "images: $(date -u +%Y-%m-%d), $held face(s) held"
+          git push origin "$BRANCH"
+          gh pr create --fill --title "Images $(date -u +%Y-%m-%d)" \
+            --body "Images fetched from the publisher's public folder, rendered, uploaded to the bucket and verified through the CDN; data/images.json records each source and key, and the export derives image_urls / image_status from it. Review the export diff, merge, then tag a release so the records reach the domain."
