@@ -84,7 +84,7 @@ What the hosted steps guarantee, in order (`.github/workflows/release.yml`, help
 6. **The alias flips** - the redirect rule's target becomes `/<tag>/` - only if `versions.json` now names this tag as the newest of its major, and the workflow confirms the alias redirects there before continuing. One operation, so no client ever sees a mixed dataset.
 7. The GitHub release, then the website rebuild.
 
-A failed run leaves at most a partial root without `RELEASED` - never listed, never aliased, harmless - and re-running the same tag resumes it (same bytes, objects compared by size so the resume is quick) or refuses it (different bytes). A dispatched re-run reuses the tag it already created, provided it still names the same commit. Two releases cannot interleave: the workflow runs in a concurrency group.
+A failed run leaves at most a partial root without `RELEASED` - never listed, never aliased, harmless - and re-running the same tag resumes it (same bytes, objects compared by size so the resume is quick) or refuses it (different bytes). A dispatched re-run reuses the tag it already created; if `main` has moved since (a workflow fix merged in between), the tag is moved to the new commit as long as nothing was published under it - no GitHub release and no `RELEASED` root - because until then it marks an attempt, not a release. Two releases cannot interleave: the workflow runs in a concurrency group.
 
 ## When a sync is ambiguous
 

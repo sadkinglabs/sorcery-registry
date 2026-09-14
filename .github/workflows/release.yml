@@ -75,20 +75,34 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           NOTES: ${{ inputs.notes }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           case "$VERSION" in v[0-9]*) ;; *) echo "::error::version must look like v3.1.0"; exit 1;; esac
+          git config user.name "registry-release"
+          git config user.email "actions@github.com"
+          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
           if git rev-parse -q --verify "refs/tags/$VERSION^{commit}" > /dev/null; then
-            # A re-run after a failure: the tag already exists. Reuse it only
-            # if it names this very commit; anything else is a different release.
-            if [ "$(git rev-parse "$VERSION^{commit}")" != "$(git rev-parse HEAD)" ]; then
-              echo "::error::tag $VERSION already exists and points at another commit"
-              exit 1
+            # The tag exists: an earlier attempt at this release. At HEAD it is
+            # simply reused. Elsewhere it may move to HEAD only while nothing
+            # has been published under it - no GitHub release and no RELEASED
+            # root on the domain - because until then the tag is an attempt,
+            # not a release. Once either exists, the tag is history.
+            if [ "$(git rev-parse "$VERSION^{commit}")" = "$(git rev-parse HEAD)" ]; then
+              echo "::notice::tag $VERSION already exists at HEAD; reusing it"
+            else
+              if gh release view "$VERSION" > /dev/null 2>&1; then
+                echo "::error::$VERSION is already released on GitHub from another commit"
+                exit 1
+              fi
+              if [ -n "$R2_BUCKET" ] && aws s3api head-object --bucket "$R2_BUCKET" --key "$VERSION/RELEASED" > /dev/null 2>&1; then
+                echo "::error::$VERSION is already released on the domain from another commit"
+                exit 1
+              fi
+              echo "::notice::tag $VERSION names an unfinished attempt at $(git rev-parse --short "$VERSION^{commit}"); moving it to HEAD"
+              git tag -fa "$VERSION" -F "$RUNNER_TEMP/notes.md"
+              git push --force origin "refs/tags/$VERSION"
             fi
-            echo "::notice::tag $VERSION already exists at HEAD; reusing it"
           else
-            git config user.name "registry-release"
-            git config user.email "actions@github.com"
-            printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
             git tag -a "$VERSION" -F "$RUNNER_TEMP/notes.md"
             git push origin "refs/tags/$VERSION"
           fi
