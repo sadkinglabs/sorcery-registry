@@ -97,6 +97,12 @@ jobs:
           echo "::error::vars.R2_BUCKET is not set; images cannot be uploaded (see CONTRIBUTING, Hosting)"
           exit 1
 
+      - name: Adopt renditions the bucket already holds
+        # A run killed after its upload but before its pull request leaves
+        # its renditions in the bucket; record them instead of fetching again.
+        if: github.event_name == 'schedule' || inputs.mode == 'sync'
+        run: python -m registry.images adopt --listing review/image-listing.json --bucket "$R2_BUCKET"
+
       - name: Fetch what changed and render the renditions
         if: github.event_name == 'schedule' || inputs.mode == 'sync'
         env:

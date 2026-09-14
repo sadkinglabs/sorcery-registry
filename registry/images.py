@@ -764,6 +764,120 @@ def cmd_upload(args):
     return subprocess.call(command)
 
 
+# --------------------------------------------------------------------------
+# Adopting what the bucket already holds
+# --------------------------------------------------------------------------
+
+OBJECT_NAME = re.compile(r"^(?P<pid>P\d{6})\.(?P<key>[0-9a-f]{12})(?P<back>\.back)?"
+                         r"\.(?P<rendition>small|normal|large|original)\.(?P<ext>[a-z0-9]+)$")
+RENDITION_NAMES = tuple(name for name, _, _ in RENDITIONS) + ("original",)
+
+
+def list_bucket_objects(bucket, prefix="images/", run=subprocess.run):
+    """Every object under the prefix: (name without the prefix, size, upload
+    time). The aws CLI pages through the listing itself."""
+    result = run(["aws", "s3api", "list-objects-v2", "--bucket", bucket, "--prefix", prefix,
+                  "--output", "json", "--query", "Contents[].[Key,Size,LastModified]"],
+                 capture_output=True, text=True, check=True)
+    rows = json.loads(result.stdout or "null") or []
+    return [(key[len(prefix):], int(size), uploaded) for key, size, uploaded in rows
+            if key.startswith(prefix)]
+
+
+def bucket_index(objects):
+    """{(printing_id, face): {key: {rendition: (ext, size, uploaded)}}} from
+    the object names; anything not in our naming scheme is ignored."""
+    index = {}
+    for name, size, uploaded in objects:
+        match = OBJECT_NAME.match(name)
+        if not match:
+            continue
+        face = "back" if match.group("back") else "front"
+        index.setdefault((match.group("pid"), face), {}).setdefault(match.group("key"), {})[
+            match.group("rendition")] = (match.group("ext"), size, uploaded)
+    return index
+
+
+def _instant(text):
+    """ISO 8601 from Drive ("...Z") or the aws CLI ("...+00:00") as a datetime."""
+    return datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
+
+
+def adopt(mapping, state, index, today=None):
+    """Record, without downloading, every file the registry would fetch
+    whose renditions already sit in the bucket: a run killed after its
+    upload but before its pull request leaves them there, content-
+    addressed, and the folder listing supplies everything else the state
+    records. Adopted only when the evidence is unambiguous - exactly one
+    complete set of renditions for that face, every object uploaded after
+    the source file was last modified, the original the same size and
+    extension as the file - and only while the recipe in force is the one
+    the state was last rendered with (after a recipe bump, the bucket's
+    keys belong to the old recipe and must be re-rendered). Returns the
+    adopted entries and a Counter of why the rest were left to the fetch."""
+    adopted, skipped = [], Counter()
+    if state.get("recipe") != RENDITION_RECIPE:
+        skipped["recipe changed: the bucket holds the old recipe"] += len(plan_fetch(mapping, state))
+        return adopted, skipped
+    for entry in plan_fetch(mapping, state):
+        keys = index.get((entry["printing_id"], entry["face"]), {})
+        complete = {key: r for key, r in keys.items() if set(r) == set(RENDITION_NAMES)}
+        if not complete:
+            skipped["not in the bucket"] += 1
+            continue
+        if len(complete) > 1:
+            skipped["several complete keys in the bucket"] += 1
+            continue
+        key, renditions = next(iter(complete.items()))
+        ext, original_size, _ = renditions["original"]
+        if ext != original_extension(entry["name"]) or (
+                entry.get("size") is not None and original_size != entry["size"]):
+            skipped["original differs from the file"] += 1
+            continue
+        if entry.get("modified") and any(_instant(uploaded) < _instant(entry["modified"])
+                                         for _, _, uploaded in renditions.values()):
+            skipped["uploaded before the file last changed"] += 1
+            continue
+        if not entry.get("width") or not entry.get("height"):
+            skipped["no dimensions in the listing"] += 1
+            continue
+        state["printings"].setdefault(entry["printing_id"], {})[entry["face"]] = {
+            "key": key,
+            "recipe": state["recipe"],
+            "source": entry["name"],
+            "drive_id": entry["id"],
+            "md5": entry["md5"],
+            "width": entry["width"],
+            "height": entry["height"],
+            "lowres": is_lowres(entry["width"]),
+            "original_ext": ext,
+            "objects": {rendition: renditions[rendition][1] for rendition in RENDITION_NAMES},
+            "fetched": today or datetime.date.today().isoformat(),
+        }
+        adopted.append(entry)
+    return adopted, skipped
+
+
+def cmd_adopt(args):
+    listing = json.loads(Path(args.listing).read_text(encoding="utf-8"))
+    state = load_images(args.images)
+    if not plan_fetch(listing["mapping"], state):
+        print("nothing to fetch, nothing to adopt")
+        return 0
+    objects = list_bucket_objects(args.bucket)
+    adopted, skipped = adopt(listing["mapping"], state, bucket_index(objects))
+    for entry in adopted:
+        held = state["printings"][entry["printing_id"]][entry["face"]]
+        print(f"adopted {entry['printing_id']} {entry['face']} <- {entry['name']} -> {held['key']}")
+    if adopted:
+        save_images(state, args.images)
+    print(f"adopted {len(adopted)} face(s) from {len(objects)} objects in the bucket; "
+          + "; ".join(f"{n} left to fetch: {why}" for why, n in skipped.most_common()), flush=True)
+    step_summary(f"### Adopted from the bucket\n\n{len(adopted)} face(s) already rendered and uploaded "
+                 f"by an earlier run were recorded without downloading.\n")
+    return 0
+
+
 VERIFY_WORKERS = 16
 
 
@@ -832,6 +946,12 @@ def main(argv=None):
                    help="stop fetching after this long so the run can still upload, verify and open "
                         "its PR; the next run continues where data/images.json says")
     p.set_defaults(run=cmd_fetch)
+
+    p = sub.add_parser("adopt", help="record renditions the bucket already holds, without downloading")
+    p.add_argument("--listing", default=str(LISTING_PATH))
+    p.add_argument("--images", default=str(IMAGES_PATH))
+    p.add_argument("--bucket", default=os.environ.get("R2_BUCKET", ""))
+    p.set_defaults(run=cmd_adopt)
 
     p = sub.add_parser("upload", help="copy the rendered objects into the bucket")
     p.add_argument("--work", default=str(WORK_PATH))
