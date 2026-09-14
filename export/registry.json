@@ -51797,13 +51797,18 @@
       "flavour_text": "“It serves him right who runs into the long reach of a pikeman.” — Grimmelshausen",
       "typeline": "Exceptional Mortals with prodigious poles",
       "back": null,
-      "image_hash": null,
+      "image_hash": "93dbd8484e16",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000290.json",
       "kairos_url": "https://kairosarchive.net/printings/P000290",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000290.93dbd8484e16.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000290.93dbd8484e16.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000290.93dbd8484e16.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000290.93dbd8484e16.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000291",
@@ -51820,13 +51825,18 @@
       "flavour_text": "“It serves him right who runs into the long reach of a pikeman.” — Grimmelshausen",
       "typeline": "Exceptional Mortals with prodigious poles",
       "back": null,
-      "image_hash": null,
+      "image_hash": "93211b1a423c",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000291.json",
       "kairos_url": "https://kairosarchive.net/printings/P000291",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000291.93211b1a423c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000291.93211b1a423c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000291.93211b1a423c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000291.93211b1a423c.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000292",
@@ -51889,13 +51899,18 @@
       "flavour_text": "How fair to greet, on misted morn\nA daint parade of dew-kissed bloom\nNow deep, inspire! A bliss reborn\nOf air faint lade with sweet perfume",
       "typeline": "Ordinary Spirits of sweet succor",
       "back": null,
-      "image_hash": null,
+      "image_hash": "bd49a0d5fe9f",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000294.json",
       "kairos_url": "https://kairosarchive.net/printings/P000294",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000294.bd49a0d5fe9f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000294.bd49a0d5fe9f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000294.bd49a0d5fe9f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000294.bd49a0d5fe9f.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000295",
@@ -51912,13 +51927,18 @@
       "flavour_text": "How fair to greet, on misted morn\nA daint parade of dew-kissed bloom\nNow deep, inspire! A bliss reborn\nOf air faint lade with sweet perfume",
       "typeline": "Ordinary Spirits of sweet succor",
       "back": null,
-      "image_hash": null,
+      "image_hash": "ba58a1332eb2",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000295.json",
       "kairos_url": "https://kairosarchive.net/printings/P000295",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000295.ba58a1332eb2.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000295.ba58a1332eb2.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000295.ba58a1332eb2.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000295.ba58a1332eb2.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000296",
@@ -64401,13 +64421,18 @@
       "flavour_text": "",
       "typeline": "An Exceptional Beast of deadly portent",
       "back": null,
-      "image_hash": null,
+      "image_hash": "432ffb768217",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000838.json",
       "kairos_url": "https://kairosarchive.net/printings/P000838",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000838.432ffb768217.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000838.432ffb768217.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000838.432ffb768217.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000838.432ffb768217.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000839",
@@ -64424,13 +64449,18 @@
       "flavour_text": "",
       "typeline": "An Exceptional Beast of deadly portent",
       "back": null,
-      "image_hash": null,
+      "image_hash": "78e62d1f9962",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000839.json",
       "kairos_url": "https://kairosarchive.net/printings/P000839",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000839.78e62d1f9962.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000839.78e62d1f9962.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000839.78e62d1f9962.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000839.78e62d1f9962.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000840",
@@ -64493,13 +64523,18 @@
       "flavour_text": "",
       "typeline": "An Elite Mortal with duplicitous skills",
       "back": null,
-      "image_hash": null,
+      "image_hash": "c96fe3bd7340",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000842.json",
       "kairos_url": "https://kairosarchive.net/printings/P000842",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000842.c96fe3bd7340.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000842.c96fe3bd7340.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000842.c96fe3bd7340.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000842.c96fe3bd7340.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000843",
@@ -64516,13 +64551,18 @@
       "flavour_text": "",
       "typeline": "An Elite Mortal with duplicitous skills",
       "back": null,
-      "image_hash": null,
+      "image_hash": "51be7e9c2996",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P000843.json",
       "kairos_url": "https://kairosarchive.net/printings/P000843",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P000843.51be7e9c2996.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000843.51be7e9c2996.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000843.51be7e9c2996.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000843.51be7e9c2996.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P000844",
@@ -70036,13 +70076,18 @@
       "flavour_text": "",
       "typeline": "An Elite Aura of milk and honey",
       "back": null,
-      "image_hash": null,
+      "image_hash": "cbb7091b423e",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P001083.json",
       "kairos_url": "https://kairosarchive.net/printings/P001083",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P001083.cbb7091b423e.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P001083.cbb7091b423e.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P001083.cbb7091b423e.large.webp",
+        "original": "https://api.kairosarchive.net/images/P001083.cbb7091b423e.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P001084",
@@ -70059,13 +70104,18 @@
       "flavour_text": "",
       "typeline": "An Elite Aura of milk and honey",
       "back": null,
-      "image_hash": null,
+      "image_hash": "134e659154e5",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P001084.json",
       "kairos_url": "https://kairosarchive.net/printings/P001084",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P001084.134e659154e5.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P001084.134e659154e5.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P001084.134e659154e5.large.webp",
+        "original": "https://api.kairosarchive.net/images/P001084.134e659154e5.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P001085",
@@ -70680,13 +70730,18 @@
       "flavour_text": "",
       "typeline": "Elite Armor fit for any adventure",
       "back": null,
-      "image_hash": null,
+      "image_hash": "345904ec91ca",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P001111.json",
       "kairos_url": "https://kairosarchive.net/printings/P001111",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P001111.345904ec91ca.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P001111.345904ec91ca.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P001111.345904ec91ca.large.webp",
+        "original": "https://api.kairosarchive.net/images/P001111.345904ec91ca.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P001112",
@@ -70703,13 +70758,18 @@
       "flavour_text": "",
       "typeline": "Elite Armor fit for any adventure",
       "back": null,
-      "image_hash": null,
+      "image_hash": "a384ed53edee",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P001112.json",
       "kairos_url": "https://kairosarchive.net/printings/P001112",
-      "image_urls": null,
-      "image_status": "missing"
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P001112.a384ed53edee.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P001112.a384ed53edee.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P001112.a384ed53edee.large.webp",
+        "original": "https://api.kairosarchive.net/images/P001112.a384ed53edee.original.png"
+      },
+      "image_status": "lowres"
     },
     {
       "printing_id": "P001113",

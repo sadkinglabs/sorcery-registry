@@ -1,0 +1,245 @@
+{
+  "recipe": 1,
+  "printings": {
+    "P000290": {
+      "front": {
+        "key": "93dbd8484e16",
+        "recipe": 1,
+        "source": "001-albespine_pikemen-b-s.png",
+        "drive_id": "1CACap7D8CFuuKHUKEoNBJdCUO4nmIaKT",
+        "md5": "a3660a2a412ef9df9574562c80a851bb",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 607593,
+          "small": 13026,
+          "normal": 106494,
+          "large": 153938
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P000291": {
+      "front": {
+        "key": "93211b1a423c",
+        "recipe": 1,
+        "source": "001-albespine_pikemen-b-f.png",
+        "drive_id": "1JIYuIcP2iB7r7xfTBkRNfwaJXIMUUVNh",
+        "md5": "1a142cad5c4a99c221f788e4f5cdd1ee",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 601563,
+          "small": 13112,
+          "normal": 105374,
+          "large": 153374
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P000294": {
+      "front": {
+        "key": "bd49a0d5fe9f",
+        "recipe": 1,
+        "source": "001-alvalinne_dryads-b-s.png",
+        "drive_id": "1Lea8WND10DJxaILVxQyez6HcBcGb1ZP4",
+        "md5": "ab6ebee43f2b56afb8ae2874a7e9f3ff",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 598778,
+          "small": 11428,
+          "normal": 82110,
+          "large": 118154
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P000295": {
+      "front": {
+        "key": "ba58a1332eb2",
+        "recipe": 1,
+        "source": "001-alvalinne_dryads-b-f.png",
+        "drive_id": "12KgwU4Y-CoekfR1tYwzfe1epLWR2-bfw",
+        "md5": "e36dacdac07f9023d2679f50d5095919",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 581461,
+          "small": 11388,
+          "normal": 78408,
+          "large": 113716
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P000838": {
+      "front": {
+        "key": "432ffb768217",
+        "recipe": 1,
+        "source": "001-accursed_albatross-b-s.png",
+        "drive_id": "1gWaB6tIDU8TyEYJL1vd8HtewQzE_A_e9",
+        "md5": "db1ead978517b91d5e49541e35e60c6d",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 588149,
+          "small": 11630,
+          "normal": 73272,
+          "large": 103810
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P000839": {
+      "front": {
+        "key": "78e62d1f9962",
+        "recipe": 1,
+        "source": "001-accursed_albatross-b-f.png",
+        "drive_id": "1Reu0nmNfDemRYGxx3_vSYYOBbflgIobM",
+        "md5": "9f5d91c45193ccea26659ff10adbc4ba",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 573773,
+          "small": 11564,
+          "normal": 71840,
+          "large": 101418
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P000842": {
+      "front": {
+        "key": "c96fe3bd7340",
+        "recipe": 1,
+        "source": "001-adept_illusionist-b-s.png",
+        "drive_id": "19zC_n3pvqmWmc3TUMZigyhisHm3UXdGi",
+        "md5": "772bcdefc75568b47ea5e8423721e234",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 561057,
+          "small": 9890,
+          "normal": 66776,
+          "large": 99610
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P000843": {
+      "front": {
+        "key": "51be7e9c2996",
+        "recipe": 1,
+        "source": "001-adept_illusionist-b-f.png",
+        "drive_id": "1cahA8TNJlacYL7ibGfe5IiuBulJH5ryV",
+        "md5": "77f6096fc67b0774d85f38d4fcbddd98",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 527162,
+          "small": 9892,
+          "normal": 65312,
+          "large": 94996
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P001083": {
+      "front": {
+        "key": "cbb7091b423e",
+        "recipe": 1,
+        "source": "001-abundance-b-s.png",
+        "drive_id": "1dBo98-855UfEB8IOa36cimuCw87nO3xS",
+        "md5": "59e13fa6e0dba30f1259704257d5c4f3",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 579881,
+          "small": 10860,
+          "normal": 72826,
+          "large": 105384
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P001084": {
+      "front": {
+        "key": "134e659154e5",
+        "recipe": 1,
+        "source": "001-abundance-b-f.png",
+        "drive_id": "1YT7qj5fSSwLiNEk85G1RxfCOJ8oOwfVb",
+        "md5": "a59d43dd42a0b71221c43ab55e89b72a",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 567098,
+          "small": 11018,
+          "normal": 71006,
+          "large": 104214
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P001111": {
+      "front": {
+        "key": "345904ec91ca",
+        "recipe": 1,
+        "source": "001-all_terrain_vestments-b-s.png",
+        "drive_id": "1R6fUL5iSf-AcxytneqsGbZJvMRU6W158",
+        "md5": "49699c7c4b46a97fd7dc6a0b3ebec129",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 446280,
+          "small": 5918,
+          "normal": 41690,
+          "large": 63310
+        },
+        "fetched": "2026-09-14"
+      }
+    },
+    "P001112": {
+      "front": {
+        "key": "a384ed53edee",
+        "recipe": 1,
+        "source": "001-all_terrain_vestments-b-f.png",
+        "drive_id": "1ajaQSlDjv30zT1qvY-sVSiFRBEDTMDIS",
+        "md5": "a7614dbdb079c6030acbb5f4a8d99624",
+        "width": 380,
+        "height": 531,
+        "lowres": true,
+        "original_ext": "png",
+        "objects": {
+          "original": 435375,
+          "small": 6150,
+          "normal": 42624,
+          "large": 63532
+        },
+        "fetched": "2026-09-14"
+      }
+    }
+  }
+}
