@@ -38,6 +38,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write  # to dispatch the validate workflow on the branch it opens
 
 concurrency:
   group: images
@@ -156,3 +157,8 @@ jobs:
           git push origin "$BRANCH"
           gh pr create --fill --title "Images $(date -u +%Y-%m-%d)" \
             --body "Images fetched from the publisher's public folder, rendered, uploaded to the bucket and verified through the CDN; data/images.json records each source and key, and the export derives image_urls / image_status from it. Review the export diff, merge, then tag a release so the records reach the domain."
+          # A PR opened with this token does not trigger CI on its own
+          # (GitHub's rule against workflows triggering workflows); a
+          # workflow_dispatch is the allowed exception, so ask for the
+          # required check explicitly.
+          gh workflow run validate.yml --ref "$BRANCH"
