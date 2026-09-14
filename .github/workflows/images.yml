@@ -24,8 +24,13 @@ on:
         options: [list, sync]
         default: list
       limit:
-        description: "sync: at most this many images this run (0 = everything that changed)"
-        default: "0"
+        description: "sync: at most this many images this run (0 = everything that changed; default 1500, under Google's per-address allowance)"
+        default: "1500"
+  schedule:
+    # Weekly sync, Tuesday 06:00 UTC (the drift check runs Monday): a new
+    # set's images, or the rest of a batch Google cut short, arrive as a
+    # pull request without anyone dispatching.
+    - cron: "0 6 * * 2"
 
 permissions:
   contents: write
@@ -70,7 +75,7 @@ jobs:
           retention-days: 30
 
       - name: Commit the listing to the review branch
-        if: inputs.mode == 'list'
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'list'
         run: |
           git config user.name "registry-images"
           git config user.email "actions@github.com"
@@ -83,20 +88,20 @@ jobs:
       # ---- sync
 
       - name: Hosting must be configured
-        if: inputs.mode == 'sync' && env.R2_BUCKET == ''
+        if: (github.event_name == 'schedule' || inputs.mode == 'sync') && env.R2_BUCKET == ''
         run: |
           echo "::error::vars.R2_BUCKET is not set; images cannot be uploaded (see CONTRIBUTING, Hosting)"
           exit 1
 
       - name: Fetch what changed and render the renditions
-        if: inputs.mode == 'sync'
+        if: github.event_name == 'schedule' || inputs.mode == 'sync'
         env:
           GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
           LIMIT: ${{ inputs.limit }}
-        run: python -m registry.images fetch --listing review/image-listing.json --work work/images --limit "${LIMIT:-0}"
+        run: python -m registry.images fetch --listing review/image-listing.json --work work/images --limit "${LIMIT:-1500}"
 
       - name: Keep the failure report, if any
-        if: inputs.mode == 'sync' && always()
+        if: (github.event_name == 'schedule' || inputs.mode == 'sync') && always()
         uses: actions/upload-artifact@v4
         with:
           name: image-failures
@@ -105,21 +110,21 @@ jobs:
           retention-days: 30
 
       - name: Upload the rendered objects
-        if: inputs.mode == 'sync'
+        if: github.event_name == 'schedule' || inputs.mode == 'sync'
         run: python -m registry.images upload --work work/images --bucket "$R2_BUCKET"
 
       - name: Verify every held object through the CDN
-        if: inputs.mode == 'sync'
+        if: github.event_name == 'schedule' || inputs.mode == 'sync'
         run: python -m registry.images verify
 
       - name: Regenerate the export and validate
-        if: inputs.mode == 'sync'
+        if: github.event_name == 'schedule' || inputs.mode == 'sync'
         run: |
           python -m registry.export
           python -m registry.validate --against HEAD
 
       - name: Open a pull request if anything changed
-        if: inputs.mode == 'sync'
+        if: github.event_name == 'schedule' || inputs.mode == 'sync'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
