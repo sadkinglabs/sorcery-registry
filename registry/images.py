@@ -654,17 +654,25 @@ def progress_line(done, total, failed, elapsed):
 def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
                pause=0.5, sleep=time.sleep, log=print,
                max_consecutive_failures=MAX_CONSECUTIVE_FAILURES, local=None,
-               clock=time.monotonic, progress_every=PROGRESS_EVERY):
+               clock=time.monotonic, progress_every=PROGRESS_EVERY, budget_seconds=None):
     """Fetch every entry in turn. A file that fails after its retries is
     recorded and skipped - the run goes on, the state holds only what
     succeeded, and the next run tries the failure again - because one
     bad answer from Google must not discard hundreds of good ones. When
     several files in a row are refused, the address is blocked for the
-    day: the loop stops early and leaves the rest for the next run."""
+    day: the loop stops early and leaves the rest for the next run. A
+    time budget does the same on purpose: a GitHub job dies at six hours
+    with everything on its disk, so the fetch must stop while there is
+    still time to upload, verify and open the pull request."""
     failures = []
     consecutive = 0
     started = clock()
     for index, entry in enumerate(todo, 1):
+        if budget_seconds is not None and clock() - started >= budget_seconds:
+            remaining = len(todo) - index + 1
+            log(f"::notice::time budget of {budget_seconds / 60:.0f} min spent after {index - 1} files; "
+                f"stopping with {remaining} left for the next run", flush=True)
+            break
         try:
             key = fetch_one(entry, api_key, work, state, get_bytes=get_bytes, sleep=sleep, log=log,
                             local=local)
@@ -719,8 +727,11 @@ def cmd_fetch(args):
     print(f"{len(todo)} image(s) to fetch" + (f" from {args.source_dir}" if local else ""), flush=True)
     if limit and len(todo) == limit:
         print(f"(capped at {limit} this run; the next run continues where data/images.json says)", flush=True)
+    # No courtesy pause when reading a local copy or signed in: a signed
+    # request is metered by quota, and the download itself takes seconds.
     failures = fetch_many(todo, api_key, args.work, state, args.images,
-                          pause=0 if local else args.pause, local=local)
+                          pause=0 if (local or api_key.authenticated) else args.pause, local=local,
+                          budget_seconds=args.budget_minutes * 60 if args.budget_minutes else None)
     fetched = len(todo) - len(failures)
     print(f"fetched {fetched}, failed {len(failures)}", flush=True)
     held = sum(len(faces) for faces in state["printings"].values())
@@ -753,19 +764,37 @@ def cmd_upload(args):
     return subprocess.call(command)
 
 
-def cmd_verify(args):
-    from .hosted import _status
-    state = load_images(args.images)
-    problems = []
-    checked = 0
-    for name, size in image_objects(state):
+VERIFY_WORKERS = 16
+
+
+def verify_objects(objects, status=None, workers=VERIFY_WORKERS):
+    """HEAD every object through the CDN, several at a time (these are
+    our own addresses on our own CDN; tens of thousands one by one would
+    not fit a job). Returns the problems, in object order."""
+    from concurrent.futures import ThreadPoolExecutor
+    if status is None:
+        from .hosted import _status
+        status = _status
+
+    def check(item):
+        name, size = item
         url = f"{IMAGE_BASE}/{name}"
-        status, headers = _status(url)
-        checked += 1
-        if status != 200:
-            problems.append(f"{status} {url}")
-        elif headers.get("content-length") and int(headers["content-length"]) != size:
-            problems.append(f"{url}: served {headers['content-length']} bytes, rendered {size}")
+        code, headers = status(url)
+        if code != 200:
+            return f"{code} {url}"
+        if headers.get("content-length") and int(headers["content-length"]) != size:
+            return f"{url}: served {headers['content-length']} bytes, rendered {size}"
+        return None
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return [problem for problem in pool.map(check, objects) if problem]
+
+
+def cmd_verify(args):
+    state = load_images(args.images)
+    objects = image_objects(state)
+    problems = verify_objects(objects)
+    checked = len(objects)
     if problems:
         print("::error::objects named in data/images.json are not served as rendered:")
         print("\n".join(problems[:50]))
@@ -799,6 +828,9 @@ def main(argv=None):
                         "unpacked) instead of downloading; no API key needed")
     p.add_argument("--failures", default="review/image-failures.json")
     p.add_argument("--strict", action="store_true", help="exit 1 if any file failed")
+    p.add_argument("--budget-minutes", type=float, default=None,
+                   help="stop fetching after this long so the run can still upload, verify and open "
+                        "its PR; the next run continues where data/images.json says")
     p.set_defaults(run=cmd_fetch)
 
     p = sub.add_parser("upload", help="copy the rendered objects into the bucket")

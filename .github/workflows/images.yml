@@ -104,7 +104,9 @@ jobs:
           GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
           LIMIT: ${{ inputs.limit }}
         # No --limit: everything with a service account, 1,500 anonymously.
-        run: python -m registry.images fetch --listing review/image-listing.json --work work/images ${LIMIT:+--limit "$LIMIT"}
+        # The budget leaves the six-hour job time to upload, verify and open
+        # the PR; the next run continues from data/images.json.
+        run: python -m registry.images fetch --listing review/image-listing.json --work work/images --budget-minutes 240 ${LIMIT:+--limit "$LIMIT"}
 
       - name: Keep the failure report, if any
         if: (github.event_name == 'schedule' || inputs.mode == 'sync') && always()

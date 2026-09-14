@@ -556,6 +556,54 @@ class ListingWarningsTest(unittest.TestCase):
         self.assertIn("slug_history", out[2])
 
 
+class TimeBudgetTest(unittest.TestCase):
+    def test_fetch_stops_when_the_budget_is_spent_and_keeps_what_it_got(self):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow not installed")
+        import hashlib, tempfile
+        from pathlib import Path
+        from registry.images import RENDITION_RECIPE, fetch_many, load_images
+        good = _png(20, 28)
+        md5 = hashlib.md5(good).hexdigest()
+        entries = [{"id": f"f{i}", "name": f"001-c{i}-b-s.png", "md5": md5, "printing_id": f"P{i:06d}", "face": "front"}
+                   for i in range(10)]
+        ticks = iter(range(0, 1000, 10))  # every clock() call is ten seconds later
+        lines = []
+        with tempfile.TemporaryDirectory() as tmp:
+            state = {"recipe": RENDITION_RECIPE, "printings": {}}
+            failures = fetch_many(entries, "K", Path(tmp) / "w", state, Path(tmp) / "images.json",
+                                  get_bytes=lambda url: good, sleep=lambda s: None,
+                                  log=lambda line, **k: lines.append(line),
+                                  clock=lambda: next(ticks), progress_every=0, budget_seconds=25)
+            held = load_images(Path(tmp) / "images.json")["printings"]
+        self.assertEqual(failures, [])
+        self.assertLess(len(held), 10)                      # stopped early
+        self.assertGreater(len(held), 0)                    # kept what it got
+        self.assertTrue(any("time budget" in line and "left for the next run" in line for line in lines))
+
+
+class VerifyTest(unittest.TestCase):
+    def test_objects_are_checked_concurrently_and_problems_named(self):
+        from registry.images import verify_objects
+        objects = [("a.webp", 10), ("b.webp", 20), ("c.png", 30)]
+        seen = []
+
+        def status(url):
+            seen.append(url)
+            if url.endswith("b.webp"):
+                return 404, {}
+            if url.endswith("c.png"):
+                return 200, {"content-length": "31"}
+            return 200, {"content-length": "10"}
+        problems = verify_objects(objects, status=status, workers=4)
+        self.assertEqual(len(seen), 3)
+        self.assertEqual(len(problems), 2)
+        self.assertTrue(problems[0].startswith("404 "))
+        self.assertIn("served 31 bytes, rendered 30", problems[1])
+
+
 class LocalSourceTest(unittest.TestCase):
     def test_a_local_copy_of_the_folder_replaces_the_download(self):
         try:
