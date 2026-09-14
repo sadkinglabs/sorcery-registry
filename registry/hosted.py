@@ -180,6 +180,21 @@ def verify_root(base_url, tag, dist):
         return 1
     print(f"verified {root}: registry.json {actual}, index.json {tag}, "
           f"cards/{card}.json, slugs/{slug}.json")
+
+    # CORS is a bucket setting outside the release's control: report it,
+    # never fail on it - a browser client needs it, a curl client does not.
+    try:
+        with _request(f"{root}/registry.json.sha256",
+                      headers={"Origin": "https://kairosarchive.net"}) as response:
+            allowed = response.headers.get("Access-Control-Allow-Origin")
+    except Exception as error:  # pragma: no cover - network
+        allowed = f"(request failed: {error})"
+    if allowed == "*":
+        print("cors: any origin may read the release")
+    else:
+        print(f"::warning::the bucket sends no permissive CORS header "
+              f"(Access-Control-Allow-Origin={allowed!r}); browsers on other origins cannot "
+              f"fetch the objects until the bucket's CORS policy is set in the dashboard")
     return 0
 
 

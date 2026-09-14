@@ -77,14 +77,14 @@ The workflow switches the hosted steps on when these repository **variables** ex
 What the hosted steps guarantee, in order (`.github/workflows/release.yml`, helpers in `registry/hosted.py`):
 
 1. **Immutability.** A root already marked `RELEASED` is not re-uploaded (a re-run after a GitHub-side failure only redoes the pointers and the release). A root that already carries a *different* `registry.json.sha256` fails the run: bytes at a published path never change - release a new version instead.
-2. **Upload** of `dist/` to `/<tag>/` with a one-year immutable cache header, plus the bucket's CORS (`GET`/`HEAD` from any origin).
+2. **Upload** of `dist/` to `/<tag>/` with a one-year immutable cache header. It also tries to set the bucket's CORS policy, which an *Object Read & Write* token is not allowed to do; that is a warning, not a failure, because CORS is a one-off bucket setting made in the dashboard (R2 → bucket → Settings → CORS policy) with this JSON: `[{"AllowedOrigins": ["*"], "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["*"], "ExposeHeaders": ["ETag"], "MaxAgeSeconds": 86400}]`. The verification step reports whether the CDN sends the permissive header.
 3. **Every `image_urls` value in the export answers `HEAD 200`** through the CDN, so no published record ever references an image that is not served.
 4. **Verification by bytes**: the served `registry.json` hashes to the committed digest, `index.json` names the tag and the root, a card object and a slug object answer as JSON. Only then is `RELEASED` written (the digest and the run URL).
 5. **`versions.json`** is rebuilt from the one currently served plus this release (`python -m registry.versions`; newest first, `latest` per major only moves forward, a changed digest for a listed tag is refused) and uploaded with a 60-second cache.
 6. **The alias flips** - the redirect rule's target becomes `/<tag>/` - only if `versions.json` now names this tag as the newest of its major, and the workflow confirms the alias redirects there before continuing. One operation, so no client ever sees a mixed dataset.
 7. The GitHub release, then the website rebuild.
 
-A failed run leaves at most a partial root without `RELEASED` - never listed, never aliased, harmless - and re-running the same tag resumes it (same bytes) or refuses it (different bytes). Two releases cannot interleave: the workflow runs in a concurrency group.
+A failed run leaves at most a partial root without `RELEASED` - never listed, never aliased, harmless - and re-running the same tag resumes it (same bytes, objects compared by size so the resume is quick) or refuses it (different bytes). A dispatched re-run reuses the tag it already created, provided it still names the same commit. Two releases cannot interleave: the workflow runs in a concurrency group.
 
 ## When a sync is ambiguous
 
