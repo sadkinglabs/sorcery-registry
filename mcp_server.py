@@ -344,7 +344,8 @@ class Registry:
                 continue
             results.append({k: card.get(k) for k in
                             ("codex_id", "name", "type", "category", "rarity",
-                             "elements", "keywords", "cost", "errata", "rules_text")})
+                             "elements", "keywords", "cost", "attack", "defense",
+                             "power", "errata", "rules_text")})
         results.sort(key=lambda c: c["codex_id"])
         return {"total_matches": len(results), "returned": min(len(results), limit),
                 "cards": results[:limit]}

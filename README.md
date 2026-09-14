@@ -75,7 +75,7 @@ No keys, no signup. Two courtesies are required of automated clients: send a `Us
 
 ```jsonc
 {
-  "header":        { "schema_version": 9, "source": "...", "sets": 6, "cards": 1100, ... },
+  "header":        { "schema_version": 10, "source": "...", "sets": 6, "cards": 1100, ... },
   "sets":          [ { "set_code": "001", "set_name": "Alpha", "released_at": "2023-06-22",
                        "cards": 407, "printings": 817,
                        "api_url": "https://api.kairosarchive.net/v3/sets/001.json",
@@ -83,7 +83,7 @@ No keys, no signup. Two courtesies are required of automated clients: send a `Us
   "cards":         [ { "codex_id": "C000001", "name": "Apprentice Wizard",
                        "type": "Minion", "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
                        "subtypes": ["Mortal"], "elements": ["Air"], "keywords": ["Genesis", "Spellcaster"],
-                       "umbrellas": [], "cost": 3, "attack": 1, "defense": 1, "life": null,
+                       "umbrellas": [], "cost": 3, "attack": 1, "defense": 1, "power": 1, "life": null,
                        "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
                        "rules_text": "Spellcaster\nGenesis → Draw a spell.", "back": null, "errata": false,
                        "set_codes": ["001", "002", "999"],
@@ -114,6 +114,7 @@ Practical notes:
 
 - **Key on the IDs, treat everything else as data.** `slug`, `set_code`, `set_name`, `card_name` are conveniences that can change; `codex_id` and `printing_id` cannot. Sets are identified by their two official facts: `set_code` (001 = Alpha, 002 = Beta, 006 = Gothic; 003 is deliberately unused, so the codes are labels, not an order) and `set_name`, the official display name. Both are published exactly as upstream states them - the registry invents no codes of its own.
 - **Gameplay data lives on the card; physical facts live on the printing.** This is how the official API is organised, and the registry mirrors it. `rules_text`, stats, thresholds, `keywords` and the rest describe the card and apply to every printing of it; a printing carries set, product, finish, slug, artist, typeline and flavour text. There is no such thing as "the text printed in Alpha": a card plays by its current text wherever it was printed.
+- **`power` is derived, on every face.** Sorcery's power equals attack when attack and defense are equal, otherwise ⌊(attack + defense) / 2⌋ (null when either is null). The registry publishes it on cards, back faces and every `card_history` row so every consumer computes the same number and none has to know the rule.
 - **Lists are lists.** `subtypes`, `elements`, `keywords` and `umbrellas` are arrays, in upstream's own order. `["None"]` in `elements` means colourless. `slot` is the rarity slot a card is distributed in and agrees with `rarity` except where nothing is printed on the card (Avatars, some tokens). `umbrellas` are the cross-subtype groups rules text refers to (Evil, Knight, Royalty).
 - **Double-faced cards have a `back`.** For the two physically double-faced cards (Druid, Foot Soldier) the card's `back` carries the full gameplay data of the reverse face, and each printing's `back` its artist and typeline. Everything else is a front; `back` is `null` for every other card.
 - **Printings are readable on their own.** Each printing carries `card_name`, derived at export time from the card its `codex_id` points at, so a printing record never needs a join just to be understood. It's a convenience copy: the card record stays the source of truth for card-level data.

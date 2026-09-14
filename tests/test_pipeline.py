@@ -606,14 +606,14 @@ class BackFaceRoundTripTest(unittest.TestCase):
 
 
 class MigrationTest(unittest.TestCase):
-    def test_v9_records_the_version_and_refuses_anything_but_v8(self):
+    def test_v10_records_the_version_and_refuses_anything_but_v9(self):
         from registry.db import get_meta, set_meta
-        from registry.migrate_v9 import migrate
+        from registry.migrate_v10 import migrate
         con = open_db(":memory:")
         init_db(con)
-        set_meta(con, "schema_version", "8")
+        set_meta(con, "schema_version", "9")
         migrate(con)
-        self.assertEqual(get_meta(con, "schema_version"), "9")
+        self.assertEqual(get_meta(con, "schema_version"), "10")
         with self.assertRaises(ValueError):
             migrate(con)
 
@@ -795,6 +795,41 @@ class RecordAddressesTest(unittest.TestCase):
         self.assertIn("card C000001: api_url", errors[0])
         self.assertIn("image_status 'ok' disagrees", errors[1])
         self.assertIn("set 001: kairos_url", errors[2])
+
+
+class DerivedPowerTest(unittest.TestCase):
+    def test_the_rule(self):
+        from registry.export import power
+        self.assertEqual(power(3, 3), 3)        # equal: the shared value
+        self.assertEqual(power(4, 2), 3)        # mean
+        self.assertEqual(power(3, 2), 2)        # floor of the mean
+        self.assertEqual(power(0, 5), 2)
+        self.assertIsNone(power(None, 2))
+        self.assertIsNone(power(2, None))
+
+    def test_every_face_carries_power_after_defense(self):
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["engine"]["attack"], raw[0]["engine"]["defense"] = 5, 2
+        raw[0]["engine"]["back"] = engine(type="Avatar", category="Avatar", rarity=None,
+                                          attack=3, defense=3)
+        raw[0]["printings"][0]["meta"]["back"] = {
+            "finish": "Standard", "product": "Booster", "flavor": None,
+            "typeline": "Back", "artist": {"name": "B", "slug": "b"}}
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        export = build_export(con, images={"printings": {}})
+        wizard = export["cards"][0]
+        keys = list(wizard)
+        self.assertEqual(keys[keys.index("defense") + 1], "power")
+        self.assertEqual(wizard["power"], 3)
+        self.assertEqual(wizard["back"]["power"], 3)
+        self.assertEqual(list(wizard["back"])[list(wizard["back"]).index("defense") + 1], "power")
+        site = export["cards"][1]
+        self.assertIsNone(site["power"])   # a site has no attack or defense
+        row = next(r for r in export["card_history"] if r["codex_id"] == "C000001")
+        self.assertEqual(row["power"], 3)
+        self.assertEqual(row["back"]["power"], 3)
 
 
 class HistoryValidationTest(unittest.TestCase):

@@ -25,12 +25,32 @@ def checksum_path(export_path):
     return export_path.with_name(export_path.name + ".sha256")
 
 
+def power(attack, defense):
+    """Sorcery's derived power: equal to attack when attack equals defense,
+    otherwise the floor of their mean; null when either is null. Published
+    so every consumer computes the same number - the site's pow: search,
+    a deck tool's sort - and none has to know the rule."""
+    if attack is None or defense is None:
+        return None
+    return attack if attack == defense else (attack + defense) // 2
+
+
+def with_power(record):
+    """The same record with power inserted after defense."""
+    out = {}
+    for key, value in record.items():
+        out[key] = value
+        if key == "defense":
+            out["power"] = power(record.get("attack"), record.get("defense"))
+    return out
+
+
 def _face(value, fields):
     """A back face in fixed key order, or None. Stored JSON has sorted
     keys; the export reads in the same order as the front face."""
     if value is None:
         return None
-    return {field: value.get(field) for field in fields}
+    return with_power({field: value.get(field) for field in fields})
 
 
 # Renditions of a card image: the three sized ones are WebP, "original"
@@ -192,6 +212,7 @@ def build_export(con, images=None):
         record = {"codex_id": format_card_id(row["card_id"])}
         for field in CARD_FIELDS:
             record[field] = decode_field(field, row[field])
+        record = with_power(record)
         record["back"] = _face(record["back"], FACE_FIELDS)
         record["errata"] = bool(row["errata"])
         record["set_codes"] = sorted(set_codes_by_card.get(row["card_id"], set()))
@@ -277,6 +298,7 @@ def build_export(con, images=None):
                      "valid_to": row["valid_to"]}
             for field in HISTORY_FIELDS:
                 entry[field] = face.get(field)
+            entry = with_power(entry)
             entry["back"] = _face(entry["back"], FACE_FIELDS)
             card_history.append(entry)
 

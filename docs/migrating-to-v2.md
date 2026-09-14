@@ -1,4 +1,18 @@
-# Migrating to v3.1 (from v3.0), v3.0 (from v2.0) and v2.0 (from v1.x)
+# Migrating to v3.2 (from v3.1), v3.1 (from v3.0), v3.0 (from v2.0) and v2.0 (from v1.x)
+
+## v3.1 → v3.2 (schema 9 → 10)
+
+Additive; **no identifier changed**. The images landed and one derived value was added:
+
+| New | On | Value |
+|---|---|---|
+| `power` | cards, `back` faces, `card_history` rows (after `defense`) | Sorcery's derived power: equal to attack when attack equals defense, otherwise ⌊(attack + defense) / 2⌋; null when either is null |
+| `image_status: "lowres"` | cards, printings | a third value: held and served in every rendition, but the publisher's file was upscaled to fill the large rendition (the early sets ship at 380×531) |
+| `image_urls` filled in | printings, `back` faces, cards | the fields existed since v3.1 as null; they now carry addresses under `api.kairosarchive.net/images/` for every printing the publisher's folder has a file for |
+| `image_hash` filled in | printings | the art-version key behind those addresses |
+
+`index/cards.json` gains `attack`, `defense`, `power`, `life` and `image_status`; `index/printings.json` gains `image_hash` and `image_status`. A consumer validating against the schema needs the v3.2 schema; one reading fields by name needs nothing.
+
 
 ## v3.0 → v3.1 (schema 8 → 9)
 

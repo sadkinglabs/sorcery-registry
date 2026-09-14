@@ -49,8 +49,8 @@ DIST_PATH = Path("dist")
 PRINTING_SUMMARY = ("printing_id", "slug", "set_code", "set_name", "released_at",
                     "product", "finish", "printed_as_current", "retired_at")
 CARD_INDEX = ("codex_id", "name", "type", "category", "rarity", "elements",
-              "keywords", "subtypes", "cost", "errata", "set_codes",
-              "default_printing_id", "image_status")
+              "keywords", "subtypes", "cost", "attack", "defense", "power", "life",
+              "errata", "set_codes", "default_printing_id", "image_status")
 PRINTING_INDEX = ("printing_id", "codex_id", "slug", "set_code", "product",
                   "finish", "printed_as_current", "retired_at", "image_hash",
                   "image_status")
