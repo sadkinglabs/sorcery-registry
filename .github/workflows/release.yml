@@ -124,7 +124,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install mcp jsonschema
+        run: pip install mcp jsonschema pillow
 
       - name: Tests and invariants on the tagged commit
         run: |

@@ -1,0 +1,20 @@
+{
+  "_comment": "Human decisions about files in the publisher's image folder that the naming rule cannot place. assign: file -> printing and face, with the reason. ignore: files that must not be used, with the reason. Every entry is an audit trail, like data/overrides.json.",
+  "assign": {
+    "004-foot_soldiers-bt-s.png": {
+      "printing_id": "P003076",
+      "face": "front",
+      "reason": "The folder pluralises the Arthurian Legends box-topper Foot Soldier (registry slug 004-foot_soldier-bt-s). Byte-identical (same MD5) to 004-foot_soldiers_english-bt-s.png, the English face, which the API models as the front."
+    },
+    "004-foot_soldiers-bt-s-r.png": {
+      "printing_id": "P003076",
+      "face": "back",
+      "reason": "Reverse of the above. Byte-identical to 004-foot_soldiers_saracen-bt-s.png, the Saracen face, which the API models as the back."
+    }
+  },
+  "ignore": {
+    "004-foot_soldiers_english-bt-s.png": "Same bytes as 004-foot_soldiers-bt-s.png, which is used for P003076's front.",
+    "004-foot_soldiers_saracen-bt-s.png": "Same bytes as 004-foot_soldiers-bt-s-r.png, which is used for P003076's back.",
+    "999-waypoint_portal-d-s.png": "No such printing upstream: the API lists Waypoint Portal's Dust promo only as foil (999-waypoint_portal-d-f). Kept out until upstream lists a standard-finish printing; the registry does not invent printings from image files."
+  }
+}

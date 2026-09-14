@@ -44,12 +44,24 @@ Every card, printing and set record - in the export, in the per-object files, in
 
 A slug object exists for every slug in `slug_history`, current or superseded. That is the migration path as a URL: a tool holding a pre-rename slug fetches `slugs/{old}.json` and receives the permanent ids and the current slug. A 404 here means the slug never existed in the registry under any naming convention.
 
+## Images
+
+Card images live under `https://api.kairosarchive.net/images/`, hosted by the registry as the publisher's guidance asks. Every printing carries `image_urls` for its front face (and `back.image_urls` for a double-faced printing), every card its default printing's, and `image_status` says what to expect:
+
+| `image_status` | meaning |
+|---|---|
+| `missing` | the registry holds no image for this face; `image_urls` is null |
+| `lowres` | held and served in every rendition, but the publisher's file was too small for the large rendition and was upscaled (the early sets ship at 380×531) |
+| `ok` | held at full size (744×1039 sources) |
+
+Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680, `large` 672×936, all WebP with the aspect preserved (a rendition may be a pixel narrower than nominal), plus `original`, the publisher's file untouched in its own format. Object names are self-describing and permanent: `{printing_id}.{key}.{rendition}.{ext}`, with `.back` before the rendition for a back face (`P000937.ab12cd34ef56.normal.webp`, `P001762.9f8e7d6c5b4a.back.large.webp`). `key` is the art-version key, sha256(original bytes ‖ encoding recipe) truncated to 12 hex, published on the printing as `image_hash`: new art or a new recipe is a new key and a new address, and the bytes at an old address never change, so cache them forever. The indexes carry `image_hash` and `image_status` so a client can build any address from the scheme above without fetching the printing object. Images are © Erik's Curiosa, served for archive, identification and site function; hotlinking is allowed, with credit ([usage terms](usage.md)).
+
 ## Indexes, for client-side search
 
 The registry has ~1,100 cards; filtering them in the client is a millisecond. These are the compact lists to do it with:
 
-- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `errata`, `set_codes`, `default_printing_id` per card (~220 KB).
-- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `product`, `finish`, `printed_as_current`, `retired_at` per printing (~500 KB).
+- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `errata`, `set_codes`, `default_printing_id`, `image_status` per card (~230 KB).
+- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `product`, `finish`, `printed_as_current`, `retired_at`, `image_hash`, `image_status` per printing (~600 KB).
 - `index/slugs.json` - `{slug: printing_id}` for every slug ever (~100 KB).
 
 ## History, whole

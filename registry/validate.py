@@ -37,6 +37,7 @@ from pathlib import Path
 from . import SCHEMA_VERSION
 from .db import HISTORY_FIELDS, decode_field, face_of, get_meta, open_db
 from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, render
+from .images import load_images
 from .ids import id_number
 
 REQUIRED_TRIGGERS = {
@@ -191,6 +192,7 @@ def check_export_matches(con, export_path, errors):
         if card["printing_ids"] != sorted(card["printing_ids"]):
             errors.append(f"card {card['codex_id']}: printing_ids is not sorted")
     check_addresses(export, errors)
+    check_images(export, load_images(), errors)
 
 
 def check_addresses(export, errors):
@@ -212,7 +214,7 @@ def check_addresses(export, errors):
     def check_image(kind, own_id, record):
         has_urls = record.get("image_urls") is not None
         status = record.get("image_status")
-        if has_urls != (status == "ok"):
+        if has_urls != (status in ("ok", "lowres")):
             errors.append(f"{kind} {own_id}: image_status {status!r} disagrees with "
                           f"image_urls being {'present' if has_urls else 'null'}")
         if has_urls and not all(own_id in url for url in record["image_urls"].values()):
@@ -229,6 +231,25 @@ def check_addresses(export, errors):
         check_image("printing", printing["printing_id"], printing)
     for set_entry in export["sets"]:
         check("set", set_entry, "set_code", set_entry["set_code"])
+
+
+def check_images(export, images, errors):
+    """data/images.json may only name printings that exist, and a back
+    image only for a printing that has a back face; every held face must
+    show up in the export exactly as held."""
+    by_id = {p["printing_id"]: p for p in export["printings"]}
+    for pid, faces in images.get("printings", {}).items():
+        printing = by_id.get(pid)
+        if printing is None:
+            errors.append(f"data/images.json names unknown printing {pid}")
+            continue
+        for face, held in faces.items():
+            if face == "back" and printing["back"] is None:
+                errors.append(f"data/images.json holds a back image for {pid}, which has no back face")
+                continue
+            urls = printing["image_urls"] if face == "front" else printing["back"]["image_urls"]
+            if not urls or held["key"] not in urls["small"]:
+                errors.append(f"{pid} {face}: export does not carry the held key {held['key']}")
 
 
 def check_against_ref(con, ref, export_path, errors):

@@ -666,14 +666,17 @@ class RecordAddressesTest(unittest.TestCase):
     derived from the ids at export time, so they can never disagree with
     the record they sit on."""
 
-    def _export(self, overrides=None):
+    HELD = {"recipe": 1, "printings": {
+        "P000001": {"front": {"key": "ab12cd34ef56", "lowres": False, "original_ext": "png"}}}}
+
+    def _export(self, overrides=None, images=None):
         con = open_db(":memory:")
         init_db(con)
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
         if overrides:
             apply_overrides(snapshot, overrides)
         apply_plan(con, diff(load_registry_state(con), snapshot), "2026-08-19")
-        return build_export(con)
+        return build_export(con, images=images if images is not None else {"printings": {}})
 
     def test_cards_printings_and_sets_carry_their_addresses(self):
         export = self._export()
@@ -711,14 +714,14 @@ class RecordAddressesTest(unittest.TestCase):
         self.assertIsNone(image_urls("P000937", None))
 
     def test_a_card_carries_its_default_printings_image(self):
-        # image_hash is registry-owned; an override is the one way to set
-        # it outside the image pipeline, which is exactly what a test needs.
-        export = self._export([{"match": {"card_name": "Apprentice Wizard",
-                                          "set_name": "Alpha"},
-                                "set_fields": {"image_hash": "ab12cd34ef56"},
-                                "reason": "test"}])
+        # What the registry holds comes from data/images.json, never from
+        # the database: the export is handed that document.
+        export = self._export(images=self.HELD)
         printing = export["printings"][0]
         self.assertEqual(printing["image_status"], "ok")
+        self.assertEqual(printing["image_hash"], "ab12cd34ef56")
+        self.assertEqual(printing["image_urls"]["original"],
+                         "https://api.kairosarchive.net/images/P000001.ab12cd34ef56.original.png")
         self.assertEqual(printing["image_urls"]["small"],
                          "https://api.kairosarchive.net/images/P000001.ab12cd34ef56.small.webp")
         card = export["cards"][0]
@@ -751,11 +754,30 @@ class RecordAddressesTest(unittest.TestCase):
             self.skipTest("jsonschema not installed")
         schema_file = Path(__file__).resolve().parent.parent / "schema" / "registry.schema.json"
         schema = json.loads(schema_file.read_text(encoding="utf-8"))
-        export = json.loads(render(self._export([{
-            "match": {"card_name": "Apprentice Wizard"},
-            "set_fields": {"image_hash": "ab12cd34ef56"}, "reason": "test"}])))
+        held = copy.deepcopy(self.HELD)
+        held["printings"]["P000002"] = {"front": {"key": "0123456789ab", "lowres": True,
+                                                  "original_ext": "jpg"}}
+        export = json.loads(render(self._export(images=held)))
         errors = list(jsonschema.Draft202012Validator(schema).iter_errors(export))
         self.assertEqual(errors, [], [e.message for e in errors[:3]])
+        self.assertEqual(export["printings"][1]["image_status"], "lowres")
+        self.assertTrue(export["printings"][1]["image_urls"]["original"].endswith(".original.jpg"))
+
+    def test_validator_ties_the_held_images_to_the_export(self):
+        from registry.validate import check_images
+        export = self._export(images=self.HELD)
+        errors = []
+        check_images(export, self.HELD, errors)
+        self.assertEqual(errors, [])
+        wrong = {"printings": {"P000001": {"front": {"key": "ffffffffffff"},
+                                           "back": {"key": "0123456789ab"}},
+                               "P000099": {"front": {"key": "0123456789ab"}}}}
+        errors = []
+        check_images(export, wrong, errors)
+        self.assertEqual(len(errors), 3, errors)
+        self.assertIn("does not carry the held key", errors[0])
+        self.assertIn("has no back face", errors[1])
+        self.assertIn("unknown printing P000099", errors[2])
 
     def test_validator_catches_addresses_that_name_another_record(self):
         from registry.validate import check_addresses

@@ -98,7 +98,7 @@ class MappingTest(unittest.TestCase):
         self.assertTrue(by_name["001-Apprentice-Wizard-B-F.PNG"]["slug_is_current"])
         self.assertEqual([u["name"] for u in mapping["unmapped"]], ["card-back.png"])
         self.assertEqual(mapping["duplicates"],
-                         {"P000003": ["004-witch-b-s.png", "004-witch-b-s.jpg"]})
+                         {"P000003/front": ["004-witch-b-s.png", "004-witch-b-s.jpg"]})
         self.assertEqual(mapping["printings_without_file"], [])
 
     def test_missing_printings_are_listed(self):
@@ -138,3 +138,170 @@ class SummaryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DecisionsAndFacesTest(unittest.TestCase):
+    EXPORT = {
+        "printings": [
+            {"printing_id": "P000001", "slug": "001-apprentice-wizard-b-s", "back": None},
+            {"printing_id": "P000009", "slug": "004-druid-bt-s", "back": {"artist": "x"}},
+            {"printing_id": "P000010", "slug": "004-foot_soldier-bt-s", "back": {"artist": "y"}},
+        ],
+        "slug_history": [
+            {"slug": "001-apprentice-wizard-b-s", "printing_id": "P000001"},
+            {"slug": "004-druid-bt-s", "printing_id": "P000009"},
+            {"slug": "004-foot_soldier-bt-s", "printing_id": "P000010"},
+        ],
+    }
+
+    def test_r_suffix_is_the_back_face_only_when_the_printing_has_one(self):
+        files = [{"name": "004-druid-bt-s.png", "path": ""},
+                 {"name": "004-druid-bt-s-r.png", "path": ""},
+                 {"name": "001-apprentice-wizard-b-s-r.png", "path": ""}]
+        mapping = map_listing(files, self.EXPORT)
+        faces = {(m["printing_id"], m["face"]): m["name"] for m in mapping["mapped"]}
+        self.assertEqual(faces[("P000009", "front")], "004-druid-bt-s.png")
+        self.assertEqual(faces[("P000009", "back")], "004-druid-bt-s-r.png")
+        self.assertEqual([u["name"] for u in mapping["unmapped"]],
+                         ["001-apprentice-wizard-b-s-r.png"])
+        self.assertEqual(mapping["printings_without_file"], ["P000001", "P000010"])
+        self.assertEqual(mapping["backs_without_file"], ["P000010"])
+
+    def test_decisions_assign_and_ignore_with_reasons(self):
+        decisions = {"assign": {"004-foot_soldiers-bt-s.png": {"printing_id": "P000010", "face": "front", "reason": "plural"},
+                                "004-foot_soldiers-bt-s-r.png": {"printing_id": "P000010", "face": "back", "reason": "plural"}},
+                     "ignore": {"004-foot_soldiers_english-bt-s.png": "same bytes"}}
+        files = [{"name": n, "path": ""} for n in ("004-foot_soldiers-bt-s.png", "004-foot_soldiers-bt-s-r.png",
+                                                   "004-foot_soldiers_english-bt-s.png")]
+        mapping = map_listing(files, self.EXPORT, decisions)
+        faces = {(m["printing_id"], m["face"]): m for m in mapping["mapped"]}
+        self.assertEqual(faces[("P000010", "front")]["decided"], "plural")
+        self.assertEqual(faces[("P000010", "back")]["name"], "004-foot_soldiers-bt-s-r.png")
+        self.assertEqual([i["name"] for i in mapping["ignored"]], ["004-foot_soldiers_english-bt-s.png"])
+        self.assertEqual(mapping["unmapped"], [])
+        self.assertEqual(mapping["backs_without_file"], ["P000009"])
+
+    def test_the_committed_decisions_file_is_well_formed(self):
+        from registry.images import load_decisions
+        decisions = load_decisions()
+        self.assertIn("004-foot_soldiers-bt-s.png", decisions["assign"])
+        for entry in decisions["assign"].values():
+            self.assertTrue(entry["reason"])
+
+    def test_a_decision_without_a_reason_is_refused(self):
+        import json, tempfile
+        from pathlib import Path
+        from registry.images import load_decisions
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "d.json"
+            path.write_text(json.dumps({"assign": {"x.png": {"printing_id": "P1", "face": "front"}}}))
+            with self.assertRaises(ValueError):
+                load_decisions(path)
+
+
+def _png(width, height):
+    from PIL import Image
+    import io
+    image = Image.new("RGB", (width, height), (120, 40, 200))
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+class RenditionTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            raise unittest.SkipTest("Pillow not installed")
+
+    def test_hires_source_renders_scryfall_sizes_and_is_not_lowres(self):
+        from PIL import Image
+        import io
+        from registry.images import is_lowres, render
+        renditions, (w, h) = render(_png(744, 1039))
+        self.assertEqual((w, h), (744, 1039))
+        self.assertFalse(is_lowres(w))
+        sizes = {name: (wd, ht) for name, (_, wd, ht) in renditions.items()}
+        self.assertEqual(sizes["small"][1], 204)
+        self.assertEqual(sizes["normal"][1], 680)
+        self.assertEqual(sizes["large"][1], 936)
+        for name, (data, wd, ht) in renditions.items():
+            self.assertLessEqual(wd, dict((n, bw) for n, bw, _ in __import__("registry.images", fromlist=["RENDITIONS"]).RENDITIONS)[name])
+            with Image.open(io.BytesIO(data)) as image:
+                self.assertEqual(image.format, "WEBP")
+                self.assertEqual(image.size, (wd, ht))
+
+    def test_lowres_source_is_upscaled_and_flagged(self):
+        from registry.images import is_lowres, render
+        renditions, (w, h) = render(_png(380, 531))
+        self.assertTrue(is_lowres(w))
+        self.assertEqual(renditions["large"][2], 936)   # upscaled, the owner's decision
+        self.assertEqual(renditions["small"][2], 204)
+
+    def test_art_key_changes_with_the_bytes_and_with_the_recipe(self):
+        from registry.images import art_key
+        a, b = _png(10, 14), _png(10, 15)
+        self.assertEqual(len(art_key(a)), 12)
+        self.assertNotEqual(art_key(a), art_key(b))
+        self.assertNotEqual(art_key(a, recipe=1), art_key(a, recipe=2))
+        self.assertEqual(art_key(a), art_key(a))
+
+    def test_object_names_are_self_describing(self):
+        from registry.images import object_name
+        self.assertEqual(object_name("P000937", "ab12cd34ef56", "front", "normal", "webp"),
+                         "P000937.ab12cd34ef56.normal.webp")
+        self.assertEqual(object_name("P000937", "ab12cd34ef56", "back", "original", "png"),
+                         "P000937.ab12cd34ef56.back.original.png")
+
+
+class FetchStateTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            raise unittest.SkipTest("Pillow not installed")
+
+    def test_fetch_one_writes_objects_and_records_the_source(self):
+        import hashlib, tempfile
+        from pathlib import Path
+        from registry.images import RENDITION_RECIPE, fetch_one, image_objects, load_images, plan_fetch, save_images
+        original = _png(744, 1039)
+        entry = {"id": "drive1", "name": "006-witch-b-s.png", "md5": hashlib.md5(original).hexdigest(),
+                 "printing_id": "P000005", "face": "front"}
+        with tempfile.TemporaryDirectory() as tmp:
+            state = {"recipe": RENDITION_RECIPE, "printings": {}}
+            key = fetch_one(entry, "KEY", Path(tmp) / "work", state,
+                            get_bytes=lambda url: original, today="2026-09-14")
+            held = state["printings"]["P000005"]["front"]
+            self.assertEqual(held["key"], key)
+            self.assertEqual(held["md5"], entry["md5"])
+            self.assertEqual((held["width"], held["height"]), (744, 1039))
+            self.assertFalse(held["lowres"])
+            self.assertEqual(held["original_ext"], "png")
+            self.assertEqual(set(held["objects"]), {"original", "small", "normal", "large"})
+            names = sorted(p.name for p in (Path(tmp) / "work").iterdir())
+            self.assertEqual(names, sorted(n for n, _ in image_objects(state)))
+            self.assertIn(f"P000005.{key}.original.png", names)
+            # Persisted and reloaded, the same file is not fetched again;
+            # a changed MD5 or recipe is.
+            save_images(state, Path(tmp) / "images.json")
+            reloaded = load_images(Path(tmp) / "images.json")
+            mapping = {"mapped": [entry]}
+            self.assertEqual(plan_fetch(mapping, reloaded), [])
+            changed = dict(entry, md5="different")
+            self.assertEqual(plan_fetch({"mapped": [changed]}, reloaded), [changed])
+            reloaded["recipe"] = RENDITION_RECIPE + 1
+            self.assertEqual(plan_fetch(mapping, reloaded), [entry])
+
+    def test_a_download_that_does_not_match_the_listing_is_refused(self):
+        import tempfile
+        from pathlib import Path
+        from registry.images import RENDITION_RECIPE, fetch_one
+        entry = {"id": "drive1", "name": "x.png", "md5": "not-it", "printing_id": "P1", "face": "front"}
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(RuntimeError):
+                fetch_one(entry, "KEY", Path(tmp), {"recipe": RENDITION_RECIPE, "printings": {}},
+                          get_bytes=lambda url: _png(10, 14))

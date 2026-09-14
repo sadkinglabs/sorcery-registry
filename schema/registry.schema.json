@@ -189,7 +189,7 @@
               "type": "null"
             }
           ],
-          "description": "Derived: the back face's own image renditions; null while the registry holds none (always null today)."
+          "description": "Derived: the back face's own image renditions; null while the registry holds none."
         }
       },
       "required": [
@@ -208,7 +208,7 @@
         "small": {
           "type": "string",
           "format": "uri",
-          "description": "146x204 WebP: search results, lists."
+          "description": "146x204 WebP (aspect preserved, so possibly a pixel narrower): search results, lists."
         },
         "normal": {
           "type": "string",
@@ -239,9 +239,10 @@
       "type": "string",
       "enum": [
         "missing",
+        "lowres",
         "ok"
       ],
-      "description": "missing: the registry holds no image for this face (image_urls null). ok: every rendition in image_urls is served."
+      "description": "missing: the registry holds no image for this face (image_urls null). lowres: held and served in every rendition, but the publisher's file was too small for the large rendition and was upscaled (the early sets ship at 380x531). ok: held at full size."
     }
   },
   "type": "object",
@@ -661,7 +662,7 @@
               "string",
               "null"
             ],
-            "description": "Registry-owned art-version key of this printing's front image, set by the image pipeline; null until then. image_urls is derived from it."
+            "description": "The art-version key of this printing's front image - sha256(original bytes || encoding recipe)[:12], recorded in data/images.json by the image pipeline; null while the registry holds none. image_urls is derived from it; a new key means new art or a new recipe, never changed bytes at an old address."
           },
           "printed_as_current": {
             "type": [
@@ -700,7 +701,7 @@
                 "type": "null"
               }
             ],
-            "description": "Derived from image_hash: the front face's image renditions, null while the registry holds none."
+            "description": "Derived: the front face's image renditions, null while the registry holds none."
           },
           "image_status": {
             "$ref": "#/$defs/imageStatus"
