@@ -11,7 +11,10 @@ name: images
 #           export. Nothing reaches main except through that PR, and no
 #           published record references an image until the release
 #           workflow has checked it again.
-# Toward Google: a plain API key (public files only), one request at a
+# Toward Google: a service account's bearer token (secret
+# GDRIVE_SERVICE_ACCOUNT; it reads only what is public, but counts against
+# the project's quota instead of the abuse filter that blocks anonymous
+# cloud addresses), falling back to a plain API key; one request at a
 # time, identified. Toward the publisher: the same courtesy their API
 # asks for. The aws CLI is only the S3 client for R2.
 
@@ -24,8 +27,8 @@ on:
         options: [list, sync]
         default: list
       limit:
-        description: "sync: at most this many images this run (0 = everything that changed; default 1500, under Google's per-address allowance)"
-        default: "1500"
+        description: "sync: at most this many images this run (empty: everything with a service account, 1500 anonymously; 0 forces everything)"
+        default: ""
   schedule:
     # Weekly sync, Tuesday 06:00 UTC (the drift check runs Monday): a new
     # set's images, or the rest of a batch Google cut short, arrive as a
@@ -60,10 +63,11 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install pillow jsonschema
+        run: pip install pillow jsonschema google-auth requests
 
       - name: List the public folder and map files to printings
         env:
+          GDRIVE_SERVICE_ACCOUNT: ${{ secrets.GDRIVE_SERVICE_ACCOUNT }}
           GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
         run: python -m registry.images list --out review/image-listing.json
 
@@ -96,9 +100,11 @@ jobs:
       - name: Fetch what changed and render the renditions
         if: github.event_name == 'schedule' || inputs.mode == 'sync'
         env:
+          GDRIVE_SERVICE_ACCOUNT: ${{ secrets.GDRIVE_SERVICE_ACCOUNT }}
           GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
           LIMIT: ${{ inputs.limit }}
-        run: python -m registry.images fetch --listing review/image-listing.json --work work/images --limit "${LIMIT:-1500}"
+        # No --limit: everything with a service account, 1,500 anonymously.
+        run: python -m registry.images fetch --listing review/image-listing.json --work work/images ${LIMIT:+--limit "$LIMIT"}
 
       - name: Keep the failure report, if any
         if: (github.event_name == 'schedule' || inputs.mode == 'sync') && always()

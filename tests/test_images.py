@@ -460,6 +460,87 @@ class ProgressTest(unittest.TestCase):
         self.assertEqual([p.split(" ")[1] for p in progress], ["3/7", "6/7", "7/7"])
 
 
+class FakeCredentials:
+    def __init__(self, valid=True, token="tok"):
+        self.valid, self.token, self.refreshed = valid, token, 0
+
+    def refresh(self, request):
+        self.valid, self.token, self.refreshed = True, "fresh", self.refreshed + 1
+
+
+class DriveAuthTest(unittest.TestCase):
+    def test_api_key_is_anonymous_and_travels_in_the_url(self):
+        from registry.images import DriveAuth
+        auth = DriveAuth(api_key="K")
+        self.assertFalse(auth.authenticated)
+        self.assertEqual(auth.params(), {"key": "K"})
+        self.assertEqual(auth.headers(), {})
+        self.assertEqual(auth.download_url("f 1"), "https://www.googleapis.com/drive/v3/files/f%201?alt=media&key=K")
+        fetch = auth.fetch(lambda url: url)  # the anonymous fetcher is handed back untouched
+        self.assertEqual(fetch("u"), "u")
+
+    def test_service_account_signs_every_request_and_keeps_the_key_out_of_urls(self):
+        from registry.images import DriveAuth
+        auth = DriveAuth(api_key="K", credentials=FakeCredentials())
+        self.assertTrue(auth.authenticated)
+        self.assertEqual(auth.params(), {})
+        self.assertEqual(auth.headers(), {"Authorization": "Bearer tok"})
+        self.assertEqual(auth.download_url("f1"), "https://www.googleapis.com/drive/v3/files/f1?alt=media")
+        seen = []
+        auth.fetch(lambda url, headers=None: seen.append((url, headers)))("u")
+        self.assertEqual(seen, [("u", {"Authorization": "Bearer tok"})])
+
+    def test_expired_token_is_refreshed_before_use(self):
+        from registry.images import bearer_token
+        creds = FakeCredentials(valid=False, token=None)
+        self.assertEqual(bearer_token(creds, request_factory=lambda: "req"), "fresh")
+        self.assertEqual(creds.refreshed, 1)
+        self.assertEqual(bearer_token(creds, request_factory=lambda: "req"), "fresh")
+        self.assertEqual(creds.refreshed, 1)  # still valid: no second refresh
+
+    def test_neither_identity_is_an_error_and_the_key_is_the_fallback(self):
+        from registry.images import DriveAuth
+        with self.assertRaises(ValueError):
+            DriveAuth.from_env(environ={})
+        self.assertFalse(DriveAuth.from_env(environ={"GDRIVE_API_KEY": "K"}).authenticated)
+
+    def test_listing_sends_the_bearer_token_instead_of_the_key(self):
+        from registry.images import DriveAuth, list_folder
+        calls = []
+
+        def drive(url, headers=None):
+            calls.append((url, headers))
+            return {"files": []}
+        list_folder("root", DriveAuth(credentials=FakeCredentials()), get=drive, pause=0)
+        self.assertEqual(len(calls), 1)
+        self.assertNotIn("key=", calls[0][0])
+        self.assertEqual(calls[0][1], {"Authorization": "Bearer tok"})
+
+    def test_fetch_one_downloads_with_the_bearer_token(self):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow not installed")
+        import hashlib, tempfile
+        from pathlib import Path
+        from registry.images import RENDITION_RECIPE, DriveAuth, fetch_one
+        good = _png(20, 28)
+        seen = []
+
+        def fake(url, headers=None):
+            seen.append((url, headers))
+            return good
+        entry = {"id": "f1", "name": "001-a-b-s.png", "md5": hashlib.md5(good).hexdigest(),
+                 "printing_id": "P000001", "face": "front"}
+        with tempfile.TemporaryDirectory() as tmp:
+            state = {"recipe": RENDITION_RECIPE, "printings": {}}
+            fetch_one(entry, DriveAuth(credentials=FakeCredentials()), Path(tmp) / "w", state,
+                      get_bytes=fake, sleep=lambda s: None, log=lambda *a, **k: None)
+        self.assertEqual(seen, [("https://www.googleapis.com/drive/v3/files/f1?alt=media",
+                                 {"Authorization": "Bearer tok"})])
+        self.assertIn("P000001", state["printings"])
+
+
 class LocalSourceTest(unittest.TestCase):
     def test_a_local_copy_of_the_folder_replaces_the_download(self):
         try:
