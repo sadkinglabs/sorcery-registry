@@ -70,3 +70,32 @@ jobs:
           curl -sSI -A "$ua" -H "Origin: https://example.com" -H "Access-Control-Request-Method: GET" -X OPTIONS "$BASE/$TAG/index.json" | grep -i -E '^(HTTP|access-control)' || true
           echo "== anonymous client (no User-Agent): expect 403 from the WAF rule"
           curl -sS -o /dev/null -A "" -H "User-Agent:" -w "%{http_code}\n" "$BASE/$TAG/index.json"
+
+      - name: Inspect served images (alpha channel, corners) on one face of each resolution family
+        run: |
+          if [ ! -f data/images.json ]; then echo "no images held at $TAG"; exit 0; fi
+          pip install -q pillow
+          python - <<'PY'
+          import io, json, urllib.request
+          from PIL import Image
+          from registry.export import face_urls
+          state = json.load(open("data/images.json"))
+          picked = {}
+          for pid, faces in state["printings"].items():
+              held = faces.get("front")
+              if held and held["lowres"] not in picked:
+                  picked[held["lowres"]] = (pid, held)
+          for lowres, (pid, held) in sorted(picked.items()):
+              for rendition in ("original", "small"):
+                  url = face_urls(pid, held)[rendition]
+                  req = urllib.request.Request(url, headers={"User-Agent": "sorcery-registry-check (+https://kairosarchive.net)"})
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      data = r.read(); ctype = r.headers.get("Content-Type")
+                  with Image.open(io.BytesIO(data)) as im:
+                      w, h = im.size
+                      rgba = im.convert("RGBA")
+                      corners = [rgba.getpixel(p)[3] for p in ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1))]
+                      centre = rgba.getpixel((w // 2, h // 2))[3]
+                      print(f"{'lowres' if lowres else 'ok    '} {pid} {rendition:8} {im.format} {im.mode} {w}x{h} {len(data)//1024}K {ctype}"
+                            f" | alpha channel: {'yes' if 'A' in im.getbands() else 'no'} | corner alpha: {corners} | centre alpha: {centre}")
+          PY
