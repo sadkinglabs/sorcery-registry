@@ -541,6 +541,21 @@ class DriveAuthTest(unittest.TestCase):
         self.assertIn("P000001", state["printings"])
 
 
+class ListingWarningsTest(unittest.TestCase):
+    def test_quiet_when_every_file_is_placed(self):
+        from registry.images import listing_warnings
+        base = {"unmapped": 0, "faces_claimed_twice": 0, "mapped_to_superseded_slug": 0}
+        self.assertEqual(listing_warnings(base), [])
+
+    def test_each_kind_of_drift_is_named(self):
+        from registry.images import listing_warnings
+        out = listing_warnings({"unmapped": 3, "faces_claimed_twice": 1, "mapped_to_superseded_slug": 40})
+        self.assertEqual(len(out), 3)
+        self.assertIn("3 file(s)", out[0]); self.assertIn("image-decisions", out[0])
+        self.assertIn("claimed by two files", out[1])
+        self.assertIn("slug_history", out[2])
+
+
 class LocalSourceTest(unittest.TestCase):
     def test_a_local_copy_of_the_folder_replaces_the_download(self):
         try:

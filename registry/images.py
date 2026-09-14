@@ -418,6 +418,25 @@ def summarize(files, mapping):
     }
 
 
+def listing_warnings(summary):
+    """What a maintainer must look at after a listing: the folder holds
+    files the naming rule cannot place, or names two files for one face,
+    or the publisher's naming has drifted so far that mapped files are
+    reached through superseded slugs. Each is a GitHub annotation, so the
+    weekly run shows it on the run page without anyone opening a log."""
+    warnings = []
+    if summary["unmapped"]:
+        warnings.append(f"{summary['unmapped']} file(s) in the folder map to no printing; "
+                        f"decide them in data/image-decisions.json (assign or ignore, with a reason)")
+    if summary["faces_claimed_twice"]:
+        warnings.append(f"{summary['faces_claimed_twice']} face(s) are claimed by two files; "
+                        f"decide which one in data/image-decisions.json")
+    if summary["mapped_to_superseded_slug"]:
+        warnings.append(f"{summary['mapped_to_superseded_slug']} file(s) are named by a slug the "
+                        f"API no longer uses; the folder lags the API (harmless, resolved through slug_history)")
+    return warnings
+
+
 def render_summary(summary):
     lines = [f"files: {summary['files']} in {len(summary['folders'])} folder(s), "
              f"{summary['bytes_total'] / 1e6:.0f} MB total, largest {summary['bytes_largest'] / 1e6:.1f} MB"]
@@ -555,6 +574,9 @@ def cmd_list(args):
                               indent=2, ensure_ascii=False) + "\n",
                    encoding="utf-8", newline="\n")
     print(render_summary(summary))
+    for warning in listing_warnings(summary):
+        print(f"::warning::{warning}", flush=True)
+    step_summary("### Folder listing\n\n```\n" + render_summary(summary) + "\n```\n")
     print(f"wrote {out}")
     return 0
 
