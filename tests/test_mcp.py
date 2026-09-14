@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import os
+import sys
 import tempfile
 import time
 import unittest
@@ -284,6 +285,23 @@ class _Response:
 
     def json(self):
         return json.loads(self.content)
+
+
+class UserAgentTest(unittest.TestCase):
+    def test_every_request_identifies_the_server(self):
+        seen = {}
+
+        class FakeRequests:
+            @staticmethod
+            def get(url, **kwargs):
+                seen.update(url=url, **kwargs)
+                return _Response(200, b"{}")
+
+        with mock.patch.dict(sys.modules, {"requests": FakeRequests}):
+            mcp_server._get("https://example.test/x", timeout=5)
+        self.assertEqual(seen["headers"]["User-Agent"], mcp_server.USER_AGENT)
+        self.assertIn("kairosarchive.net", mcp_server.USER_AGENT)
+        self.assertEqual(seen["timeout"], 5)
 
 
 class PublishedExportTest(unittest.TestCase):
