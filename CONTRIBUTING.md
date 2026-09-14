@@ -113,7 +113,7 @@ python -m registry.export && python -m registry.validate --against origin/main
 git checkout -b images/$(date -u +%Y-%m-%d) && git add data/images.json export/ && git commit -m "images: ..." && git push -u origin HEAD
 ```
 
-Then open the pull request. The R2 values are the same ones the release workflow holds as secrets; keep them in your shell session only. `data/images.json` is saved after every file, so an interrupted run resumes.
+Then open the pull request. The R2 values are the same ones the release workflow holds as secrets; keep them in your shell session only. `data/images.json` is saved after every file, so an interrupted run resumes. The fetch prints a `progress:` line every 100 files (handled, fetched, failed, rate, time left); on GitHub the same counts land in the run's step summary.
 
 The renditions are Scryfall's (small 146×204, normal 488×680, large 672×936 WebP, plus the untouched original). Everything that determines the rendered bytes is `RENDITION_RECIPE` in `registry/images.py`: bump it when the sizes, quality or resampling change, and the next sync re-renders every image under a new key, so no published address ever changes bytes. The publisher's files come in two resolutions; the low one (380×531) is upscaled by decision and flagged `image_status: lowres`.
 

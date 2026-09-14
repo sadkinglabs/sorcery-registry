@@ -528,9 +528,21 @@ def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None, sle
     return key
 
 
+PROGRESS_EVERY = 100
+
+
+def progress_line(done, total, failed, elapsed):
+    """One line a reader can act on: how far, how fast, how much longer."""
+    rate = done / elapsed if elapsed > 0 else 0.0
+    left = (total - done) / rate if rate > 0 else 0.0
+    return (f"progress: {done}/{total} handled, {done - failed} fetched, {failed} failed, "
+            f"{elapsed / 60:.1f} min elapsed, {rate * 60:.0f}/min, about {left / 60:.0f} min left")
+
+
 def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
                pause=0.5, sleep=time.sleep, log=print,
-               max_consecutive_failures=MAX_CONSECUTIVE_FAILURES, local=None):
+               max_consecutive_failures=MAX_CONSECUTIVE_FAILURES, local=None,
+               clock=time.monotonic, progress_every=PROGRESS_EVERY):
     """Fetch every entry in turn. A file that fails after its retries is
     recorded and skipped - the run goes on, the state holds only what
     succeeded, and the next run tries the failure again - because one
@@ -539,6 +551,7 @@ def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
     day: the loop stops early and leaves the rest for the next run."""
     failures = []
     consecutive = 0
+    started = clock()
     for index, entry in enumerate(todo, 1):
         try:
             key = fetch_one(entry, api_key, work, state, get_bytes=get_bytes, sleep=sleep, log=log,
@@ -553,14 +566,24 @@ def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
                 log(f"::warning::{consecutive} files refused in a row; Google is refusing this "
                     f"address. Stopping with {remaining} left for the next run.", flush=True)
                 break
-            sleep(pause)
-            continue
-        consecutive = 0
-        save_images(state, images_path)  # progress survives an interrupted run
-        log(f"[{index}/{len(todo)}] {entry['printing_id']} {entry['face']} <- {entry['name']} -> {key}",
-            flush=True)
+        else:
+            consecutive = 0
+            save_images(state, images_path)  # progress survives an interrupted run
+            log(f"[{index}/{len(todo)}] {entry['printing_id']} {entry['face']} <- {entry['name']} -> {key}",
+                flush=True)
+        if progress_every and (index % progress_every == 0 or index == len(todo)):
+            log(progress_line(index, len(todo), len(failures), clock() - started), flush=True)
         sleep(pause)
     return failures
+
+
+def step_summary(markdown):
+    """Append to the GitHub Actions step summary when running there, so the
+    run page answers "how many?" without opening a log. A no-op elsewhere."""
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(markdown)
 
 
 def cmd_fetch(args):
@@ -581,6 +604,9 @@ def cmd_fetch(args):
                           pause=0 if local else args.pause, local=local)
     fetched = len(todo) - len(failures)
     print(f"fetched {fetched}, failed {len(failures)}", flush=True)
+    held = sum(len(faces) for faces in state["printings"].values())
+    step_summary(f"### Images\n\n{len(todo)} to fetch, **{fetched} fetched**, {len(failures)} failed; "
+                 f"{held} face(s) now held in `{args.images}`.\n")
     if failures:
         report = Path(args.failures)
         report.parent.mkdir(parents=True, exist_ok=True)
