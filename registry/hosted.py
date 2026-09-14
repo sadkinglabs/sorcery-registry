@@ -109,17 +109,31 @@ def redirect_rule(base_url, major, tag, description=None):
 # Network parts (standard library only)
 # --------------------------------------------------------------------------
 
-def _request(url, method="GET", data=None, headers=None, timeout=30):
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """urlopen follows redirects silently; a probe that asks "does this
+    URL redirect?" must see the 3xx itself, not where it leads."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_OPENER = urllib.request.build_opener()
+_NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
+def _request(url, method="GET", data=None, headers=None, timeout=30, follow_redirects=True):
     request = urllib.request.Request(url, data=data, method=method,
                                      headers={"User-Agent": USER_AGENT, **(headers or {})})
-    return urllib.request.urlopen(request, timeout=timeout)
+    opener = _OPENER if follow_redirects else _NO_REDIRECT_OPENER
+    return opener.open(request, timeout=timeout)
 
 
-def _status(url, method="HEAD"):
+def _status(url, method="HEAD", follow_redirects=True):
     """(status, headers) with header names lower-cased: servers differ in
-    case (Content-Type, content-type) and the checks must not."""
+    case (Content-Type, content-type) and the checks must not. With
+    follow_redirects=False a 3xx is returned as such, Location included."""
     try:
-        with _request(url, method) as response:
+        with _request(url, method, follow_redirects=follow_redirects) as response:
             return response.status, {k.lower(): v for k, v in response.headers.items()}
     except urllib.error.HTTPError as error:
         return error.code, {k.lower(): v for k, v in error.headers.items()}
@@ -234,7 +248,7 @@ def flip_alias(base_url, major, tag, versions_path, zone, rule_id, attempts=20):
     probe = f"{base_url.rstrip('/')}/{major}/index.json"
     want = f"{base_url.rstrip('/')}/{tag}/index.json"
     for _ in range(attempts):
-        status, headers = _status(probe, method="GET")
+        status, headers = _status(probe, method="GET", follow_redirects=False)
         if status == 302 and headers.get("location") == want:
             print(f"{major} alias now redirects to {tag}")
             return 0
