@@ -1,0 +1,72 @@
+name: check-domain
+
+# On demand: prove what api.kairosarchive.net serves right now, from a
+# runner (the maintainers' own machines may not reach it). Runs the same
+# verification the release performs - registry.json digest, index.json,
+# a card and a slug object, the CORS header - against a release root, and
+# shows the alias redirect and versions.json. Read-only: no credentials.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release root to verify, e.g. v3.1.0 (empty: the newest in versions.json)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY_BASE_URL: ${{ vars.REGISTRY_BASE_URL }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve the base URL and the tag
+        env:
+          TAG_INPUT: ${{ inputs.tag }}
+        run: |
+          base="${REGISTRY_BASE_URL:-https://api.kairosarchive.net}"
+          case "$base" in http://*|https://*) ;; *) base="https://$base";; esac
+          base="${base%/}"
+          echo "BASE=$base" >> "$GITHUB_ENV"
+          echo "== versions.json"
+          curl -fsS -A "sorcery-registry-check (+https://kairosarchive.net)" "$base/versions.json" | tee "$RUNNER_TEMP/versions.json"
+          tag="$TAG_INPUT"
+          if [ -z "$tag" ]; then
+            tag=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['latest']['v3'])" "$RUNNER_TEMP/versions.json")
+          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "checking $base/$tag/"
+
+      - name: Fetch what the release built, to compare against
+        run: |
+          # The published objects are rebuilt from the tagged export so the
+          # digest and index can be compared exactly as the release did.
+          git fetch --depth 1 origin "refs/tags/$TAG:refs/tags/$TAG"
+          git checkout -q "$TAG"
+          MAJOR="${TAG%%.*}"
+          python -m registry.publish --dataset-version "$TAG" --base-url "$BASE/$TAG" --latest-url "$BASE/$MAJOR" --out dist
+
+      - name: Verify the release root (digest, index, objects, CORS)
+        run: python -m registry.hosted verify-root --base-url "$BASE" --tag "$TAG" --dist dist
+
+      - name: Show the edge behaviour
+        run: |
+          ua="sorcery-registry-check (+https://kairosarchive.net)"
+          echo "== alias: $BASE/v3/index.json"
+          curl -sS -o /dev/null -A "$ua" -w "%{http_code} -> %{redirect_url}\n" "$BASE/v3/index.json"
+          echo "== headers on the release root"
+          curl -sSI -A "$ua" "$BASE/$TAG/registry.json.sha256" | grep -i -E '^(HTTP|cache-control|cf-cache-status|content-type|access-control|etag)' || true
+          echo "== CORS preflight from another origin"
+          curl -sSI -A "$ua" -H "Origin: https://example.com" -H "Access-Control-Request-Method: GET" -X OPTIONS "$BASE/$TAG/index.json" | grep -i -E '^(HTTP|access-control)' || true
+          echo "== anonymous client (no User-Agent): expect 403 from the WAF rule"
+          curl -sS -o /dev/null -A "" -H "User-Agent:" -w "%{http_code}\n" "$BASE/$TAG/index.json"
