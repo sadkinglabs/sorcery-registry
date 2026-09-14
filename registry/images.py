@@ -101,7 +101,9 @@ def _get_json(url):
 
 class DriveError(RuntimeError):
     """An HTTP failure from Drive, with the reason Google gives (e.g.
-    userRateLimitExceeded, downloadQuotaExceeded) when the body is JSON."""
+    userRateLimitExceeded, downloadQuotaExceeded) when the body is JSON.
+    Google's HTML "Sorry..." page - shown when it decides an address is
+    sending automated traffic - is reported as reason "blocked"."""
 
     def __init__(self, code, url, body=b""):
         self.code = code
@@ -111,15 +113,23 @@ class DriveError(RuntimeError):
             errors = json.loads(text).get("error", {}).get("errors", [])
             self.reason = errors[0].get("reason") if errors else None
         except (ValueError, AttributeError):
-            pass
+            if "<html" in text.lower() and code in (403, 429):
+                self.reason = "blocked"
+        detail = "" if self.reason == "blocked" else f": {text[:200]!r}"
         super().__init__(f"Drive API {code} ({self.reason or 'no reason given'}) for "
-                         f"{_redact(url)}: {text[:200]!r}")
+                         f"{_redact(url)}{detail}")
 
 
 # Google throttles anonymous downloads; these come back on a good day
 # after a pause. Anything else is a real answer.
 RETRIABLE_REASONS = {"userRateLimitExceeded", "rateLimitExceeded", "quotaExceeded",
                      "backendError", "internalError"}
+# The block page lasts longer than a throttle: one long wait, then give
+# the file up so the run can decide to stop (see fetch_many).
+BLOCK_WAIT_SECONDS = 90
+# After this many files in a row refused, the address is blocked for the
+# day: stop fetching and let the run publish what it has.
+MAX_CONSECUTIVE_FAILURES = 5
 
 
 def _get_bytes(url):
@@ -140,11 +150,18 @@ def retriable(error):
 
 def get_with_retry(url, get_bytes=_get_bytes, attempts=6, sleep=time.sleep, log=print):
     """Fetch, backing off 2, 4, 8, 16, 32 seconds on throttling and
-    transient failures; anything else is raised at once."""
+    transient failures; one long wait on Google's block page; anything
+    else is raised at once."""
     for attempt in range(1, attempts + 1):
         try:
             return get_bytes(url)
         except Exception as error:
+            if isinstance(error, DriveError) and error.reason == "blocked":
+                if attempt > 1:
+                    raise
+                log(f"  blocked by Google; waiting {BLOCK_WAIT_SECONDS}s once: {error}", flush=True)
+                sleep(BLOCK_WAIT_SECONDS)
+                continue
             if not retriable(error) or attempt == attempts:
                 raise
             delay = 2 ** attempt
@@ -453,10 +470,11 @@ def cmd_list(args):
     return 0
 
 
-def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None):
+def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None, sleep=time.sleep,
+              log=print):
     """Download one mapped file, render it, write the objects under `work`
     and record the source in `state` (not yet saved)."""
-    original = get_with_retry(download_url(entry["id"], api_key), get_bytes)
+    original = get_with_retry(download_url(entry["id"], api_key), get_bytes, sleep=sleep, log=log)
     md5 = hashlib.md5(original).hexdigest()
     if entry.get("md5") and md5 != entry["md5"]:
         raise RuntimeError(f"{entry['name']}: downloaded MD5 {md5} differs from the listing's "
@@ -490,21 +508,32 @@ def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None):
 
 
 def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
-               pause=0.5, sleep=time.sleep, log=print):
+               pause=0.5, sleep=time.sleep, log=print,
+               max_consecutive_failures=MAX_CONSECUTIVE_FAILURES):
     """Fetch every entry in turn. A file that fails after its retries is
     recorded and skipped - the run goes on, the state holds only what
     succeeded, and the next run tries the failure again - because one
-    bad answer from Google must not discard hundreds of good ones."""
+    bad answer from Google must not discard hundreds of good ones. When
+    several files in a row are refused, the address is blocked for the
+    day: the loop stops early and leaves the rest for the next run."""
     failures = []
+    consecutive = 0
     for index, entry in enumerate(todo, 1):
         try:
-            key = fetch_one(entry, api_key, work, state, get_bytes=get_bytes)
+            key = fetch_one(entry, api_key, work, state, get_bytes=get_bytes, sleep=sleep, log=log)
         except Exception as error:  # noqa: BLE001 - recorded, not swallowed
             failures.append({"name": entry["name"], "printing_id": entry["printing_id"],
                              "face": entry["face"], "error": str(error)})
             log(f"[{index}/{len(todo)}] FAILED {entry['name']}: {error}", flush=True)
+            consecutive += 1
+            if consecutive >= max_consecutive_failures:
+                remaining = len(todo) - index
+                log(f"::warning::{consecutive} files refused in a row; Google is refusing this "
+                    f"address. Stopping with {remaining} left for the next run.", flush=True)
+                break
             sleep(pause)
             continue
+        consecutive = 0
         save_images(state, images_path)  # progress survives an interrupted run
         log(f"[{index}/{len(todo)}] {entry['printing_id']} {entry['face']} <- {entry['name']} -> {key}",
             flush=True)
@@ -591,7 +620,9 @@ def main(argv=None):
     p.add_argument("--listing", default=str(LISTING_PATH))
     p.add_argument("--images", default=str(IMAGES_PATH))
     p.add_argument("--work", default=str(WORK_PATH))
-    p.add_argument("--limit", type=int, default=0, help="at most N images this run (0: all)")
+    p.add_argument("--limit", type=int, default=1500,
+                   help="at most N images this run (0: all). Google refuses an address after "
+                        "roughly 1,600 anonymous downloads; the default stays under it")
     p.add_argument("--only", nargs="*", default=None, help="printing ids to restrict to")
     p.add_argument("--pause", type=float, default=0.5)
     p.add_argument("--failures", default="review/image-failures.json")

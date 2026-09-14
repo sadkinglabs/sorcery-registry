@@ -375,3 +375,62 @@ class ResilienceTest(unittest.TestCase):
             self.assertIn("downloadQuotaExceeded", failures[0]["error"])
             held = load_images(Path(tmp) / "images.json")
             self.assertEqual(sorted(held["printings"]), ["P1", "P3"])
+
+
+class BlockDetectionTest(unittest.TestCase):
+    def _blocked(self):
+        from registry.images import DriveError
+        return DriveError(403, "https://x/files/1?alt=media&key=SECRET",
+                          b"<html><head><title>Sorry...</title></head><body>automated queries</body></html>")
+
+    def test_the_html_block_page_is_recognised_and_waited_out_once(self):
+        from registry.images import BLOCK_WAIT_SECONDS, DriveError, get_with_retry
+        error = self._blocked()
+        self.assertEqual(error.reason, "blocked")
+        self.assertNotIn("SECRET", str(error))
+        self.assertNotIn("<html", str(error))
+        slept, calls = [], []
+
+        def fake(url):
+            calls.append(url)
+            if len(calls) == 1:
+                raise error
+            return b"ok"
+        self.assertEqual(get_with_retry("u", fake, sleep=slept.append, log=lambda *a, **k: None), b"ok")
+        self.assertEqual(slept, [BLOCK_WAIT_SECONDS])
+        calls.clear(); slept.clear()
+        with self.assertRaises(DriveError):
+            get_with_retry("u", lambda url: (_ for _ in ()).throw(self._blocked()), sleep=slept.append,
+                           log=lambda *a, **k: None)
+        self.assertEqual(slept, [BLOCK_WAIT_SECONDS])  # one long wait, then give the file up
+
+    def test_consecutive_refusals_stop_the_run_and_keep_what_succeeded(self):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow not installed")
+        import hashlib, tempfile
+        from pathlib import Path
+        from registry.images import RENDITION_RECIPE, fetch_many, load_images
+        good = _png(20, 28)
+        md5 = hashlib.md5(good).hexdigest()
+        entries = [{"id": f"f{i}", "name": f"001-c{i}-b-s.png", "md5": md5, "printing_id": f"P{i:06d}", "face": "front"}
+                   for i in range(12)]
+        calls = []
+
+        def fake(url):
+            calls.append(url)
+            n = int(__import__("re").search(r"/files/f(\d+)\?", url).group(1))
+            if n >= 3:
+                raise self._blocked()
+            return good
+        with tempfile.TemporaryDirectory() as tmp:
+            state = {"recipe": RENDITION_RECIPE, "printings": {}}
+            failures = fetch_many(entries, "K", Path(tmp) / "w", state, Path(tmp) / "images.json",
+                                  get_bytes=fake, sleep=lambda s: None, log=lambda *a, **k: None,
+                                  max_consecutive_failures=3)
+            self.assertEqual(len(failures), 3)             # stopped after three in a row
+            self.assertEqual(sorted(load_images(Path(tmp) / "images.json")["printings"]),
+                             ["P000000", "P000001", "P000002"])
+            # 3 successes + 3 refusals x 2 attempts each (one long wait per file): no churn beyond that
+            self.assertEqual(len(calls), 3 + 3 * 2)
