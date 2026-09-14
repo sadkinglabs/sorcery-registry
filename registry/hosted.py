@@ -144,14 +144,36 @@ def _read(url):
         return response.read()
 
 
+def missing_images(urls, status=None, workers=8, per_second=15, sleep=None, attempts=3):
+    """The referenced addresses the CDN does not answer 200 for, checked a
+    few at a time and paced under the zone's own rate rule (200 requests
+    per 10 seconds per address); a 429 is waited out and retried. Same
+    discipline as the image sync's verification, see registry/images.py."""
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    from .images import Pacer, RATE_LIMITED_WAIT
+    status = status or _status
+    sleep = sleep or time.sleep
+    pacer = Pacer(per_second, sleep=sleep)
+
+    def check(url):
+        for attempt in range(1, attempts + 1):
+            pacer.wait()
+            code, _ = status(url)
+            if code == 429 and attempt < attempts:
+                sleep(RATE_LIMITED_WAIT)
+                continue
+            break
+        return None if code == 200 else f"{code} {url}"
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return [problem for problem in pool.map(check, urls) if problem]
+
+
 def check_images(export_path):
     export = json.loads(Path(export_path).read_text(encoding="utf-8"))
     urls = image_urls_in(export)
-    missing = []
-    for url in urls:
-        status, _ = _status(url)
-        if status != 200:
-            missing.append(f"{status} {url}")
+    missing = missing_images(urls)
     if missing:
         print("::error::published records reference images the CDN does not serve:")
         print("\n".join(missing))
