@@ -604,6 +604,86 @@ class VerifyTest(unittest.TestCase):
         self.assertIn("served 31 bytes, rendered 30", problems[1])
 
 
+class AdoptTest(unittest.TestCase):
+    def _index(self, pid="P000001", face="front", key="abcdef012345", ext="png", sizes=None,
+               uploaded="2026-09-14T20:40:00+00:00", missing=()):
+        from registry.images import bucket_index
+        sizes = sizes or {"small": 10, "normal": 20, "large": 30, "original": 600}
+        back = ".back" if face == "back" else ""
+        objects = [(f"{pid}.{key}{back}.{r}.{ext if r == 'original' else 'webp'}", size, uploaded)
+                   for r, size in sizes.items() if r not in missing]
+        return bucket_index(objects + [("not-ours.txt", 1, uploaded)])
+
+    def _mapping(self, **over):
+        entry = {"id": "f1", "name": "001-abundance-b-s.png", "md5": "m1", "size": 600, "width": 744,
+                 "height": 1039, "modified": "2026-09-01T00:00:00.000Z", "printing_id": "P000001",
+                 "face": "front"}
+        entry.update(over)
+        return {"mapped": [entry]}
+
+    def test_a_complete_fresh_set_is_recorded_without_a_download(self):
+        from registry.images import RENDITION_RECIPE, adopt, image_objects
+        state = {"recipe": RENDITION_RECIPE, "printings": {}}
+        adopted, skipped = adopt(self._mapping(), state, self._index(), today="2026-09-14")
+        self.assertEqual(len(adopted), 1)
+        held = state["printings"]["P000001"]["front"]
+        self.assertEqual(held["key"], "abcdef012345")
+        self.assertEqual(held["objects"], {"small": 10, "normal": 20, "large": 30, "original": 600})
+        self.assertEqual((held["md5"], held["width"], held["lowres"], held["original_ext"], held["fetched"]),
+                         ("m1", 744, False, "png", "2026-09-14"))
+        self.assertEqual(len(image_objects(state)), 4)
+        self.assertEqual(skipped, {})
+
+    def test_ambiguous_or_incomplete_or_stale_evidence_is_left_to_the_fetch(self):
+        from registry.images import RENDITION_RECIPE, adopt, bucket_index
+        fresh = lambda: {"recipe": RENDITION_RECIPE, "printings": {}}
+        # two complete keys for the same face
+        two = self._index(key="aaaaaaaaaaaa")
+        two[("P000001", "front")].update(self._index(key="bbbbbbbbbbbb")[("P000001", "front")])
+        _, skipped = adopt(self._mapping(), fresh(), two)
+        self.assertIn("several complete keys in the bucket", skipped)
+        # a rendition missing
+        _, skipped = adopt(self._mapping(), fresh(), self._index(missing=("large",)))
+        self.assertIn("not in the bucket", skipped)
+        # uploaded before the file was last modified
+        _, skipped = adopt(self._mapping(modified="2026-09-14T21:00:00.000Z"), fresh(), self._index())
+        self.assertIn("uploaded before the file last changed", skipped)
+        # original size differs from the file
+        _, skipped = adopt(self._mapping(size=601), fresh(), self._index())
+        self.assertIn("original differs from the file", skipped)
+        # nothing at all in the bucket
+        _, skipped = adopt(self._mapping(), fresh(), bucket_index([]))
+        self.assertEqual(skipped, {"not in the bucket": 1})
+
+    def test_nothing_is_adopted_after_a_recipe_bump(self):
+        from registry.images import RENDITION_RECIPE, adopt
+        state = {"recipe": RENDITION_RECIPE - 1, "printings": {}}
+        adopted, skipped = adopt(self._mapping(), state, self._index())
+        self.assertEqual(adopted, [])
+        self.assertEqual(sum(skipped.values()), 1)
+        self.assertTrue(any("recipe" in why for why in skipped))
+
+    def test_already_held_faces_are_not_touched(self):
+        from registry.images import RENDITION_RECIPE, adopt
+        state = {"recipe": RENDITION_RECIPE, "printings": {"P000001": {"front": {
+            "key": "held00000000", "recipe": RENDITION_RECIPE, "md5": "m1"}}}}
+        adopted, skipped = adopt(self._mapping(), state, self._index())
+        self.assertEqual(adopted, [])
+        self.assertEqual(state["printings"]["P000001"]["front"]["key"], "held00000000")
+
+    def test_bucket_listing_is_parsed_from_the_aws_cli(self):
+        from registry.images import list_bucket_objects
+        import types
+        seen = []
+
+        def run(command, **kwargs):
+            seen.append(command)
+            return types.SimpleNamespace(stdout='[["images/P000001.abcdef012345.small.webp", 10, "2026-09-14T20:40:00+00:00"], ["other/x", 1, "2026-09-14T20:40:00+00:00"]]')
+        objects = list_bucket_objects("bkt", run=run)
+        self.assertEqual(objects, [("P000001.abcdef012345.small.webp", 10, "2026-09-14T20:40:00+00:00")])
+        self.assertIn("list-objects-v2", seen[0])
+
+
 class LocalSourceTest(unittest.TestCase):
     def test_a_local_copy_of_the_folder_replaces_the_download(self):
         try:
