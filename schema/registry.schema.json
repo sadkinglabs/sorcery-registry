@@ -105,6 +105,13 @@
             "null"
           ]
         },
+        "power": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Derived: Sorcery's power - equal to attack when attack equals defense, otherwise floor((attack + defense) / 2); null when either is null. Published so every consumer computes the same number."
+        },
         "life": {
           "type": [
             "integer",
@@ -141,6 +148,7 @@
         "cost",
         "attack",
         "defense",
+        "power",
         "life",
         "thr_air",
         "thr_earth",
@@ -440,6 +448,13 @@
               "null"
             ]
           },
+          "power": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Derived: Sorcery's power - equal to attack when attack equals defense, otherwise floor((attack + defense) / 2); null when either is null. Published so every consumer computes the same number."
+          },
           "life": {
             "type": [
               "integer",
@@ -543,6 +558,7 @@
           "cost",
           "attack",
           "defense",
+          "power",
           "life",
           "thr_air",
           "thr_earth",
@@ -900,6 +916,13 @@
               "null"
             ]
           },
+          "power": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Derived: Sorcery's power - equal to attack when attack equals defense, otherwise floor((attack + defense) / 2); null when either is null. Published so every consumer computes the same number."
+          },
           "life": {
             "type": [
               "integer",
@@ -949,6 +972,7 @@
           "cost",
           "attack",
           "defense",
+          "power",
           "life",
           "thr_air",
           "thr_earth",

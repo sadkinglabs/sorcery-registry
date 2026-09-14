@@ -39,7 +39,11 @@ API slug demoted to an ordinary, mutable column.
 # image_status (null / "missing" until the image pipeline fills
 # image_hash). All derived at export time from the ids, never stored. No
 # database change.
-SCHEMA_VERSION = 9
+# v10: power - a derived gameplay value on every face (card, back face,
+# card_history rows): equal to attack when attack equals defense, else
+# floor((attack + defense) / 2), null when either is null. image_status
+# gains "lowres" as the images land. No database change.
+SCHEMA_VERSION = 10
 API_URL = "https://api.sorcerytcg.com/api/cards"
 
 # Where the published records live. api_url on every record points at the
