@@ -71,7 +71,7 @@ The same data is served, one object per thing, from **`https://api.kairosarchive
 - **Poll `https://api.kairosarchive.net/versions.json`** (60 s cache; hourly is plenty) to learn when a release exists and the digest of its `registry.json`; a release is listed only after the CDN has been verified serving it.
 - Every release is also mirrored here as a tagged GitHub release, so `raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json` is the same bytes.
 
-No keys, no signup; rate limits exist only as a tripwire against runaway crawlers (fetch `registry.json` or the indexes rather than crawling objects one by one).
+No keys, no signup. Two courtesies are required of automated clients: send a `User-Agent` that names your project (requests without one are blocked at the edge), and fetch `registry.json` or the indexes rather than crawling objects one by one; a generous per-address rate limit is the only other tripwire. Details in [`docs/usage.md`](docs/usage.md).
 
 ```jsonc
 {

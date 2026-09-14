@@ -24,9 +24,9 @@ This page says nothing about commercial use of Erik's Curiosa's content, either 
 - **Fetch in bulk, not object by object.** `registry.json` (one file, everything) or the `index/` lists are the right shape for a client that wants many records; the per-object files are for one lookup at a time. Please do not crawl the object tree.
 - **Cache what you fetch.** Release roots (`/v3.1.0/…`) are immutable - cache them forever. To learn when a new release exists, poll `versions.json` (60-second cache; once an hour is plenty, the data changes a few times a year) and read the digest before re-downloading.
 - **Hotlinking images is allowed**, with credit to Erik's Curiosa. The addresses in `image_urls` are permanent and immutable (new art gets a new address), so link to them directly rather than copying them.
-- **Identify automated clients** with a `User-Agent` that names your project and a way to reach you.
+- **Automated clients must send a `User-Agent`** that names the project and a way to reach you, for example `my-deck-tool/1.2 (contact@example.com)`. Requests with no `User-Agent` at all are blocked at the edge. This is not a security measure and does not pretend to be one: it is how we see who is here, so we can reach a client before a problem becomes a block, and thank the ones that name themselves. Browsers send one automatically, so pages and hotlinked images are unaffected.
 - **Availability is best effort.** The domain is a CDN in front of object storage and has no maintenance windows, but it has no SLA either. Every release is mirrored on GitHub as a tagged release (`raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json`), and the registry's own guarantee - identifiers never change - means a copy you hold is never wrong, only older.
-- **Rate limits** exist only as a tripwire against runaway crawlers (a generous per-address limit at the edge). A well-behaved client will never meet it.
+- **Rate limits** exist only as a tripwire against runaway crawlers (a generous per-address limit at the edge). A well-behaved client will never meet it. If you were blocked and believe you should not have been, open an issue with your `User-Agent` and the time.
 
 ## Links to sellers
 

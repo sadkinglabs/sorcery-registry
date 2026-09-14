@@ -146,10 +146,16 @@ def export_url(tag):
     return RAW_EXPORT_URL.format(tag=tag)
 
 
+USER_AGENT = "sorcery-registry-mcp (+https://kairosarchive.net; github.com/sadkinglabs/sorcery-registry)"
+
+
 def _get(url, **kwargs):
-    """The one place HTTP happens, so tests can replace it."""
+    """The one place HTTP happens, so tests can replace it. Every request
+    identifies this server, as the registry's own usage terms require of
+    automated clients."""
     import requests
-    return requests.get(url, **kwargs)
+    headers = {"User-Agent": USER_AGENT, **kwargs.pop("headers", {})}
+    return requests.get(url, headers=headers, **kwargs)
 
 
 def _fetch_bytes(url):
