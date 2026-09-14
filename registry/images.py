@@ -2,6 +2,7 @@
 
     python -m registry.images list   [--out review/image-listing.json]
     python -m registry.images fetch  [--listing ...] [--limit N] [--work work/images]
+                                     [--source-dir /path/to/unzipped/folder]
     python -m registry.images upload [--work work/images] [--bucket ...]
     python -m registry.images verify [--work work/images]
 
@@ -470,11 +471,31 @@ def cmd_list(args):
     return 0
 
 
+def local_source(source_dir):
+    """A get_bytes for a folder downloaded whole from Drive (the web UI's
+    zip): files are found by name, anywhere under the directory."""
+    index = {}
+    for path in Path(source_dir).rglob("*"):
+        if path.is_file():
+            index.setdefault(path.name, path)
+
+    def read(name):
+        path = index.get(name)
+        if path is None:
+            raise FileNotFoundError(f"{name} is not under {source_dir}")
+        return path.read_bytes()
+    return read
+
+
 def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None, sleep=time.sleep,
-              log=print):
-    """Download one mapped file, render it, write the objects under `work`
-    and record the source in `state` (not yet saved)."""
-    original = get_with_retry(download_url(entry["id"], api_key), get_bytes, sleep=sleep, log=log)
+              log=print, local=None):
+    """Download one mapped file (or read it from a local copy of the
+    folder), render it, write the objects under `work` and record the
+    source in `state` (not yet saved)."""
+    if local is not None:
+        original = local(entry["name"])
+    else:
+        original = get_with_retry(download_url(entry["id"], api_key), get_bytes, sleep=sleep, log=log)
     md5 = hashlib.md5(original).hexdigest()
     if entry.get("md5") and md5 != entry["md5"]:
         raise RuntimeError(f"{entry['name']}: downloaded MD5 {md5} differs from the listing's "
@@ -509,7 +530,7 @@ def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None, sle
 
 def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
                pause=0.5, sleep=time.sleep, log=print,
-               max_consecutive_failures=MAX_CONSECUTIVE_FAILURES):
+               max_consecutive_failures=MAX_CONSECUTIVE_FAILURES, local=None):
     """Fetch every entry in turn. A file that fails after its retries is
     recorded and skipped - the run goes on, the state holds only what
     succeeded, and the next run tries the failure again - because one
@@ -520,7 +541,8 @@ def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
     consecutive = 0
     for index, entry in enumerate(todo, 1):
         try:
-            key = fetch_one(entry, api_key, work, state, get_bytes=get_bytes, sleep=sleep, log=log)
+            key = fetch_one(entry, api_key, work, state, get_bytes=get_bytes, sleep=sleep, log=log,
+                            local=local)
         except Exception as error:  # noqa: BLE001 - recorded, not swallowed
             failures.append({"name": entry["name"], "printing_id": entry["printing_id"],
                              "face": entry["face"], "error": str(error)})
@@ -542,7 +564,8 @@ def fetch_many(todo, api_key, work, state, images_path, get_bytes=_get_bytes,
 
 
 def cmd_fetch(args):
-    api_key = _need_key()
+    local = local_source(args.source_dir) if args.source_dir else None
+    api_key = "unused" if local else _need_key()
     listing = json.loads(Path(args.listing).read_text(encoding="utf-8"))
     state = load_images(args.images)
     if state.get("recipe") != RENDITION_RECIPE:
@@ -553,8 +576,9 @@ def cmd_fetch(args):
         todo = [e for e in todo if e["printing_id"] in args.only]
     if args.limit:
         todo = todo[:args.limit]
-    print(f"{len(todo)} image(s) to fetch", flush=True)
-    failures = fetch_many(todo, api_key, args.work, state, args.images, pause=args.pause)
+    print(f"{len(todo)} image(s) to fetch" + (f" from {args.source_dir}" if local else ""), flush=True)
+    failures = fetch_many(todo, api_key, args.work, state, args.images,
+                          pause=0 if local else args.pause, local=local)
     fetched = len(todo) - len(failures)
     print(f"fetched {fetched}, failed {len(failures)}", flush=True)
     if failures:
@@ -625,6 +649,9 @@ def main(argv=None):
                         "roughly 1,600 anonymous downloads; the default stays under it")
     p.add_argument("--only", nargs="*", default=None, help="printing ids to restrict to")
     p.add_argument("--pause", type=float, default=0.5)
+    p.add_argument("--source-dir", default=None,
+                   help="read originals from a local copy of the folder (the Drive web UI's zip, "
+                        "unpacked) instead of downloading; no API key needed")
     p.add_argument("--failures", default="review/image-failures.json")
     p.add_argument("--strict", action="store_true", help="exit 1 if any file failed")
     p.set_defaults(run=cmd_fetch)

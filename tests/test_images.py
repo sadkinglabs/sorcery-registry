@@ -434,3 +434,30 @@ class BlockDetectionTest(unittest.TestCase):
                              ["P000000", "P000001", "P000002"])
             # 3 successes + 3 refusals x 2 attempts each (one long wait per file): no churn beyond that
             self.assertEqual(len(calls), 3 + 3 * 2)
+
+
+class LocalSourceTest(unittest.TestCase):
+    def test_a_local_copy_of_the_folder_replaces_the_download(self):
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow not installed")
+        import hashlib, tempfile
+        from pathlib import Path
+        from registry.images import RENDITION_RECIPE, fetch_many, local_source
+        good = _png(30, 42)
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "Sorcery Images" / "nested"
+            src.mkdir(parents=True)
+            (src / "001-abundance-b-s.png").write_bytes(good)
+            entries = [{"id": "x", "name": "001-abundance-b-s.png", "md5": hashlib.md5(good).hexdigest(),
+                        "printing_id": "P000001", "face": "front"},
+                       {"id": "y", "name": "001-missing-b-s.png", "md5": "m", "printing_id": "P000002", "face": "front"}]
+            state = {"recipe": RENDITION_RECIPE, "printings": {}}
+            failures = fetch_many(entries, "unused", Path(tmp) / "w", state, Path(tmp) / "images.json",
+                                  get_bytes=lambda url: (_ for _ in ()).throw(AssertionError("must not download")),
+                                  sleep=lambda s: None, log=lambda *a, **k: None,
+                                  local=local_source(Path(tmp) / "Sorcery Images"))
+            self.assertEqual(sorted(state["printings"]), ["P000001"])
+            self.assertEqual([f["name"] for f in failures], ["001-missing-b-s.png"])
+            self.assertIn("not under", failures[0]["error"])
