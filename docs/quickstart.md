@@ -74,6 +74,9 @@ major alias (`/v3/`) - both serve the same shapes.
 | `index/cards.json` | a compact list for client-side card search/filtering |
 | `index/printings.json` | a compact list for client-side printing search |
 | `index/slugs.json` | `{slug: printing_id}` for every slug that has ever existed |
+| `history/slugs.json` | every slug ever issued, with its validity dates |
+| `history/names.json` | every card name ever recorded |
+| `history/cards.json` | every state of every card's gameplay face (the errata log) |
 
 Every card, printing and set record carries its own `api_url` (the
 moving `/v3/` alias - always leads to the current record) and
@@ -89,7 +92,8 @@ Printings (and cards, via their `default_printing_id`) carry
 image held, `image_urls` is `null`), `"lowres"` (held and served at
 every size, but the publisher's source file was too small for the
 `large` rendition and was upscaled), or `"ok"` (held at full size). A
-double-faced printing's reverse face carries its own pair under `back`.
+double-faced printing's reverse face carries its own `image_urls` under
+`back` (the status is the printing's).
 
 `image_urls`, when not null, has four renditions, all WebP except
 `original`: `small` 146×204, `normal` 488×680, `large` 672×936, and
