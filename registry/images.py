@@ -89,9 +89,10 @@ def _redact(url):
     return re.sub(r"([?&]key=)[^&]+", r"\1REDACTED", url)
 
 
-def _get_json(url):
+def _get_json(url, headers=None):
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT,
-                                                   "Accept": "application/json"})
+                                                   "Accept": "application/json",
+                                                   **(headers or {})})
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
             return json.loads(response.read())
@@ -133,8 +134,8 @@ BLOCK_WAIT_SECONDS = 90
 MAX_CONSECUTIVE_FAILURES = 5
 
 
-def _get_bytes(url):
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+def _get_bytes(url, headers=None):
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, **(headers or {})})
     try:
         with urllib.request.urlopen(request, timeout=300) as response:
             return response.read()
@@ -170,13 +171,97 @@ def get_with_retry(url, get_bytes=_get_bytes, attempts=6, sleep=time.sleep, log=
             sleep(delay)
 
 
+DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
+
+
+def service_account_credentials(raw_json):
+    """Credentials for a service account from its JSON key (the text of
+    the file Google Cloud hands out). google-auth is imported here, not
+    at module level: it is only needed when a service account is used."""
+    from google.oauth2 import service_account
+    return service_account.Credentials.from_service_account_info(
+        json.loads(raw_json), scopes=[DRIVE_SCOPE])
+
+
+def bearer_token(credentials, request_factory=None):
+    """The current access token, refreshed when missing or about to
+    expire (google-auth treats a token as expired a few minutes early)."""
+    if not credentials.valid:
+        if request_factory is None:
+            import google.auth.transport.requests
+            request_factory = google.auth.transport.requests.Request
+        credentials.refresh(request_factory())
+    return credentials.token
+
+
+class DriveAuth:
+    """How this client identifies itself to Drive.
+
+    A service account (a robot identity in the owner's Google Cloud
+    project; secret GDRIVE_SERVICE_ACCOUNT holds its JSON key) signs
+    every request with a bearer token, so downloads are counted against
+    the project's quota instead of Google's abuse filter for anonymous
+    traffic from cloud addresses - the filter that blocks a GitHub runner
+    after roughly 1,600 files. A plain API key (GDRIVE_API_KEY) is the
+    anonymous fallback. Either identity can only read what is already
+    public; nothing about the publisher's folder changes."""
+
+    def __init__(self, api_key=None, credentials=None):
+        if not api_key and credentials is None:
+            raise ValueError("neither GDRIVE_SERVICE_ACCOUNT nor GDRIVE_API_KEY is set")
+        self.api_key = api_key
+        self.credentials = credentials
+
+    @classmethod
+    def from_env(cls, environ=os.environ):
+        raw = environ.get("GDRIVE_SERVICE_ACCOUNT")
+        return cls(api_key=environ.get("GDRIVE_API_KEY"),
+                   credentials=service_account_credentials(raw) if raw else None)
+
+    @property
+    def authenticated(self):
+        return self.credentials is not None
+
+    def describe(self):
+        return "service account (bearer token)" if self.authenticated else "API key (anonymous)"
+
+    def params(self):
+        """Query parameters that identify the client: the key, when anonymous."""
+        return {} if self.authenticated else {"key": self.api_key}
+
+    def headers(self):
+        """Request headers that identify the client: the bearer token, when signed."""
+        return {"Authorization": f"Bearer {bearer_token(self.credentials)}"} if self.authenticated else {}
+
+    def download_url(self, file_id):
+        url = f"{DRIVE_FILES}/{urllib.parse.quote(file_id)}?alt=media"
+        return url if self.authenticated else f"{url}&key={urllib.parse.quote(self.api_key)}"
+
+    def fetch(self, get_bytes):
+        """`get_bytes` with this identity attached: the anonymous fetcher is
+        returned as is (its key is in the URL), the signed one is wrapped so
+        every call carries a fresh bearer token."""
+        if not self.authenticated:
+            return get_bytes
+        return lambda url: get_bytes(url, headers=self.headers())
+
+
+def _auth(api_key_or_auth):
+    """The older entry points took an API key; accept either."""
+    if isinstance(api_key_or_auth, DriveAuth):
+        return api_key_or_auth
+    return DriveAuth(api_key=api_key_or_auth)
+
+
 def download_url(file_id, api_key):
-    return f"{DRIVE_FILES}/{urllib.parse.quote(file_id)}?alt=media&key={urllib.parse.quote(api_key)}"
+    return _auth(api_key).download_url(file_id)
 
 
 def list_folder(folder_id, api_key, get=_get_json, pause=0.2):
     """Every file under the folder, subfolders included, each with the
-    folder path it sits in (relative to the root). Sequential, paged."""
+    folder path it sits in (relative to the root). Sequential, paged.
+    `api_key` is a key or a DriveAuth."""
+    auth = _auth(api_key)
     files = []
     pending = [(folder_id, "")]
     while pending:
@@ -189,11 +274,12 @@ def list_folder(folder_id, api_key, get=_get_json, pause=0.2):
                 "pageSize": 1000,
                 "supportsAllDrives": "true",
                 "includeItemsFromAllDrives": "true",
-                "key": api_key,
+                **auth.params(),
             }
             if token:
                 params["pageToken"] = token
-            page = get(f"{DRIVE_FILES}?{urllib.parse.urlencode(params)}")
+            url = f"{DRIVE_FILES}?{urllib.parse.urlencode(params)}"
+            page = get(url, headers=auth.headers()) if auth.authenticated else get(url)
             for entry in page.get("files", []):
                 if entry.get("mimeType") == FOLDER_MIME:
                     pending.append((entry["id"], f"{path}{entry['name']}/"))
@@ -447,11 +533,13 @@ def image_objects(state):
 # --------------------------------------------------------------------------
 
 def _need_key():
-    api_key = os.environ.get("GDRIVE_API_KEY")
-    if not api_key:
-        print("::error::GDRIVE_API_KEY is not set")
+    try:
+        auth = DriveAuth.from_env()
+    except ValueError as error:
+        print(f"::error::{error}")
         sys.exit(1)
-    return api_key
+    print(f"Drive identity: {auth.describe()}", flush=True)
+    return auth
 
 
 def cmd_list(args):
@@ -495,7 +583,9 @@ def fetch_one(entry, api_key, work, state, get_bytes=_get_bytes, today=None, sle
     if local is not None:
         original = local(entry["name"])
     else:
-        original = get_with_retry(download_url(entry["id"], api_key), get_bytes, sleep=sleep, log=log)
+        auth = _auth(api_key)
+        original = get_with_retry(auth.download_url(entry["id"]), auth.fetch(get_bytes),
+                                  sleep=sleep, log=log)
     md5 = hashlib.md5(original).hexdigest()
     if entry.get("md5") and md5 != entry["md5"]:
         raise RuntimeError(f"{entry['name']}: downloaded MD5 {md5} differs from the listing's "
@@ -588,7 +678,7 @@ def step_summary(markdown):
 
 def cmd_fetch(args):
     local = local_source(args.source_dir) if args.source_dir else None
-    api_key = "unused" if local else _need_key()
+    api_key = DriveAuth(api_key="unused") if local else _need_key()
     listing = json.loads(Path(args.listing).read_text(encoding="utf-8"))
     state = load_images(args.images)
     if state.get("recipe") != RENDITION_RECIPE:
@@ -597,9 +687,16 @@ def cmd_fetch(args):
     todo = plan_fetch(listing["mapping"], state)
     if args.only:
         todo = [e for e in todo if e["printing_id"] in args.only]
-    if args.limit:
-        todo = todo[:args.limit]
+    limit = args.limit
+    if limit is None:
+        # Anonymous downloads are refused after ~1,600 a day per address;
+        # a signed run (or a local copy) has no such ceiling.
+        limit = 0 if local or api_key.authenticated else 1500
+    if limit:
+        todo = todo[:limit]
     print(f"{len(todo)} image(s) to fetch" + (f" from {args.source_dir}" if local else ""), flush=True)
+    if limit and len(todo) == limit:
+        print(f"(capped at {limit} this run; the next run continues where data/images.json says)", flush=True)
     failures = fetch_many(todo, api_key, args.work, state, args.images,
                           pause=0 if local else args.pause, local=local)
     fetched = len(todo) - len(failures)
@@ -670,7 +767,7 @@ def main(argv=None):
     p.add_argument("--listing", default=str(LISTING_PATH))
     p.add_argument("--images", default=str(IMAGES_PATH))
     p.add_argument("--work", default=str(WORK_PATH))
-    p.add_argument("--limit", type=int, default=1500,
+    p.add_argument("--limit", type=int, default=None,
                    help="at most N images this run (0: all). Google refuses an address after "
                         "roughly 1,600 anonymous downloads; the default stays under it")
     p.add_argument("--only", nargs="*", default=None, help="printing ids to restrict to")
