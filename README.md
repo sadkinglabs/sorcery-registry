@@ -64,7 +64,7 @@ Everything you need is one file: [`export/registry.json`](export/registry.json).
 
 ### Hosted
 
-The same data is served, one object per thing, from **`https://api.kairosarchive.net`** - see [`docs/api.md`](docs/api.md) for every URL. The short version:
+The same data is served, one object per thing, from **`https://api.kairosarchive.net`** - see [`docs/api.md`](docs/api.md) for every URL. New here? [`docs/quickstart.md`](docs/quickstart.md) walks through the ids, discovery and images with working examples. The short version:
 
 - **Pin a release** and it never changes: `https://api.kairosarchive.net/v3.1.0/registry.json` (and `cards/C000230.json`, `printings/P000937.json`, `slugs/{slug}.json`, `sets/006.json`, the indexes) - immutable, cache forever.
 - **Follow the major alias** for the newest data of a shape you understand: `https://api.kairosarchive.net/v3/…` redirects to the newest verified v3.x root. A breaking change is a new major alias; nothing breaks in place.

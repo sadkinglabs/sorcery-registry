@@ -17,12 +17,14 @@ import mcp_server
 from mcp_server import Registry, card_ref, printing_ref
 
 def _printing(printing_id, codex_id, set_name, set_code, released_at, slug,
-              finish="Standard", artist="A", product="Booster"):
+              finish="Standard", artist="A", product="Booster",
+              image_status="missing", image_urls=None):
     return {"printing_id": printing_id, "codex_id": codex_id, "set_name": set_name,
             "set_code": set_code, "released_at": released_at, "product": product,
             "finish": finish, "slug": slug, "artist": artist,
             "artist_slug": artist.lower(), "flavour_text": None, "typeline": "",
-            "back": None, "image_hash": None, "retired_at": None}
+            "back": None, "image_hash": None, "retired_at": None,
+            "image_status": image_status, "image_urls": image_urls}
 
 
 DATA = {
@@ -33,18 +35,24 @@ DATA = {
          "category": "Spell", "rarity": "Ordinary", "slot": "Ordinary",
          "subtypes": ["Mortal"], "elements": ["Air"],
          "keywords": ["Spellcaster", "Genesis"], "umbrellas": [],
-         "cost": 3, "attack": 1, "defense": 1, "life": None,
+         "cost": 3, "attack": 1, "defense": 1, "power": 1, "life": None,
          "thr_air": 1, "thr_earth": 0, "thr_fire": 0, "thr_water": 0,
          "rules_text": "Spellcaster", "back": None, "errata": False,
-         "set_codes": ["001", "002"], "printing_ids": ["P000001", "P000002"]},
+         "set_codes": ["001", "002"], "printing_ids": ["P000001", "P000002"],
+         "image_status": "missing", "image_urls": None},
         {"codex_id": "C000002", "name": "Witch", "type": "Minion",
          "category": "Spell", "rarity": "Elite", "slot": "Elite",
          "subtypes": ["Mortal"], "elements": ["Water", "Air"],
          "keywords": ["Spellcaster"], "umbrellas": ["Evil"],
-         "cost": 2, "attack": 1, "defense": 1, "life": None,
+         "cost": 2, "attack": 3, "defense": 1, "power": 2, "life": None,
          "thr_air": 0, "thr_earth": 0, "thr_fire": 0, "thr_water": 1,
          "rules_text": "Curse.", "back": None, "errata": True,
-         "set_codes": ["001"], "printing_ids": ["P000003"]},
+         "set_codes": ["001"], "printing_ids": ["P000003"],
+         "image_status": "ok",
+         "image_urls": {"small": "https://api.kairosarchive.net/images/P000003.abc123.small.webp",
+                        "normal": "https://api.kairosarchive.net/images/P000003.abc123.normal.webp",
+                        "large": "https://api.kairosarchive.net/images/P000003.abc123.large.webp",
+                        "original": "https://api.kairosarchive.net/images/P000003.abc123.original.png"}},
     ],
     "printings": [
         _printing("P000001", "C000001", "Alpha", "001", "2023-06-22",
@@ -52,7 +60,11 @@ DATA = {
         _printing("P000002", "C000001", "Beta", "002", "2023-10-06",
                   "002-apprentice_wizard-b-f", finish="Foil"),
         _printing("P000003", "C000002", "Alpha", "001", "2023-06-22",
-                  "004-witch_x-b-s", artist="B"),
+                  "004-witch_x-b-s", artist="B", image_status="ok",
+                  image_urls={"small": "https://api.kairosarchive.net/images/P000003.abc123.small.webp",
+                              "normal": "https://api.kairosarchive.net/images/P000003.abc123.normal.webp",
+                              "large": "https://api.kairosarchive.net/images/P000003.abc123.large.webp",
+                              "original": "https://api.kairosarchive.net/images/P000003.abc123.original.png"}),
     ],
     "slug_history": [
         {"slug": "001-apprentice_wizard-b-s", "printing_id": "P000001",
@@ -166,6 +178,23 @@ class LookupTest(unittest.TestCase):
     def test_missing_ids_report_not_found(self):
         self.assertFalse(self.reg.get_card(99)["found"])
         self.assertFalse(self.reg.get_printing("P000099")["found"])
+
+    def test_get_card_surfaces_power_and_image_fields(self):
+        # power and image_status/image_urls are whole-record fields that
+        # get_card must pass through untouched (it spreads the card dict).
+        card = self.reg.get_card("C000002")
+        self.assertEqual(card["power"], 2)  # attack 3, defense 1 -> floor(4/2)
+        self.assertEqual(card["image_status"], "ok")
+        self.assertEqual(card["image_urls"]["normal"],
+                         "https://api.kairosarchive.net/images/P000003.abc123.normal.webp")
+
+    def test_get_printing_surfaces_image_fields(self):
+        printing = self.reg.get_printing("P000001")
+        self.assertEqual(printing["image_status"], "missing")
+        self.assertIsNone(printing["image_urls"])
+        printing = self.reg.get_printing("P000003")
+        self.assertEqual(printing["image_status"], "ok")
+        self.assertIn("large", printing["image_urls"])
 
 
 class SearchTest(unittest.TestCase):

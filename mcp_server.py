@@ -453,7 +453,11 @@ def build_server():
             "whose text or stats changed since printing carries errata=true and a "
             "closed row in the export's card_history; default_printing_id names "
             "its representative printing and each printing's printed_as_current "
-            "says whether its printed values match the card's current face."
+            "says whether its printed values match the card's current face. "
+            "Cards carry a derived power (attack when attack equals defense, "
+            "else floor((attack+defense)/2), null if either is null); printings "
+            "(and cards, via their default printing) carry image_status "
+            "(missing/lowres/ok) and image_urls (small/normal/large/original)."
         ),
     )
     registry = Registry(load_registry())
@@ -466,14 +470,20 @@ def build_server():
 
     def get_card(codex_id: str) -> dict:
         """Fetch one card by its permanent codex_id (e.g. 'C000042'; a bare
-        number is accepted too), with its full gameplay data and every
+        number is accepted too), with its full gameplay data - including the
+        derived power (attack when attack equals defense, else
+        floor((attack+defense)/2), null if either is null) - the default
+        printing's image_status (missing/lowres/ok) and image_urls
+        (small/normal/large/original, or null when missing), and every
         printing of it (all sets, products and finishes)."""
         return registry.get_card(codex_id)
 
     def get_printing(printing_id: str) -> dict:
         """Fetch one printing by its permanent printing_id (e.g. 'P000042'; a
         bare number is accepted too): the exact physical print (set, product,
-        finish) with its physical facts and current slug."""
+        finish) with its physical facts, current slug, and this printing's
+        own image_status (missing/lowres/ok) and image_urls
+        (small/normal/large/original, or null when missing)."""
         return registry.get_printing(printing_id)
 
     def search_cards(name: str = None, type: str = None, element: str = None,
@@ -488,7 +498,9 @@ def build_server():
         card_set restricts to cards printed in a set, given as its official
         code ('006') or name ('Gothic'); errata=true finds cards whose text
         or stats have been updated since they were printed (the registry
-        tracks this itself; card_history in the export has every state)."""
+        tracks this itself; card_history in the export has every state).
+        Each result carries the derived power (attack when attack equals
+        defense, else floor((attack+defense)/2), null if either is null)."""
         return registry.search_cards(name, type, element, rarity, card_set,
                                      keyword, category, errata, limit)
 
