@@ -7,3 +7,4 @@ review/upstream-snapshot.json
 dist/
 work/
 review/image-listing.json
+review/image-failures.json
