@@ -94,9 +94,16 @@ jobs:
                 echo "::error::$VERSION is already released on GitHub from another commit"
                 exit 1
               fi
-              if [ -n "$R2_BUCKET" ] && aws s3api head-object --bucket "$R2_BUCKET" --key "$VERSION/RELEASED" > /dev/null 2>&1; then
-                echo "::error::$VERSION is already released on the domain from another commit"
-                exit 1
+              if [ -n "$R2_BUCKET" ] && aws s3 cp "s3://$R2_BUCKET/$VERSION/RELEASED" "$RUNNER_TEMP/RELEASED" > /dev/null 2>&1; then
+                # The domain already serves this version. The tag may still
+                # move if HEAD's export is byte for byte what was released -
+                # a workflow-only fix merged in between - never otherwise.
+                released=$(awk '$1 == "sha256" {print $2}' "$RUNNER_TEMP/RELEASED")
+                local=$(cut -d' ' -f1 export/registry.json.sha256)
+                if [ "$released" != "$local" ]; then
+                  echo "::error::$VERSION is already released on the domain with export $released; HEAD's export is $local"
+                  exit 1
+                fi
               fi
               echo "::notice::tag $VERSION names an unfinished attempt at $(git rev-parse --short "$VERSION^{commit}"); moving it to HEAD"
               git tag -fa "$VERSION" -F "$RUNNER_TEMP/notes.md"
