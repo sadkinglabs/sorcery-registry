@@ -13,12 +13,18 @@ UA = "sorcery-registry-audit/1.0 (+https://kairosarchive.net)"
 OUT = []
 
 
-def raw(url, headers=None, method="GET"):
+def raw(url, headers=None, method="GET", follow=True):
     h = {"User-Agent": UA}
     h.update(headers or {})
     req = urllib.request.Request(url, headers=h, method=method)
+    opener = urllib.request.build_opener()
+    if not follow:
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *a, **k):
+                return None
+        opener = urllib.request.build_opener(NoRedirect)
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
+        with opener.open(req, timeout=60) as r:
             return r.status, r.headers, r.read()
     except urllib.error.HTTPError as e:
         return e.code, e.headers, e.read()
@@ -169,7 +175,6 @@ ERROR_CASES = [
     ("S2", "a request with no User-Agent", f"{root}/index.json", None, "GET"),
     ("S3", "a method the bucket does not serve", f"{root}/index.json", {}, "DELETE"),
     ("S4", "a path outside any release root", f"{BASE}/not-a-release/index.json", {}, "GET"),
-    ("S5", "the bare domain", f"{BASE}/", {}, "GET"),
 ]
 for cid, what, url, extra, method in ERROR_CASES:
     headers = None if extra is None else dict(extra)
@@ -198,6 +203,17 @@ for cid, what, url, extra, method in ERROR_CASES:
               f"{facts}; body={str(payload)[:120]}")
     else:
         note(cid, f"{what} (custom error not configured)", facts)
+
+# The front door is a redirect, not an error: a person pasting the bare domain
+# should land on discovery. Do not follow it, or a 302 reads as a 200 and the
+# error-envelope assertions above fire on a perfectly good response.
+status, hdrs, _ = raw(f"{BASE}/", headers={"Origin": "https://example.com"}, method="GET", follow=False)
+target = hdrs.get("location") or ""
+if status in (301, 302, 307, 308):
+    check("S5", "the bare domain sends a client to the discovery document",
+          target.rstrip("/").endswith("/versions.json"), f"HTTP {status} -> {target}")
+else:
+    note("S5", "the bare domain (no redirect configured)", f"HTTP {status}, {len(_)} bytes")
 
 # A browser doing a conditional cross-origin GET sends If-None-Match, which is
 # not a CORS-safelisted header, so it preflights first. If OPTIONS is refused,
