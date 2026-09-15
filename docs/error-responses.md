@@ -7,8 +7,9 @@ client should rely on is in [`docs/api.md`](api.md#when-something-goes-wrong);
 this file is the operational record behind it.
 
 Measured on 15 September 2026 by `scripts/audit_api2.py`, cases S1 to S6. Body sizes are
-approximate on purpose: the CDN's pages embed a Ray ID, so their exact length moves by a
-byte or two between requests. Run the audit for the current figures.
+approximate on purpose: the CDN's pages print per-request details, including the caller's
+IP address, so the same page differs by a byte or two between callers. Run the audit for
+the current figures.
 
 | Case | Status | Body | CORS |
 |---|---|---|---|
