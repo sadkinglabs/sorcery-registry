@@ -7,6 +7,10 @@ name: api-audit
 on:
   push:
     branches: ["audit/**"]
+  schedule:
+    # Thursday 06:00 UTC, away from the other weekly jobs: a release that
+    # changes what the prose promises should fail here, not in a consumer.
+    - cron: "0 6 * * 4"
   workflow_dispatch:
 
 permissions:
@@ -22,10 +26,14 @@ jobs:
           python-version: "3.12"
       - run: pip install --quiet pillow jsonschema
       - name: Test the documented contract
-        run: python scripts/audit_api.py | tee audit.log
+        run: |
+          set -o pipefail
+          python scripts/audit_api.py | tee audit.log
       - name: Headers, compression, error shapes and data claims
         if: always()
-        run: python scripts/audit_api2.py | tee audit2.log
+        run: |
+          set -o pipefail
+          python scripts/audit_api2.py | tee audit2.log
       - name: Report
         if: always()
         run: |

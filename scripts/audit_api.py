@@ -35,12 +35,15 @@ def get(url, headers=None, method="GET", follow=True):
             body = r.read()
             elapsed = time.time() - start
             TIMINGS.append((url, elapsed, len(body)))
-            return r.status, dict(r.headers), body, elapsed
+            # r.headers, not dict(r.headers): header names are case-insensitive
+            # and the edge sends them lowercase on a cache hit, so a plain dict
+            # silently misses Cache-Control on exactly the paths it caches.
+            return r.status, r.headers, body, elapsed
     except urllib.error.HTTPError as e:
         body = e.read()
         elapsed = time.time() - start
         TIMINGS.append((url, elapsed, len(body)))
-        return e.code, dict(e.headers), body, elapsed
+        return e.code, e.headers, body, elapsed
 
 
 def jget(url, **kw):
