@@ -199,6 +199,21 @@ for cid, what, url, extra, method in ERROR_CASES:
     else:
         note(cid, f"{what} (custom error not configured)", facts)
 
+# A browser doing a conditional cross-origin GET sends If-None-Match, which is
+# not a CORS-safelisted header, so it preflights first. If OPTIONS is refused,
+# every cross-origin client is stuck re-downloading bodies it already holds.
+status, hdrs, body = raw(f"{root}/index.json", method="OPTIONS",
+                         headers={"Origin": "https://example.com",
+                                  "Access-Control-Request-Method": "GET",
+                                  "Access-Control-Request-Headers": "if-none-match"})
+facts = (f"HTTP {status}, allow-origin: {hdrs.get('access-control-allow-origin') or 'absent'}, "
+         f"allow-methods: {hdrs.get('access-control-allow-methods') or 'absent'}, "
+         f"allow-headers: {hdrs.get('access-control-allow-headers') or 'absent'}")
+if status in (200, 204) and hdrs.get("access-control-allow-origin"):
+    check("S6", "a CORS preflight for a conditional GET is answered", True, facts)
+else:
+    note("S6", "a CORS preflight for a conditional GET is refused", facts)
+
 # ---------- R. the documented curl commands, verbatim ----------
 cmds = [
     ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", "-H", "User-Agent: my-deck-tool/1.0 (me@example.com)",
