@@ -26,11 +26,11 @@ All paths below are relative to a release root or the major alias.
 
 ## Records carry their own addresses
 
-Every card, printing and set record - in the export, in the per-object files, in the indexes - carries `api_url` and `kairos_url`, and cards and printings carry `image_urls` and `image_status`; slug objects carry the resolved printing's `api_url` and `kairos_url`. `api_url` is the **current-record URL**: it points at the moving major alias, so a consumer reading a historical release root and following `api_url` leaves that snapshot by design and lands on the current record; a consumer that wants the snapshot uses the paths of the root it fetched. The addresses are derived from the ids at export time and CI proves each one names the record it sits on.
+Every card, printing and set record - in the export and in the per-object files - carries `api_url` and `kairos_url`, and cards and printings carry `image_urls` and `image_status`; slug objects carry the resolved printing's `api_url` and `kairos_url`. `api_url` is the **current-record URL**: it points at the moving major alias, so a consumer reading a historical release root and following `api_url` leaves that snapshot by design and lands on the current record; a consumer that wants the snapshot uses the paths of the root it fetched. The addresses are derived from the ids at export time and CI proves each one names the record it sits on. The indexes leave them out to stay small: both are a template away from the id each index record already carries (`{base}/v3/cards/{codex_id}.json` and `https://kairosarchive.net/cards/{codex_id}`, and the same shapes with `printings`/`{printing_id}`), and carrying them would add 38% to the card index and 56% to the printing index.
 
 ## The export itself
 
-- `registry.json` - the full export, byte for byte the committed file, so its checksum holds for the served copy.
+- `registry.json` - the full export, byte for byte the committed file, so its checksum holds for the served copy (~6.4 MB, ~380 KB over the wire: the edge serves it Brotli-compressed to any client that asks).
 - `registry.json.sha256` - `sha256sum` format. Poll this (~80 bytes) to learn whether the export changed.
 - `schema.json` - the export's JSON Schema (draft 2020-12).
 
@@ -43,6 +43,8 @@ Every card, printing and set record - in the export, in the per-object files, in
 | `slugs/{slug}.json` | "what is this slug?" for **any slug that has ever existed** | `slug`, `printing_id`, `codex_id`, `card_name`, `current_slug`, `is_current`, `valid_from`, `valid_to`, `set_code`, `set_name`, `product`, `finish`, `retired_at`, `api_url`, `kairos_url` (the printing's) |
 | `sets.json` | the set catalogue | the export's `sets` section |
 | `sets/{set_code}.json` | one set and everything in it | the set entry, plus `cards`: `{codex_id, name, printing_ids}` for every card in the set, ordered by name (the official data has no collector numbers), with only that set's printings |
+
+A miss on any of these paths is a 404 from the CDN, whose body is an HTML error page rather than JSON: check the status before parsing.
 
 A slug object exists for every slug in `slug_history`, current or superseded. That is the migration path as a URL: a tool holding a pre-rename slug fetches `slugs/{old}.json` and receives the permanent ids and the current slug. A 404 here means the slug never existed in the registry under any naming convention.
 
@@ -64,9 +66,9 @@ Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680
 
 The registry has ~1,100 cards; filtering them in the client is a millisecond. These are the compact lists to do it with:
 
-- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `errata`, `set_codes`, `default_printing_id`, `image_status` per card (~230 KB).
-- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `product`, `finish`, `printed_as_current`, `retired_at`, `image_hash`, `image_status` per printing (~600 KB).
-- `index/slugs.json` - `{slug: printing_id}` for every slug ever (~100 KB).
+- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `attack`, `defense`, `power`, `life`, `errata`, `set_codes`, `default_printing_id`, `image_status` per card (~330 KB).
+- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `product`, `finish`, `printed_as_current`, `retired_at`, `image_hash`, `image_status` per printing (~690 KB).
+- `index/slugs.json` - `{slug: printing_id}` for every slug ever (~100 KB, 3,088 entries).
 
 ## History, whole
 
