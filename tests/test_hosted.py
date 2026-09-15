@@ -2,9 +2,11 @@
 
 import threading
 import unittest
+from pathlib import Path
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from registry.hosted import _status, find_rule, image_urls_in, redirect_rule, should_flip
+from registry.hosted import (_status, check_images, find_rule, image_urls_in, redirect_rule,
+                             should_flip)
 
 
 class HostedTest(unittest.TestCase):
@@ -18,6 +20,51 @@ class HostedTest(unittest.TestCase):
         self.assertEqual(image_urls_in(export),
                          ["https://i/b.webp", "https://i/x.original.png", "https://i/x.small.webp"])
         self.assertEqual(image_urls_in({"cards": [], "printings": []}), [])
+
+    def test_only_addresses_a_previous_release_did_not_carry_are_checked(self):
+        import json
+        import tempfile
+        from unittest import mock
+
+        def export(urls):
+            return {"cards": [], "printings": [{"image_urls": {r: u for r, u in enumerate(urls)},
+                                                "back": None}]}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            previous = Path(tmp) / "previous.json"
+            current = Path(tmp) / "current.json"
+            previous.write_text(json.dumps(export(["https://i/a", "https://i/b"])), encoding="utf-8")
+            current.write_text(json.dumps(export(["https://i/a", "https://i/b", "https://i/c"])),
+                               encoding="utf-8")
+
+            asked = []
+            def record(urls):
+                asked.append(list(urls))
+                return []
+
+            with mock.patch("registry.hosted.missing_images", record):
+                self.assertEqual(check_images(str(current), str(previous)), 0)
+                # Only the address the earlier release did not publish.
+                self.assertEqual(asked, [["https://i/c"]])
+
+                asked.clear()
+                # No earlier export: everything is checked, as before.
+                self.assertEqual(check_images(str(current)), 0)
+                self.assertEqual(asked, [["https://i/a", "https://i/b", "https://i/c"]])
+
+                asked.clear()
+                # A baseline that is not there is a warning, not a skip.
+                self.assertEqual(check_images(str(current), str(Path(tmp) / "nope.json")), 0)
+                self.assertEqual(asked, [["https://i/a", "https://i/b", "https://i/c"]])
+
+                asked.clear()
+                # Nothing new: no request at all.
+                self.assertEqual(check_images(str(previous), str(previous)), 0)
+                self.assertEqual(asked, [[]])
+
+            # A miss in the new addresses still fails the release.
+            with mock.patch("registry.hosted.missing_images", lambda urls: ["404 https://i/c"]):
+                self.assertEqual(check_images(str(current), str(previous)), 1)
 
     def test_missing_images_are_named_and_a_429_is_retried(self):
         from registry.hosted import missing_images

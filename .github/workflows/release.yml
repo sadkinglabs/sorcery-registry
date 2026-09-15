@@ -211,7 +211,24 @@ jobs:
 
       - name: Every referenced image is served
         if: env.R2_BUCKET != '' && env.ALREADY_RELEASED != 'true'
-        run: python -m registry.hosted check-images --export dist/registry.json
+        run: |
+          # Addresses a previous release already published were checked when
+          # it published, and an image object is content-addressed: the art
+          # key is in its name, so an address cannot come to mean other bytes.
+          # Only the new ones are checked here - a release that touches no
+          # images then costs no requests. What this no longer catches is an
+          # object deleted from the bucket behind an address nothing changed;
+          # the weekly image sync re-verifies every held object for that.
+          PREVIOUS=$(git tag --list 'v*' --sort=-v:refname --merged "$TAG^" 2> /dev/null | head -n 1)
+          if [ -n "$PREVIOUS" ] && git cat-file -e "$PREVIOUS:export/registry.json" 2> /dev/null; then
+            git show "$PREVIOUS:export/registry.json" > "$RUNNER_TEMP/previous.json"
+            echo "checking against $PREVIOUS"
+            python -m registry.hosted check-images --export dist/registry.json \
+              --verified-in "$RUNNER_TEMP/previous.json"
+          else
+            echo "no earlier release to check against; checking every address"
+            python -m registry.hosted check-images --export dist/registry.json
+          fi
 
       - name: Verify what the CDN serves, then mark the root released
         if: env.R2_BUCKET != '' && env.ALREADY_RELEASED != 'true'
