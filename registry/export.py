@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 
 from . import API_BASE, API_URL, IMAGE_BASE, SCHEMA_VERSION, SITE_BASE
+from .errata import load_errata, unknown_printings
 from .images import load_images
 from .db import (CARD_FIELDS, FACE_FIELDS, HISTORY_FIELDS, PRINTING_FACE_FIELDS,
                  PRINTING_FIELDS, decode_field, open_db)
@@ -151,10 +152,14 @@ def printed_as_current(released_at, history, added_on=None):
     return released_at >= current["valid_from"]
 
 
-def build_export(con, images=None):
+def build_export(con, images=None, errata=None):
     """The export, from the database plus data/images.json (what images the
-    registry holds - registry-owned data kept in git, like overrides)."""
+    registry holds) and data/errata.json (printed faces recorded by hand) -
+    registry-owned data kept in git, like overrides."""
     held_images = (images if images is not None else load_images()).get("printings", {})
+    # A textless promo shows no face, so no date can say whether it is
+    # current: data/errata.json names such printings and they report null.
+    faceless = unknown_printings(errata if errata is not None else load_errata())
     # Derived at export time from the printings table, never stored: the
     # reverse card -> printings link cannot drift from the forward one.
     printing_ids_by_card = {}
@@ -177,11 +182,15 @@ def build_export(con, images=None):
     added_on = {row["printing_id"]: row["first_seen"] for row in con.execute(
         "SELECT printing_id, min(valid_from) AS first_seen FROM slug_history "
         "GROUP BY printing_id")}
-    for card_id, entries in printings_by_card.items():
+    def shows_current(row):
+        if format_printing_id(row["printing_id"]) in faceless:
+            return None
+        return printed_as_current(row["released_at"], history_by_card.get(row["card_id"], []),
+                                  added_on.get(row["printing_id"]))
+
+    for entries in printings_by_card.values():
         for entry in entries:
-            entry["printed_as_current"] = printed_as_current(
-                entry["released_at"], history_by_card.get(card_id, []),
-                added_on.get(entry["printing_id"]))
+            entry["printed_as_current"] = shows_current(entry)
 
     # Derived set catalogue: the sets themselves, with counts - the answer
     # to "what sets exist and how big are they", which the official data
@@ -253,9 +262,7 @@ def build_export(con, images=None):
         for field in PRINTING_FIELDS:
             record[field] = decode_field(field, row[field])
         record["back"] = _face(record["back"], PRINTING_FACE_FIELDS)
-        record["printed_as_current"] = printed_as_current(
-            row["released_at"], history_by_card.get(row["card_id"], []),
-            added_on.get(row["printing_id"]))
+        record["printed_as_current"] = shows_current(row)
         record["retired_at"] = row["retired_at"]
         record.update(printing_urls(record["printing_id"]))
         # What the registry holds for this printing's faces, from

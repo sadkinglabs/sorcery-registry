@@ -11,6 +11,7 @@ data/errata.json records the printed face by hand, one entry per card:
      "printed": {"rules_text": "..."},          # the fields as printed (any of HISTORY_FIELDS)
      "current_since": "2026-09-15",             # the current face applies from this date
      "current_printings": [],                   # printings that already carry the current face
+     "unknown_printings": [],                   # printings that show no face at all (a textless promo)
      "source": {"printing_id": "P000007"},      # which printing the face was read from
      "reason": "..."}                           # why, and who checked it
 
@@ -68,8 +69,9 @@ def load_errata(path=ERRATA_PATH):
             raise ValueError(f"{path}: {codex}: every entry needs a reason")
         if not isinstance(entry.get("source", {}), dict) or not entry.get("source", {}).get("printing_id"):
             raise ValueError(f"{path}: {codex}: source.printing_id names the printing the face was read from")
-        if not isinstance(entry.get("current_printings", []), list):
-            raise ValueError(f"{path}: {codex}: current_printings must be a list of printing ids")
+        for key in ("current_printings", "unknown_printings"):
+            if not isinstance(entry.get(key, []), list):
+                raise ValueError(f"{path}: {codex}: {key} must be a list of printing ids")
     return entries
 
 
@@ -122,11 +124,12 @@ def apply_errata(con, entries, log=print):
         # The printed face has been in force since the first printing that
         # carries it reached the public - which may be years before the
         # registry began recording - and until the current face took over.
-        current_ids = {id_number(pid) for pid in entry.get("current_printings", [])}
+        not_printed = {id_number(pid) for pid in entry.get("current_printings", [])
+                       + entry.get("unknown_printings", [])}
         printed_from = min([current_row["valid_from"]] + [
             row["released_at"] for row in con.execute(
                 "SELECT printing_id, released_at FROM printings WHERE card_id = ?", (card_id,))
-            if row["released_at"] and row["printing_id"] not in current_ids])
+            if row["released_at"] and row["printing_id"] not in not_printed])
         if since <= printed_from:
             raise ValueError(f"{codex}: current_since {since} must be after the printed face "
                              f"first reached the public ({printed_from})")
@@ -141,6 +144,12 @@ def apply_errata(con, entries, log=print):
         applied += 1
     con.commit()
     return {"applied": applied, "unchanged": unchanged}
+
+
+def unknown_printings(entries):
+    """Printings that show no face at all - a textless promo - whose
+    printed_as_current is null rather than a date's verdict."""
+    return {pid for entry in entries for pid in entry.get("unknown_printings", [])}
 
 
 def check_errata(con, entries, errors):
@@ -169,10 +178,13 @@ def check_errata(con, entries, errors):
             errors.append(f"errata {codex}: current_since {since} disagrees with the history "
                           f"({recorded[0]['valid_to']} / {current_row['valid_from']})")
         current_ids = set(entry.get("current_printings", []))
+        unknown_ids = set(entry.get("unknown_printings", []))
         for row in con.execute("SELECT printing_id, released_at FROM printings WHERE card_id = ?",
                                (card_id,)):
             pid = format_printing_id(row["printing_id"])
             released = row["released_at"]
+            if pid in unknown_ids:
+                continue  # shows no face; the export reports null for it
             if pid in current_ids:
                 if released is None or released < since:
                     errors.append(f"errata {codex}: {pid} is listed as carrying the current face "
@@ -181,7 +193,7 @@ def check_errata(con, entries, errors):
                 errors.append(f"errata {codex}: {pid} was released {released}, on or after "
                               f"{since}, so it counts as current; list it in current_printings "
                               f"or move current_since")
-        for pid in current_ids:
+        for pid in current_ids | unknown_ids:
             owner = con.execute("SELECT card_id FROM printings WHERE printing_id = ?",
                                 (id_number(pid),)).fetchone()
             if owner is None or owner["card_id"] != card_id:

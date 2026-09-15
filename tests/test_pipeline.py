@@ -705,6 +705,31 @@ class ErrataTest(unittest.TestCase):
         self.assertFalse(printed_as_current("2023-06-22", history, added_on="2026-08-19"))
         self.assertTrue(printed_as_current(since, history, added_on="2026-08-19"))
 
+    def test_a_textless_printing_reports_null_and_is_not_judged(self):
+        from registry.errata import apply_errata, check_errata, unknown_printings
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["printings"].append(upstream_printing("004-apprentice_wizard-p-s", "Arthurian", "004", "2024-10-04"))
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        card, _, prints = self.wizard(build_export(con))
+        promo = max(prints, key=lambda p: p["released_at"])
+        entry = self.entry(card["codex_id"], unknown_printings=[promo["printing_id"]])
+        self.assertEqual(unknown_printings([entry]), {promo["printing_id"]})
+        apply_errata(con, [entry], log=lambda *a: None)
+        _, rows, prints = self.wizard(build_export(con, errata=[entry]))
+        # The printed face is dated from the first printing that shows it;
+        # the textless one is not that, and reports no verdict at all.
+        self.assertEqual(rows[0]["valid_from"], min(p["released_at"] for p in prints if p != promo))
+        flags = {p["printing_id"]: p["printed_as_current"] for p in prints}
+        self.assertIsNone(flags[promo["printing_id"]])
+        self.assertTrue(all(v is False for pid, v in flags.items() if pid != promo["printing_id"]))
+        # Without the listing the export would pass a date's verdict on it.
+        self.assertFalse(self.wizard(build_export(con, errata=[]))[2][-1]["printed_as_current"])
+        errors = []
+        check_errata(con, [entry], errors)
+        self.assertEqual(errors, [])
+
     def test_mistakes_are_errors_not_silent(self):
         from registry.errata import apply_errata, check_errata, load_errata
         from pathlib import Path
