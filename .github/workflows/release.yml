@@ -90,13 +90,9 @@ jobs:
             if [ "$(git rev-parse "$VERSION^{commit}")" = "$(git rev-parse HEAD)" ]; then
               echo "::notice::tag $VERSION already exists at HEAD; reusing it"
             else
-              if gh release view "$VERSION" > /dev/null 2>&1; then
-                echo "::error::$VERSION is already released on GitHub from another commit"
-                exit 1
-              fi
               if [ -n "$R2_BUCKET" ] && aws s3 cp "s3://$R2_BUCKET/$VERSION/RELEASED" "$RUNNER_TEMP/RELEASED" > /dev/null 2>&1; then
-                # The domain already serves this version. The tag may still
-                # move if HEAD's export is byte for byte what was released -
+                # The domain already serves this version. HEAD may still stand
+                # in for it if its export is byte for byte what was released -
                 # a workflow-only fix merged in between - never otherwise.
                 released=$(awk '$1 == "sha256" {print $2}' "$RUNNER_TEMP/RELEASED")
                 local=$(cut -d' ' -f1 export/registry.json.sha256)
@@ -105,9 +101,17 @@ jobs:
                   exit 1
                 fi
               fi
-              echo "::notice::tag $VERSION names an unfinished attempt at $(git rev-parse --short "$VERSION^{commit}"); moving it to HEAD"
-              git tag -fa "$VERSION" -F "$RUNNER_TEMP/notes.md"
-              git push --force origin "refs/tags/$VERSION"
+              if gh release view "$VERSION" > /dev/null 2>&1; then
+                # Published on GitHub too: the tag is history and stays where
+                # it is. This run is a re-run of the pointer and website steps
+                # (the export at HEAD was just proven identical when the domain
+                # serves it; if it does not, the release was never finished).
+                echo "::notice::$VERSION is already published from $(git rev-parse --short "$VERSION^{commit}"); re-running the pointer steps without moving the tag"
+              else
+                echo "::notice::tag $VERSION names an unfinished attempt at $(git rev-parse --short "$VERSION^{commit}"); moving it to HEAD"
+                git tag -fa "$VERSION" -F "$RUNNER_TEMP/notes.md"
+                git push --force origin "refs/tags/$VERSION"
+              fi
             fi
           else
             git tag -a "$VERSION" -F "$RUNNER_TEMP/notes.md"
@@ -244,6 +248,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "GitHub release $TAG already exists; nothing to publish (re-run)"
+            exit 0
+          fi
           gh release create "$TAG" manifest.json \
             --title "$TAG" --notes-from-tag --verify-tag
 
