@@ -841,6 +841,14 @@
               }
             ]
           },
+          "source": {
+            "type": "string",
+            "enum": [
+              "api",
+              "card"
+            ],
+            "description": "Where the face came from: 'api' when the registry observed it in the official API; 'card' when it was recorded by hand from what is printed on the card (data/errata.json), the case of a card whose printed text differs from the text the API serves."
+          },
           "type": {
             "type": [
               "string",
@@ -961,6 +969,7 @@
           "codex_id",
           "valid_from",
           "valid_to",
+          "source",
           "type",
           "category",
           "rarity",

@@ -152,6 +152,7 @@ CREATE TABLE card_history (
     valid_from TEXT NOT NULL,
     valid_to   TEXT,
     face       TEXT NOT NULL,
+    source     TEXT NOT NULL DEFAULT 'api',  -- 'api': observed upstream; 'card': read from the printed card
     UNIQUE (card_id, valid_from, face)
 );
 

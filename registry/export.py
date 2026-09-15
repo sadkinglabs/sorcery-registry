@@ -134,13 +134,17 @@ def printed_as_current(released_at, history, added_on=None):
     (`added_on`, its first slug_history row): a face is recorded on the
     date of the sync that saw it, which is normally after the reprint that
     carries it reached the public, and a printing first seen alongside or
-    after the new face was necessarily printed with it."""
+    after the new face was necessarily printed with it. That shortcut holds
+    only for faces the registry observed in the API: a face recorded by
+    hand from the printed card (source "card") carries a hand-set date,
+    and then only the release date decides."""
     if not history:
         return None
     current = history[-1]
     if len(history) == 1:
         return True
-    if added_on is not None and added_on >= current["valid_from"]:
+    observed = all(row.get("source", "api") == "api" for row in history)
+    if observed and added_on is not None and added_on >= current["valid_from"]:
         return True
     if released_at is None:
         return None
@@ -167,7 +171,7 @@ def build_export(con, images=None):
 
     history_by_card = {}
     for row in con.execute(
-            "SELECT card_id, valid_from, valid_to, face FROM card_history "
+            "SELECT card_id, valid_from, valid_to, face, source FROM card_history "
             "ORDER BY card_id, valid_from, valid_to IS NULL, face"):
         history_by_card.setdefault(row["card_id"], []).append(dict(row))
     added_on = {row["printing_id"]: row["first_seen"] for row in con.execute(
@@ -295,7 +299,8 @@ def build_export(con, images=None):
             face = json.loads(row["face"])
             entry = {"codex_id": format_card_id(card_id),
                      "valid_from": row["valid_from"],
-                     "valid_to": row["valid_to"]}
+                     "valid_to": row["valid_to"],
+                     "source": row["source"]}
             for field in HISTORY_FIELDS:
                 entry[field] = face.get(field)
             entry = with_power(entry)

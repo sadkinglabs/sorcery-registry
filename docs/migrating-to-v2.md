@@ -1,5 +1,10 @@
 # Migrating to v3.2 (from v3.1), v3.1 (from v3.0), v3.0 (from v2.0) and v2.0 (from v1.x)
 
+## v3.2 to v3.3 (schema 11)
+
+Additive. `card_history` rows gain `source`: `"api"` for a face the registry observed in the official API (every row until now), `"card"` for a face recorded by hand from what is printed on the card (`data/errata.json`). Cards the publisher changed after printing gain a closed `"card"` row holding their printed face, dated from the first printing that carries it, and their older printings' `printed_as_current` becomes `false`; `errata` was already `true` for them. Nothing else changes.
+
+
 ## v3.1 → v3.2 (schema 9 → 10)
 
 Additive; **no identifier changed**. The images landed and one derived value was added:
