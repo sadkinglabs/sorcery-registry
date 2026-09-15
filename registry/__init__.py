@@ -43,7 +43,12 @@ API slug demoted to an ordinary, mutable column.
 # card_history rows): equal to attack when attack equals defense, else
 # floor((attack + defense) / 2), null when either is null. image_status
 # gains "lowres" as the images land. No database change.
-SCHEMA_VERSION = 10
+# v11: card_history rows carry source - "api" for a face observed in the
+# official API, "card" for a face recorded by hand from what is printed on
+# the card (data/errata.json) so that printings whose printed text differs
+# from the current text stop counting as showing current values. Database:
+# card_history gains the source column.
+SCHEMA_VERSION = 11
 API_URL = "https://api.sorcerytcg.com/api/cards"
 
 # Where the published records live. api_url on every record points at the

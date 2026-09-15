@@ -6,7 +6,7 @@ import unittest
 
 import registry.db
 from registry.canon import canon_text, parse_slug
-from registry.db import init_db, load_registry_state, open_db
+from registry.db import DDL, init_db, load_registry_state, open_db
 from registry.diff import diff, is_noop
 from registry.export import build_export, render
 from registry.fetch import apply_overrides, build_snapshot
@@ -606,16 +606,182 @@ class BackFaceRoundTripTest(unittest.TestCase):
 
 
 class MigrationTest(unittest.TestCase):
-    def test_v10_records_the_version_and_refuses_anything_but_v9(self):
+    def test_v11_adds_the_source_column_and_refuses_anything_but_v10(self):
         from registry.db import get_meta, set_meta
-        from registry.migrate_v10 import migrate
+        from registry.migrate_v11 import migrate
         con = open_db(":memory:")
-        init_db(con)
-        set_meta(con, "schema_version", "9")
+        # A v10 database: today's DDL without the column.
+        con.executescript(DDL.replace("    source     TEXT NOT NULL DEFAULT 'api',  -- 'api': observed upstream; 'card': read from the printed card\n", ""))
+        con.execute("INSERT INTO meta VALUES ('schema_version', '10')")
+        self.assertNotIn("source", {r["name"] for r in con.execute("PRAGMA table_info(card_history)")})
         migrate(con)
-        self.assertEqual(get_meta(con, "schema_version"), "10")
+        self.assertEqual(get_meta(con, "schema_version"), "11")
+        self.assertIn("source", {r["name"] for r in con.execute("PRAGMA table_info(card_history)")})
         with self.assertRaises(ValueError):
             migrate(con)
+
+
+class ErrataTest(unittest.TestCase):
+    """A printed face recorded by hand flips the printings that carry it."""
+
+    def populated(self):
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con),
+                             build_snapshot(copy.deepcopy(RAW_API))), "2026-08-19")
+        return con
+
+    def wizard(self, export):
+        card = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
+        rows = [h for h in export["card_history"] if h["codex_id"] == card["codex_id"]]
+        prints = [p for p in export["printings"] if p["codex_id"] == card["codex_id"]]
+        return card, rows, prints
+
+    def entry(self, codex, **over):
+        e = {"codex_id": codex, "printed": {"rules_text": "Spellcaster\nGenesis → Draw a card."},
+             "current_since": "2026-09-15", "source": {"printing_id": "P000001"},
+             "reason": "Printed text differs from the API's; read from the Alpha card."}
+        e.update(over)
+        return e
+
+    def test_recording_flips_older_printings_and_keeps_later_ones_current(self):
+        from registry.errata import apply_errata, check_errata
+        con = self.populated()
+        card, rows, prints = self.wizard(build_export(con))
+        self.assertEqual(len(rows), 1)
+        self.assertTrue(all(p["printed_as_current"] for p in prints))
+        counts = apply_errata(con, [self.entry(card["codex_id"])], log=lambda *a: None)
+        self.assertEqual(counts, {"applied": 1, "corrected": 0, "unchanged": 0})
+        card, rows, prints = self.wizard(build_export(con))
+        self.assertTrue(card["errata"])
+        earliest = min(p["released_at"] for p in prints)  # the printed face dates from the first printing
+        self.assertLess(earliest, "2026-08-19")
+        self.assertEqual([(r["valid_from"], r["valid_to"], r["source"], r["rules_text"]) for r in rows], [
+            (earliest, "2026-09-15", "card", "Spellcaster\nGenesis → Draw a card."),
+            ("2026-09-15", None, "api", "Spellcaster\nGenesis → Draw a spell."),
+        ])
+        # The printed row is the whole face: only the recorded field differs.
+        self.assertEqual(rows[0]["cost"], rows[1]["cost"])
+        # Every existing printing predates the current face, and the
+        # added-on shortcut does not apply to a hand-set date.
+        self.assertTrue(all(p["printed_as_current"] is False for p in prints))
+        errors = []
+        check_errata(con, [self.entry(card["codex_id"])], errors)
+        self.assertEqual(errors, [])
+        # Applying again changes nothing.
+        counts = apply_errata(con, [self.entry(card["codex_id"])], log=lambda *a: None)
+        self.assertEqual(counts, {"applied": 0, "corrected": 0, "unchanged": 1})
+        self.assertEqual(len(self.wizard(build_export(con))[1]), 2)
+
+    def test_a_reprint_with_the_current_text_is_listed_and_stays_current(self):
+        from registry.errata import apply_errata, check_errata
+        from registry.export import printed_as_current
+        # The fixture plus a later reprint, all seen in the registry's first sync.
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["printings"].append(upstream_printing("004-apprentice_wizard-b-s", "Arthurian", "004", "2024-10-04"))
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        card, _, prints = self.wizard(build_export(con))
+        latest = max(prints, key=lambda p: p["released_at"])
+        self.assertEqual(latest["released_at"], "2024-10-04")
+        since = latest["released_at"]  # the current face from the day of the reprint
+        entry = self.entry(card["codex_id"], current_since=since, current_printings=[latest["printing_id"]])
+        apply_errata(con, [entry], log=lambda *a: None)
+        _, rows, prints = self.wizard(build_export(con))
+        flags = {p["printing_id"]: p["printed_as_current"] for p in prints}
+        self.assertTrue(flags[latest["printing_id"]])
+        self.assertTrue(all(v is False for pid, v in flags.items() if pid != latest["printing_id"]))
+        errors = []
+        check_errata(con, [entry], errors)
+        self.assertEqual(errors, [])
+        # Without the listing, the validator names the printing the date lets through.
+        errors = []
+        check_errata(con, [self.entry(card["codex_id"], current_since=since)], errors)
+        self.assertTrue(any(latest["printing_id"] in e and "counts as current" in e for e in errors))
+        # The pure rule: a hand-recorded history ignores the added-on shortcut.
+        history = [{"valid_from": "2026-08-19", "valid_to": since, "source": "card"},
+                   {"valid_from": since, "valid_to": None, "source": "api"}]
+        self.assertFalse(printed_as_current("2023-06-22", history, added_on="2026-08-19"))
+        self.assertTrue(printed_as_current(since, history, added_on="2026-08-19"))
+
+    def test_a_corrected_transcription_updates_the_recorded_row(self):
+        from registry.errata import apply_errata, check_errata
+        con = self.populated()
+        card, _, _ = self.wizard(build_export(con))
+        entry = self.entry(card["codex_id"])
+        apply_errata(con, [entry], log=lambda *a: None)
+        _, rows, _ = self.wizard(build_export(con))
+        dates = [(r["valid_from"], r["valid_to"]) for r in rows]
+        # The reviewer reads the card again and spells it differently.
+        better = self.entry(card["codex_id"],
+                            printed={"rules_text": "Spellcaster\nGenesis → Draw a card, then a card."})
+        counts = apply_errata(con, [better], log=lambda *a: None)
+        self.assertEqual(counts, {"applied": 0, "corrected": 1, "unchanged": 0})
+        _, rows, _ = self.wizard(build_export(con))
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["rules_text"], "Spellcaster\nGenesis → Draw a card, then a card.")
+        self.assertEqual([(r["valid_from"], r["valid_to"]) for r in rows], dates)
+        errors = []
+        check_errata(con, [better], errors)
+        self.assertEqual(errors, [])
+        # But a different current_since is a date change, not a correction.
+        with self.assertRaises(ValueError):
+            apply_errata(con, [self.entry(card["codex_id"], current_since="2026-09-20")],
+                         log=lambda *a: None)
+
+    def test_a_textless_printing_reports_null_and_is_not_judged(self):
+        from registry.errata import apply_errata, check_errata, unknown_printings
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["printings"].append(upstream_printing("004-apprentice_wizard-p-s", "Arthurian", "004", "2024-10-04"))
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        card, _, prints = self.wizard(build_export(con))
+        promo = max(prints, key=lambda p: p["released_at"])
+        entry = self.entry(card["codex_id"], unknown_printings=[promo["printing_id"]])
+        self.assertEqual(unknown_printings([entry]), {promo["printing_id"]})
+        apply_errata(con, [entry], log=lambda *a: None)
+        _, rows, prints = self.wizard(build_export(con, errata=[entry]))
+        # The printed face is dated from the first printing that shows it;
+        # the textless one is not that, and reports no verdict at all.
+        self.assertEqual(rows[0]["valid_from"], min(p["released_at"] for p in prints if p != promo))
+        flags = {p["printing_id"]: p["printed_as_current"] for p in prints}
+        self.assertIsNone(flags[promo["printing_id"]])
+        self.assertTrue(all(v is False for pid, v in flags.items() if pid != promo["printing_id"]))
+        # Without the listing the export would pass a date's verdict on it.
+        self.assertFalse(self.wizard(build_export(con, errata=[]))[2][-1]["printed_as_current"])
+        errors = []
+        check_errata(con, [entry], errors)
+        self.assertEqual(errors, [])
+
+    def test_mistakes_are_errors_not_silent(self):
+        from registry.errata import apply_errata, check_errata, load_errata
+        from pathlib import Path
+        import tempfile, json as _json
+        con = self.populated()
+        card, _, _ = self.wizard(build_export(con))
+        with self.assertRaises(ValueError):  # equals the current face
+            apply_errata(con, [self.entry(card["codex_id"], printed={"rules_text": card["rules_text"]})], log=lambda *a: None)
+        with self.assertRaises(ValueError):  # not after the first printing reached the public
+            apply_errata(con, [self.entry(card["codex_id"], current_since="2023-06-22")], log=lambda *a: None)
+        with self.assertRaises(ValueError):  # not a card
+            apply_errata(con, [self.entry("C000999")], log=lambda *a: None)
+        # A recorded row without an entry is caught by the validator.
+        apply_errata(con, [self.entry(card["codex_id"])], log=lambda *a: None)
+        errors = []
+        check_errata(con, [], errors)
+        self.assertTrue(any("no entry in data/errata.json" in e for e in errors))
+        # And the file's own shape is checked.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "errata.json"
+            path.write_text(_json.dumps([{"codex_id": card["codex_id"], "printed": {"nope": 1},
+                                          "current_since": "2026-09-15", "reason": "x",
+                                          "source": {"printing_id": "P000001"}}]))
+            with self.assertRaises(ValueError):
+                load_errata(path)
+            path.write_text("[]")
+            self.assertEqual(load_errata(path), [])
 
 
 

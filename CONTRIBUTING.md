@@ -43,7 +43,7 @@ There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the 
 
 **The upstream contract.** Their page also publishes the response type, `CardAPIDTO`; it is checked in verbatim as [`schema/upstream-cards.dto.ts`](schema/upstream-cards.dto.ts) so a diff of their page is a diff of ours, and [`schema/upstream-cards.schema.json`](schema/upstream-cards.schema.json) is our machine-checked reading of it: structure and types only, every vocabulary left open. `build_snapshot` checks every payload against it before reading a field (`registry/contract.py`, stdlib-only) and stops with the path of the first field that no longer fits - a missing `engine.rules`, a `set` that became a string - rather than flattening a changed shape into wrong data; a new field or a new product spelling passes through as data. When their page changes, update both files in one PR and let the tests say what the adapter must do about it.
 
-The registry mirrors the shape the official API serves today: its field names (`set_code`, `defense`, `typeline`, `BoxTopper`), its list fields in its order, and its split between gameplay data on the card and physical facts on the printing. When upstream changes shape again, the adapter in `registry/fetch.py` is the one place that knows the upstream layout; everything downstream works from the snapshot it builds. A schema bump that restructures the database ships with a migration script (see `registry/migrate_v8.py`) that rebuilds the file from the new DDL and proves every id survived; a bump that only adds derived export fields ships a script that just records the new version (`registry/migrate_v10.py`), because the validator insists the database and the code agree on it. The previous bump's script is removed once it has run, since it can never run again.
+The registry mirrors the shape the official API serves today: its field names (`set_code`, `defense`, `typeline`, `BoxTopper`), its list fields in its order, and its split between gameplay data on the card and physical facts on the printing. When upstream changes shape again, the adapter in `registry/fetch.py` is the one place that knows the upstream layout; everything downstream works from the snapshot it builds. A schema bump that restructures the database ships with a migration script (see `registry/migrate_v8.py`) that rebuilds the file from the new DDL and proves every id survived; a bump that only adds derived export fields ships a script that just records the new version (`registry/migrate_v11.py`), because the validator insists the database and the code agree on it. The previous bump's script is removed once it has run, since it can never run again.
 
 A sync PR should contain: the updated `registry.sqlite`, the regenerated `export/registry.json`, and nothing hand-written except (when relevant) override or decision files. Run `python -m registry.validate --against origin/main` before pushing; CI runs the same check.
 
@@ -123,6 +123,23 @@ git checkout -b images/$(date -u +%Y-%m-%d) && git add data/images.json export/ 
 Then open the pull request. The R2 values are the same ones the release workflow holds as secrets; keep them in your shell session only. `data/images.json` is saved after every file, so an interrupted run resumes. The fetch prints a `progress:` line every 100 files (handled, fetched, failed, rate, time left); on GitHub the same counts land in the run's step summary.
 
 The renditions are Scryfall's (small 146×204, normal 488×680, large 672×936 WebP, plus the untouched original). Everything that determines the rendered bytes is `RENDITION_RECIPE` in `registry/images.py`: bump it when the sizes, quality or resampling change, and the next sync re-renders every image under a new key, so no published address ever changes bytes. The publisher's files come in two resolutions; the low one (380×531) is upscaled by decision and flagged `image_status: lowres`.
+
+## When the printed card and the API disagree
+
+The official API serves a card's current face. For a card the publisher changed after it was printed - the cards the old API marked `UPDATED` - the printed card is the only record of the earlier face, and the registry never observed it, so every printing would claim to show current values. [`data/errata.json`](data/errata.json) records the printed face by hand, one entry per card:
+
+```json
+{
+  "codex_id": "C000002",
+  "printed": { "rules_text": "The text as printed on the card." },
+  "current_since": "2026-09-15",
+  "current_printings": [],
+  "source": { "printing_id": "P000007" },
+  "reason": "Read from the Alpha printing's image; the API's text differs. Checked by the registry owner, 2026-09-15."
+}
+```
+
+`printed` names the gameplay fields as printed (any of the face fields: `rules_text`, `cost`, `attack`, ...); `current_since` is the date from which the current face applies; `current_printings` lists printings that already carry the current face (a reprint with the corrected text), which must have been released on or after that date, while every other printing must predate it; `unknown_printings` lists printings that show no face at all (a textless promo), which the export reports as `printed_as_current: null` since no date can say what they show. `python -m registry.errata apply` turns the entry into history: a closed `card_history` row with `source: "card"` from the day the first printing carrying the printed face reached the public until `current_since`, and the observed face from then on. The export then derives `printed_as_current: false` for the older printings. The command is idempotent; re-running it after correcting a transcription (the same dates, a differently spelled `printed`) updates the recorded row in place, because that row is the registry's reading of the card rather than an observation. It refuses an entry whose dates no longer match what is recorded, and the validator (`registry.validate`, in CI) checks that the file and the history agree, that `current_since` really separates the printings as claimed, and that no `card` row exists without an entry. To read what a card says, the `review-images` workflow (Actions tab) copies the served images of the printings of any cards into the branch `review/images` with an index. Like the overrides, every entry carries a reason, and the pull request that adds one shows the transcription for review; on the site, the card page's "As printed" panel shows the two faces side by side once the release is out.
 
 ## When a sync is ambiguous
 

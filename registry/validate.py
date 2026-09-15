@@ -35,6 +35,7 @@ import sys
 from pathlib import Path
 
 from . import SCHEMA_VERSION
+from .errata import check_errata, load_errata
 from .db import HISTORY_FIELDS, decode_field, face_of, get_meta, open_db
 from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, render
 from .images import load_images
@@ -318,6 +319,7 @@ def main():
 
     errors = []
     check_internal(con, errors)
+    check_errata(con, load_errata(), errors)
     check_export_matches(con, args.export, errors)
     if args.against:
         check_against_ref(con, args.against, args.export, errors)

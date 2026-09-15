@@ -685,7 +685,7 @@
               "boolean",
               "null"
             ],
-            "description": "Derived: whether the values physically printed on this printing equal the card's current gameplay face - true when the printing was released on or after the current face took effect, or entered the registry on or after it (a reprint that arrives in the same sync as the change it carries), or when the card's face has never changed. null when the printing has no release date and predates the current face."
+            "description": "Derived: whether the values physically printed on this printing equal the card's current gameplay face - true when the printing was released on or after the current face took effect, or entered the registry on or after it (a reprint that arrives in the same sync as the change it carries), or when the card's face has never changed. null when the printing has no release date and predates the current face, or when it shows no face at all (a textless promo listed under unknown_printings in data/errata.json)."
           },
           "retired_at": {
             "anyOf": [
@@ -841,6 +841,14 @@
               }
             ]
           },
+          "source": {
+            "type": "string",
+            "enum": [
+              "api",
+              "card"
+            ],
+            "description": "Where the face came from: 'api' when the registry observed it in the official API; 'card' when it was recorded by hand from what is printed on the card (data/errata.json), the case of a card whose printed text differs from the text the API serves."
+          },
           "type": {
             "type": [
               "string",
@@ -961,6 +969,7 @@
           "codex_id",
           "valid_from",
           "valid_to",
+          "source",
           "type",
           "category",
           "rarity",
