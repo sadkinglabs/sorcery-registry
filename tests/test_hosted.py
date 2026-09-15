@@ -19,6 +19,17 @@ class HostedTest(unittest.TestCase):
                          ["https://i/b.webp", "https://i/x.original.png", "https://i/x.small.webp"])
         self.assertEqual(image_urls_in({"cards": [], "printings": []}), [])
 
+    def test_missing_images_are_named_and_a_429_is_retried(self):
+        from registry.hosted import missing_images
+        answers = {"https://x/a": iter([(200, {})]),
+                   "https://x/b": iter([(404, {})]),
+                   "https://x/c": iter([(429, {}), (200, {})])}
+        slept = []
+        problems = missing_images(["https://x/a", "https://x/b", "https://x/c"],
+                                  status=lambda url: next(answers[url]), workers=2, sleep=slept.append)
+        self.assertEqual(problems, ["404 https://x/b"])
+        self.assertIn(11, slept)  # the 429 waited out the block window once
+
     def test_alias_only_moves_to_the_newest_of_its_major(self):
         doc = {"latest": {"v3": "v3.2.0"}}
         self.assertTrue(should_flip(doc, "v3", "v3.2.0"))
