@@ -257,7 +257,8 @@
   {
     "codex_id": "C000459",
     "printed": {
-      "rules_text": "Tap → Play or draw a site. If you played a site and you don’t control Tawny, summon her there.\nTap → Summon Bruin here. Flip this card."
+      "rules_text": "Tap → Play or draw a site. If you played a site and you don’t control Tawny, summon her there.\nTap → Summon Bruin here. Flip this card.",
+      "back.rules_text": "Tap → Play or draw a site.\nWhenever an enemy enters a nearby site, it takes 1 damage."
     },
     "current_since": "2026-09-15",
     "current_printings": [],
@@ -267,7 +268,7 @@
     "source": {
       "printing_id": "P001762"
     },
-    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001762 on 2026-09-15 (the Box Topper; the Dust printing P001763 reads the same, and the OP promo P001764 is textless). Every printing to date carries the printed text."
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001762 on 2026-09-15 (the Box Topper; the Dust printing P001763 reads the same, and the OP promo P001764 is textless). Every printing to date carries the printed text. Both faces are recorded: the API had also put the back's text on the front and left the back on its earlier wording, corrected the same day through data/overrides.json."
   },
   {
     "codex_id": "C000483",

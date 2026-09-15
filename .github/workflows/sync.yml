@@ -70,6 +70,11 @@ jobs:
           git push origin "$BRANCH"
           gh pr create --fill --title "Sync $(date -u +%Y-%m-%d)" \
             --body "Automated sync against the official API. Review the export diff before merging."
+          # A PR opened with this token does not trigger CI on its own
+          # (GitHub's rule against workflows triggering workflows); a
+          # workflow_dispatch is the allowed exception, so ask for the
+          # required check explicitly - as the images workflow does.
+          gh workflow run validate.yml --ref "$BRANCH"
 
       - name: Fail loudly when human review is needed
         if: steps.sync.outputs.ambiguous == 'true'

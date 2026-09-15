@@ -8,7 +8,8 @@ such a card would claim to show current values, which is not true.
 data/errata.json records the printed face by hand, one entry per card:
 
     {"codex_id": "C000002",
-     "printed": {"rules_text": "..."},          # the fields as printed (any of HISTORY_FIELDS)
+     "printed": {"rules_text": "..."},          # the fields as printed (any of HISTORY_FIELDS,
+                                                #  or back.<field> for one field of the back face)
      "current_since": "2026-09-15",             # the current face applies from this date
      "current_printings": [],                   # printings that already carry the current face
      "unknown_printings": [],                   # printings that show no face at all (a textless promo)
@@ -32,7 +33,7 @@ import re
 import sys
 from pathlib import Path
 
-from .db import HISTORY_FIELDS, decode_field, face_of, open_db
+from .db import FACE_FIELDS, HISTORY_FIELDS, decode_field, face_of, open_db
 from .ids import format_card_id, format_printing_id, id_number
 
 ERRATA_PATH = Path("data") / "errata.json"
@@ -59,7 +60,8 @@ def load_errata(path=ERRATA_PATH):
         printed = entry.get("printed")
         if not isinstance(printed, dict) or not printed:
             raise ValueError(f"{path}: {codex}: 'printed' must name at least one field as printed")
-        unknown = set(printed) - set(HISTORY_FIELDS)
+        unknown = {field for field in printed
+                   if field not in HISTORY_FIELDS and _back_field(field) is None}
         if unknown:
             raise ValueError(f"{path}: {codex}: not gameplay fields: {sorted(unknown)}")
         since = entry.get("current_since")
@@ -75,11 +77,32 @@ def load_errata(path=ERRATA_PATH):
     return entries
 
 
+def _back_field(field):
+    """"back.rules_text" -> "rules_text", for a field of the back face;
+    None for anything else."""
+    if not field.startswith("back."):
+        return None
+    name = field[len("back."):]
+    return name if name in FACE_FIELDS else None
+
+
 def printed_face(current, printed):
     """The face as printed: the current face with the printed fields in
-    place of the current ones."""
+    place of the current ones. A back.<field> replaces one field of the
+    back face and leaves the rest of it as the current face has it, so a
+    later correction upstream is not frozen out by this file."""
     face = {field: current.get(field) for field in HISTORY_FIELDS}
-    face.update(printed)
+    back_fields = {}
+    for field, value in printed.items():
+        name = _back_field(field)
+        if name is None:
+            face[field] = value
+        else:
+            back_fields[name] = value
+    if back_fields:
+        if face.get("back") is None:
+            raise ValueError("printed names a back face field, but the card has no back face")
+        face["back"] = {**face["back"], **back_fields}
     return face
 
 

@@ -132,6 +132,14 @@ class SnapshotTest(unittest.TestCase):
             build_snapshot(raw)
 
 
+def two_faced_snapshot():
+    """A snapshot holding one double-faced card, for the back-face tests."""
+    raw = copy.deepcopy(RAW_API)
+    raw[0]["engine"]["back"] = engine(rules="Tap → Play or draw a site.", cost=None,
+                                      attack=2, defense=2, elements=["None"], subtypes=[], keywords=[])
+    return build_snapshot(raw)
+
+
 class OverridesTest(unittest.TestCase):
     def test_override_corrects_the_card(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
@@ -154,6 +162,45 @@ class OverridesTest(unittest.TestCase):
         for slug in ("001-apprentice_wizard-b-s", "001-apprentice_wizard-b-f"):
             self.assertEqual(snapshot["printings"][slug]["artist"], "Corrected Artist")
         self.assertNotIn("artist", snapshot["cards"]["Apprentice Wizard"])
+
+    def test_override_corrects_one_field_of_the_back_face(self):
+        snapshot = two_faced_snapshot()
+        back = dict(snapshot["cards"]["Apprentice Wizard"]["back"])
+        unmatched = apply_overrides(snapshot, [{
+            "match": {"card_name": "Apprentice Wizard"},
+            "set_fields": {"rules_text": "Front, corrected.",
+                           "back.rules_text": "Back, corrected."},
+            "reason": "the API serves the faces the wrong way round"}])
+        self.assertEqual(unmatched, [])
+        card = snapshot["cards"]["Apprentice Wizard"]
+        self.assertEqual(card["rules_text"], "Front, corrected.")
+        self.assertEqual(card["back"]["rules_text"], "Back, corrected.")
+        # Every other field of the face is still upstream's.
+        for field, value in back.items():
+            if field != "rules_text":
+                self.assertEqual(card["back"][field], value, field)
+
+    def test_override_naming_a_field_that_does_not_exist_is_rejected(self):
+        snapshot = two_faced_snapshot()
+        for column in ("rules", "back.rules", "back.artist", "front.rules_text"):
+            with self.assertRaises(ValueError, msg=column):
+                apply_overrides(snapshot, [{
+                    "match": {"card_name": "Apprentice Wizard"},
+                    "set_fields": {column: "x"}, "reason": "typo in the field name"}])
+
+    def test_override_will_not_correct_a_back_face_that_is_not_there(self):
+        snapshot = build_snapshot(copy.deepcopy(RAW_API))
+        with self.assertRaises(ValueError):
+            apply_overrides(snapshot, [{
+                "match": {"card_name": "Broken Site"},
+                "set_fields": {"back.rules_text": "x"}, "reason": "no back face"}])
+
+    def test_override_will_not_restrict_a_back_face_to_one_set(self):
+        snapshot = two_faced_snapshot()
+        with self.assertRaises(ValueError):
+            apply_overrides(snapshot, [{
+                "match": {"card_name": "Apprentice Wizard", "set_name": "Alpha"},
+                "set_fields": {"back.rules_text": "x"}, "reason": "a face is a card fact"}])
 
     def test_unmatched_override_is_reported_not_fatal(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
@@ -461,6 +508,44 @@ class CardHistoryTest(unittest.TestCase):
         export = build_export(con)
         wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
         self.assertEqual(wizard["default_printing_id"], "P000001")
+
+    def test_two_changes_in_one_day_rewrite_that_day_rather_than_stack(self):
+        con = self.populated()
+        first = copy.deepcopy(RAW_API)
+        first[0]["engine"]["rules"] = "Spellcaster\r\n\r\nGenesis → Draw two spells."
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(first)), "2026-09-01")
+        # The same day, a correction: the row opened this morning is rewritten,
+        # not closed at its own start - a row valid from a day to that same day
+        # would say the face was current for no time at all.
+        second = copy.deepcopy(first)
+        second[0]["engine"]["rules"] = "Spellcaster\r\n\r\nGenesis → Draw three spells."
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(second)), "2026-09-01")
+
+        export = build_export(con)
+        wizard, rows = self.rows_for(export, "Apprentice Wizard")
+        self.assertEqual([(r["valid_from"], r["valid_to"], r["rules_text"]) for r in rows], [
+            ("2026-08-19", "2026-09-01", "Spellcaster\nGenesis → Draw a spell."),
+            ("2026-09-01", None, "Spellcaster\nGenesis → Draw three spells."),
+        ])
+        self.assertEqual(wizard["rules_text"], "Spellcaster\nGenesis → Draw three spells.")
+        # A later day still opens its own row, as before.
+        third = copy.deepcopy(second)
+        third[0]["engine"]["rules"] = "Spellcaster\r\n\r\nGenesis → Draw four spells."
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(third)), "2026-09-02")
+        _, rows = self.rows_for(build_export(con), "Apprentice Wizard")
+        self.assertEqual([(r["valid_from"], r["valid_to"]) for r in rows], [
+            ("2026-08-19", "2026-09-01"), ("2026-09-01", "2026-09-02"), ("2026-09-02", None)])
+
+    def test_a_hand_recorded_row_is_never_rewritten_by_a_sync(self):
+        con = self.populated()
+        # A face transcribed from the printed card, opened today.
+        con.execute("UPDATE card_history SET source = 'card' WHERE valid_to IS NULL")
+        changed = copy.deepcopy(RAW_API)
+        changed[0]["engine"]["rules"] = "Spellcaster\r\n\r\nGenesis → Draw two spells."
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(changed)), "2026-08-19")
+        _, rows = self.rows_for(build_export(con), "Apprentice Wizard")
+        self.assertEqual([(r["valid_from"], r["valid_to"], r.get("source")) for r in rows], [
+            ("2026-08-19", "2026-08-19", "card"), ("2026-08-19", None, "api")])
 
     def test_retagging_is_history_but_not_errata(self):
         con = self.populated()

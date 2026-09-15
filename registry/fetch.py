@@ -155,15 +155,19 @@ def apply_overrides(snapshot, overrides):
     Each override entry:
         match.card_name  required, the card to correct
         match.set_name   optional, restricts the fix to that set's printings
-        set_fields       column -> corrected value
+        set_fields       column -> corrected value; "back.<field>" corrects
+                         one field of the back face and leaves the rest of
+                         that face as upstream serves it
         reason           required free text, the audit trail
 
     Without set_name the fields are applied to the card record and every
     printing of it; with set_name, only to printings from that set. A field
     is only ever written where the record has that column (life is a card
     fact, artist a printing fact), so one entry can name fields of either.
-    Returns the list of entries that matched nothing, so the sync report
-    can flag corrections the upstream has since fixed.
+    A field name the registry does not have is an error rather than a line
+    that quietly corrects nothing. Returns the list of entries that matched
+    nothing, so the sync report can flag corrections the upstream has since
+    fixed.
     """
     unmatched = []
     for entry in overrides:
@@ -175,9 +179,30 @@ def apply_overrides(snapshot, overrides):
         card_fields = {k: v for k, v in fields.items()
                        if k in CARD_FIELDS or k in CARD_OWNED_FIELDS}
         printing_fields = {k: v for k, v in fields.items() if k in PRINTING_FIELDS}
+        back_fields = {}
+        for column, value in fields.items():
+            if column in card_fields or column in printing_fields:
+                continue
+            face_field = column[len("back."):] if column.startswith("back.") else ""
+            if face_field not in FACE_FIELDS:
+                raise ValueError(
+                    f"override names {column!r}, which is not a field of a card, "
+                    f"a printing, or (as back.<field>) a back face")
+            if set_name is not None:
+                raise ValueError(
+                    f"override sets {column!r} for one set: a back face is a card "
+                    f"fact, the same in every printing")
+            back_fields[face_field] = value
         hit = False
-        if set_name is None and card_fields and card_name in snapshot["cards"]:
-            snapshot["cards"][card_name].update(card_fields)
+        card = snapshot["cards"].get(card_name)
+        if set_name is None and (card_fields or back_fields) and card is not None:
+            card.update(card_fields)
+            if back_fields:
+                if card.get("back") is None:
+                    raise ValueError(
+                        f"override corrects the back face of {card_name!r}, "
+                        f"which upstream serves with no back face")
+                card["back"].update(back_fields)
             hit = True
         for printing in snapshot["printings"].values():
             if printing["card_name"] != card_name or not printing_fields:
