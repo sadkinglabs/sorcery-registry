@@ -22163,7 +22163,7 @@
       "thr_earth": 0,
       "thr_fire": 0,
       "thr_water": 0,
-      "rules_text": "Tap → Play or draw a site.\nNearby allied sites have \"Whenever an enemy enters here, it takes 1 damage.\"",
+      "rules_text": "Tap → Play or draw a site. If this is your first turn, summon Tawny here.\nTap → Summon Bruin here. Flip this card.",
       "back": {
         "type": "Avatar",
         "category": "Avatar",
@@ -22184,7 +22184,7 @@
         "thr_earth": 0,
         "thr_fire": 0,
         "thr_water": 0,
-        "rules_text": "Tap → Play or draw a site.\nWhenever an enemy enters a nearby site, it takes 1 damage."
+        "rules_text": "Tap → Play or draw a site.\nNearby allied sites have \"Whenever an enemy enters here, it takes 1 damage.\""
       },
       "errata": true,
       "set_codes": [
@@ -177508,7 +177508,7 @@
       "thr_earth": 0,
       "thr_fire": 0,
       "thr_water": 0,
-      "rules_text": "Tap → Play or draw a site.\nNearby allied sites have \"Whenever an enemy enters here, it takes 1 damage.\"",
+      "rules_text": "Tap → Play or draw a site. If this is your first turn, summon Tawny here.\nTap → Summon Bruin here. Flip this card.",
       "back": {
         "type": "Avatar",
         "category": "Avatar",
@@ -177529,7 +177529,7 @@
         "thr_earth": 0,
         "thr_fire": 0,
         "thr_water": 0,
-        "rules_text": "Tap → Play or draw a site.\nWhenever an enemy enters a nearby site, it takes 1 damage."
+        "rules_text": "Tap → Play or draw a site.\nNearby allied sites have \"Whenever an enemy enters here, it takes 1 damage.\""
       }
     },
     {
