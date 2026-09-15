@@ -203,5 +203,34 @@ class DistTest(unittest.TestCase):
             self.assertTrue((precious / "notes.txt").exists())
 
 
+class DocsMatchTheObjectsTest(unittest.TestCase):
+    """docs/api.md is the URL contract, so a field the publisher adds and the
+    prose forgets is a defect: a client that trusts the doc and parses
+    strictly rejects valid data. This caught attack/defense/power/life
+    missing from the documented card index after schema 10 shipped."""
+
+    def documented_fields(self, path):
+        """The backticked field names on the docs bullet for one index file."""
+        import re
+        doc = (Path(__file__).resolve().parent.parent / "docs" / "api.md").read_text(encoding="utf-8")
+        line = next(l for l in doc.splitlines() if l.startswith(f"- `{path}`"))
+        head = line.split(" per ")[0]
+        # The file name itself carries a slash and a dot, so it never matches.
+        return tuple(re.findall(r"`([a-z_]+)`", head))
+
+    def test_the_documented_index_fields_are_the_published_ones(self):
+        from registry.publish import CARD_INDEX, PRINTING_INDEX
+        self.assertEqual(self.documented_fields("index/cards.json"), CARD_INDEX)
+        self.assertEqual(self.documented_fields("index/printings.json"), PRINTING_INDEX)
+
+    def test_the_documented_printing_summary_is_the_published_one(self):
+        from registry.publish import PRINTING_SUMMARY
+        import re
+        doc = (Path(__file__).resolve().parent.parent / "docs" / "api.md").read_text(encoding="utf-8")
+        row = next(l for l in doc.splitlines() if l.startswith("| `cards/{codex_id}.json`"))
+        summary = row.split("a summary of each:")[1].split(")")[0]
+        self.assertEqual(tuple(re.findall(r"`([a-z_]+)`", summary)), PRINTING_SUMMARY)
+
+
 if __name__ == "__main__":
     unittest.main()
