@@ -91,10 +91,12 @@ def _history(con, card_id):
 
 def apply_errata(con, entries, log=print):
     """Record every entry's printed face in card_history. Idempotent: an
-    entry already recorded (same face, same dates) is left alone; one
-    whose dates no longer match what is recorded is an error to resolve
-    by hand, never a silent rewrite of history."""
-    applied = unchanged = 0
+    entry already recorded (same face, same dates) is left alone. A face
+    the file now spells differently is a corrected transcription - our
+    reading of the card, not an observation - and is updated in place,
+    keeping its dates. Dates that no longer match what is recorded are an
+    error to resolve by hand, never a silent rewrite of history."""
+    applied = unchanged = corrected = 0
     for entry in entries:
         codex = entry["codex_id"]
         card_id = id_number(codex)
@@ -111,12 +113,22 @@ def apply_errata(con, entries, log=print):
         if face_json == face_of(current):
             raise ValueError(f"{codex}: the printed face equals the current face; nothing differs")
         since = entry["current_since"]
-        recorded = [r for r in rows if r["source"] == "card" and r["face"] == face_json]
+        recorded = [r for r in rows if r["source"] == "card"]
+        if len(recorded) > 1:
+            raise ValueError(f"{codex}: {len(recorded)} hand-recorded rows; one entry records one face")
         if recorded:
             if recorded[0]["valid_to"] != since or current_row["valid_from"] != since:
                 raise ValueError(f"{codex}: recorded with current_since {recorded[0]['valid_to']}, "
                                  f"the file says {since}; history is not rewritten")
-            unchanged += 1
+            if recorded[0]["face"] == face_json:
+                unchanged += 1
+                continue
+            # Same dates, a different transcription: the reviewer read the
+            # card again. Only our reading changes, so the row does too.
+            con.execute("UPDATE card_history SET face = ? WHERE rowid = ?",
+                        (face_json, recorded[0]["rowid"]))
+            log(f"{codex}: transcription corrected")
+            corrected += 1
             continue
         if len(rows) != 1:
             raise ValueError(f"{codex}: has {len(rows)} history rows; a printed face is recorded "
@@ -143,7 +155,7 @@ def apply_errata(con, entries, log=print):
         log(f"{codex}: printed face recorded; current face from {since}")
         applied += 1
     con.commit()
-    return {"applied": applied, "unchanged": unchanged}
+    return {"applied": applied, "corrected": corrected, "unchanged": unchanged}
 
 
 def unknown_printings(entries):
@@ -214,7 +226,8 @@ def main(argv=None):
     con = open_db(args.db)
     if args.command == "apply":
         counts = apply_errata(con, entries)
-        print(f"{counts['applied']} recorded, {counts['unchanged']} already recorded")
+        print(f"{counts['applied']} recorded, {counts['corrected']} corrected, "
+              f"{counts['unchanged']} already recorded")
         return 0
     errors = []
     check_errata(con, entries, errors)

@@ -651,7 +651,7 @@ class ErrataTest(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertTrue(all(p["printed_as_current"] for p in prints))
         counts = apply_errata(con, [self.entry(card["codex_id"])], log=lambda *a: None)
-        self.assertEqual(counts, {"applied": 1, "unchanged": 0})
+        self.assertEqual(counts, {"applied": 1, "corrected": 0, "unchanged": 0})
         card, rows, prints = self.wizard(build_export(con))
         self.assertTrue(card["errata"])
         earliest = min(p["released_at"] for p in prints)  # the printed face dates from the first printing
@@ -670,7 +670,7 @@ class ErrataTest(unittest.TestCase):
         self.assertEqual(errors, [])
         # Applying again changes nothing.
         counts = apply_errata(con, [self.entry(card["codex_id"])], log=lambda *a: None)
-        self.assertEqual(counts, {"applied": 0, "unchanged": 1})
+        self.assertEqual(counts, {"applied": 0, "corrected": 0, "unchanged": 1})
         self.assertEqual(len(self.wizard(build_export(con))[1]), 2)
 
     def test_a_reprint_with_the_current_text_is_listed_and_stays_current(self):
@@ -704,6 +704,31 @@ class ErrataTest(unittest.TestCase):
                    {"valid_from": since, "valid_to": None, "source": "api"}]
         self.assertFalse(printed_as_current("2023-06-22", history, added_on="2026-08-19"))
         self.assertTrue(printed_as_current(since, history, added_on="2026-08-19"))
+
+    def test_a_corrected_transcription_updates_the_recorded_row(self):
+        from registry.errata import apply_errata, check_errata
+        con = self.populated()
+        card, _, _ = self.wizard(build_export(con))
+        entry = self.entry(card["codex_id"])
+        apply_errata(con, [entry], log=lambda *a: None)
+        _, rows, _ = self.wizard(build_export(con))
+        dates = [(r["valid_from"], r["valid_to"]) for r in rows]
+        # The reviewer reads the card again and spells it differently.
+        better = self.entry(card["codex_id"],
+                            printed={"rules_text": "Spellcaster\nGenesis → Draw a card, then a card."})
+        counts = apply_errata(con, [better], log=lambda *a: None)
+        self.assertEqual(counts, {"applied": 0, "corrected": 1, "unchanged": 0})
+        _, rows, _ = self.wizard(build_export(con))
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["rules_text"], "Spellcaster\nGenesis → Draw a card, then a card.")
+        self.assertEqual([(r["valid_from"], r["valid_to"]) for r in rows], dates)
+        errors = []
+        check_errata(con, [better], errors)
+        self.assertEqual(errors, [])
+        # But a different current_since is a date change, not a correction.
+        with self.assertRaises(ValueError):
+            apply_errata(con, [self.entry(card["codex_id"], current_since="2026-09-20")],
+                         log=lambda *a: None)
 
     def test_a_textless_printing_reports_null_and_is_not_judged(self):
         from registry.errata import apply_errata, check_errata, unknown_printings
