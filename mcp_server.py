@@ -5,7 +5,7 @@
 """MCP server for the Sorcery Card Registry.
 
 Gives AI agents direct, always-current access to the registry's stable
-identifiers without loading the full 3MB export into context. Read-only:
+identifiers without loading the full 6 MB export into context. Read-only:
 it serves the published export/registry.json, nothing more.
 
 Run it locally (each user runs their own copy; there is no hosted service):
