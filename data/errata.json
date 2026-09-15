@@ -1,1 +1,344 @@
-[]
+[
+  {
+    "codex_id": "C000002",
+    "printed": {
+      "rules_text": "Airborne\nDamage dealt by Blood Ravens' strikes heals you."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000007"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000007 on 2026-09-15 (the Beta printing was checked and reads the same). Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000005",
+    "printed": {
+      "rules_text": "Airborne\nDamage dealt by Daperyll Vampire's strikes heals you."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000019"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000019 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000094",
+    "printed": {
+      "rules_text": "At the start and end of your turn, choose whether Monastery Gargoyle has Airborne or is a non-minion artifact."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000385"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000385 on 2026-09-15 (the Beta printing was checked and reads the same). Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000098",
+    "printed": {
+      "rules_text": "Immobile\nTap → Shoot a projectile. If it hits a unit, drag it to this location. Pudge may fight it."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000401"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000401 on 2026-09-15 (the promo printing P000405 was checked and reads the same). Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000107",
+    "printed": {
+      "rules_text": "Other nearby minions lose all non-basic abilities."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000439"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000439 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000109",
+    "printed": {
+      "rules_text": "Whenever a nearby minion dies, Squirming Mass permanently gains its power."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000447"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000447 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000139",
+    "printed": {
+      "rules_text": "Airborne\nIf Askelon Phoenix would take damage from a fire spell or ability, it gains +1 power this turn, instead."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000569"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000569 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000140",
+    "printed": {
+      "rules_text": "Summon Awakened Mummies burrowed safely.\nWhen an enemy unit moves onto the ground above them, they unburrow and intercept."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000573"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000573 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000187",
+    "printed": {
+      "rules_text": "Shoot a piercing projectile. Deal 2 damage to one unit at each location along its path."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000762"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000762 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000190",
+    "printed": {
+      "rules_text": "Gain control of target enemy minion until it deals damage, and tap it. It gains Stealth."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000774"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000774 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000237",
+    "printed": {
+      "rules_text": "Immune to non-lethal damage."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P000963"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000963 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000255",
+    "printed": {
+      "rules_text": "Shoot a piercing projectile. Deal 3, then 2, then 1 damage to up to one unit at each of the first three locations along its path."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001035"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001035 on 2026-09-15 (the Beta printing was checked and reads the same). Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000272",
+    "printed": {
+      "rules_text": "Minions occupying affected sites lose all non-basic abilities."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001103"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001103 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000298",
+    "printed": {
+      "rules_text": "Bearer loses all non-basic abilities, and can't drop Magnetic Muzzle.\nAt the end of each player’s turn, if Magnetic Muzzle is abandoned, that player attaches it to a nearby minion."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001205"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001205 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000299",
+    "printed": {
+      "rules_text": "Whenever a nearby minion can attack, it must.\nNearby strikes deal double damage."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001209"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001209 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000311",
+    "printed": {
+      "rules_text": "At the start of your turn, Purge Juggernaut taps and moves to an adjacent location. Kill all minions there."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001258"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001258 on 2026-09-15 (a foil; the Beta printing was checked and reads the same). Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000321",
+    "printed": {
+      "rules_text": "Bearer has +1 power.\nAt the end of your turn, return this to its owner’s hand."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001297"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001297 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000322",
+    "printed": {
+      "rules_text": "Bearer has Ranged and can target Stealth units."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001301"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001301 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000332",
+    "printed": {
+      "rules_text": "Airborne minions atop Updraft Ridge have Movement +1."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001345"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001345 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000348",
+    "printed": {
+      "rules_text": "When played, you may return a site in play you own to your hand to play this site in its place."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001409"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001409 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000398",
+    "printed": {
+      "rules_text": "Tap → Play or draw a site.\nYou may cast one dead minion each turn, and for (0) if you’re on Death’s Door. Whenever you summon a minion this way, banish it."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "unknown_printings": [
+      "P001611"
+    ],
+    "source": {
+      "printing_id": "P001607"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001607 on 2026-09-15 (the OP promo P001611 is textless). Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000459",
+    "printed": {
+      "rules_text": "Tap → Play or draw a site. If you played a site and you don’t control Tawny, summon her there.\nTap → Summon Bruin here. Flip this card."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "unknown_printings": [
+      "P001764"
+    ],
+    "source": {
+      "printing_id": "P001762"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001762 on 2026-09-15 (the Box Topper; the Dust printing P001763 reads the same, and the OP promo P001764 is textless). Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000483",
+    "printed": {
+      "rules_text": "Bearer takes and deals double strike damage."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001811"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001811 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000548",
+    "printed": {
+      "rules_text": "Bearer strikes first and has \"Tap → Throw Rhongomyniad as a piercing projectile. It deals 3 damage to one unit at each location along its path.\""
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001942"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001942 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000566",
+    "printed": {
+      "rules_text": "Sir Galahad's strikes heal you.\nNearby allies take no damage from Demons, Spirits, and Undead."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P001978"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P001978 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000622",
+    "printed": {
+      "rules_text": "Vivien has the printed abilities of all Avatars and Spellcasters in the realm, wherever she is."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P002092"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P002092 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000658",
+    "printed": {
+      "rules_text": "Bearer's next strike deals +1 damage and strikes first, then Lance breaks."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P002179"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P002179 on 2026-09-15. Every printing to date carries the printed text."
+  },
+  {
+    "codex_id": "C000905",
+    "printed": {
+      "rules_text": "Once on your turn, you may have two target units at a nearby location fight."
+    },
+    "current_since": "2026-09-15",
+    "current_printings": [],
+    "source": {
+      "printing_id": "P002675"
+    },
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P002675 on 2026-09-15. Every printing to date carries the printed text."
+  }
+]
