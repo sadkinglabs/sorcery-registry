@@ -1,0 +1,41 @@
+name: api-audit
+
+# Tests every assertion docs/api.md and docs/quickstart.md make against the
+# live domain, from a runner (a sandbox cannot reach the zone). Read-only:
+# it fetches published objects and reports, and changes nothing.
+
+on:
+  push:
+    branches: ["audit/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pillow
+      - name: Test the documented contract
+        run: python scripts/audit_api.py | tee audit.log
+      - name: Report
+        if: always()
+        run: |
+          {
+            echo '### API documentation audit'
+            echo '```'
+            tail -40 audit.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-report
+          path: |
+            audit-report.json
+            audit.log
