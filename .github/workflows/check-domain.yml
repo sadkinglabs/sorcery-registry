@@ -13,6 +13,11 @@ on:
         description: "Release root to verify, e.g. v3.1.0 (empty: the newest in versions.json)"
         required: false
         default: ""
+  schedule:
+    # Weekly, Wednesday 06:00 UTC, after Monday's drift check and Tuesday's
+    # image sync: the newest release root is still served byte for byte,
+    # the alias still points at it, CORS and the User-Agent rule still hold.
+    - cron: "0 6 * * 3"
 
 permissions:
   contents: read
