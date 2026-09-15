@@ -1,48 +1,72 @@
-# Configuring the error responses
+# What the zone does when a request fails
 
-The contract in [`docs/api.md`](api.md#when-something-goes-wrong) is served by
-the zone, not by the repository: R2 stores objects and returns Cloudflare's own
-pages when it cannot. These are the rules that implement it. Everything here is
-dashboard work on the `kairosarchive.net` zone; nothing in this repository
-changes. The audit (`scripts/audit_api2.py`, cases S1-S6) reports each case as a
-note while it is unconfigured and asserts the full contract once a status
-answers with JSON, so configuring a rule turns it into a guard.
+The registry is static objects behind a CDN, so failures are answered by the
+zone rather than by anything in this repository. This is what it is configured
+to do, what its plan prevents, and what an upgrade would change. The contract a
+client should rely on is in [`docs/api.md`](api.md#when-something-goes-wrong);
+this file is the operational record behind it.
 
-What the zone serves today, measured on 15 September 2026:
+Measured on 15 September 2026 by `scripts/audit_api2.py`, cases S1 to S6. Body sizes are
+approximate on purpose: the CDN's pages embed a Ray ID, so their exact length moves by a
+byte or two between requests. Run the audit for the current figures.
 
 | Case | Status | Body | CORS |
 |---|---|---|---|
-| Missing object | 404 | 27,150 bytes of HTML | present |
-| No `User-Agent` | 403 | 17 bytes of text (`error code: 1020`) | absent |
-| `DELETE` (or any write) | **401** | 16,794 bytes of HTML | absent |
-| Path outside a release root | 404 | 27,150 bytes of HTML | present |
-| Bare domain `/` | 404 | 27,150 bytes of HTML | present |
-| `OPTIONS` preflight | 204 | correct already | present |
+| Missing object | 404 | about 27 KB of HTML | present |
+| Path outside a release root | 404 | about 27 KB of HTML | present |
+| No `User-Agent` | 403 | 17 bytes of plain text (`error code: 1020`) | absent |
+| A write (any method but `GET`, `HEAD`, `OPTIONS`) | 403 | about 4.5 KB of HTML | absent |
+| Bare domain `/` | 302 to `versions.json` | none | n/a |
+| `OPTIONS` preflight | 204 | none, correct headers | present |
 
-The 401 is the one to fix first: a client that sends a write gets
-"unauthorized", which invites it to go looking for credentials that do not
-exist, when the honest answer is that the archive is read-only.
+## What is configured
 
-## 1. The front door
+**Front door redirect.** Rules → Redirects → Single Redirect, named *API front
+door to discovery*. When `http.host eq "api.kairosarchive.net" and
+http.request.uri.path eq "/"`, 302 to `https://api.kairosarchive.net/versions.json`.
+A person pasting the domain into a browser reaches the discovery document
+instead of a 404.
 
-**Rules → Redirects → Single Redirect.** When `http.host eq
-"api.kairosarchive.net" and http.request.uri.path eq "/"`, redirect (302,
-preserve query string off) to `https://api.kairosarchive.net/versions.json`.
+This is a second rule alongside the `/v3/` alias. The release workflow rewrites
+that alias by rule id on every release, so the two must stay separate: editing
+the alias rule to do both jobs would be undone by the next release.
 
-This is the same product as the `/v3/` alias rule, so it is known to work on
-this zone. A person pasting the domain into a browser lands on the discovery
-document instead of a 404.
+**Read-only archive.** Security rules → Custom rules, named *read-only
+archive*, ordered first. When `http.host eq "api.kairosarchive.net" and
+http.request.method ne "GET" and http.request.method ne "HEAD" and
+http.request.method ne "OPTIONS"`, block.
 
-## 2. The JSON error pages
+Ordered first on purpose: a write that also lacks a `User-Agent` should be told
+about the method, which is the thing it must change, rather than being told to
+identify itself and then refused anyway.
 
-**Rules → Custom Errors.** One rule per status, matching `http.host eq
-"api.kairosarchive.net"`, serving a custom response with content type
-`application/json`. Check availability on the current plan first; if custom
-error responses are not offered, the same bodies can be served by a Worker
-bound to the hostname, which is a bigger change for the same result.
+This rule cannot lock out the pipeline. The release and image workflows upload
+through `https://<account>.r2.cloudflarestorage.com` with credentials, never
+through the public hostname, so a rule on that hostname never sees them.
 
-Bodies, ready to paste. Keep them under a kilobyte; a 404 that costs 27 KB is
-a bad deal for a crawler and for the bill.
+**Anonymous clients.** The pre-existing custom rule blocking requests with no
+`User-Agent`, unchanged.
+
+## What the plan prevents
+
+Three things were specified and could not be built:
+
+- **Custom Errors** is not available: the dashboard offers only an upgrade
+  prompt. This is what would let a 404, a 429 or a 5xx answer with JSON.
+- **A custom response on a block** is not available either. A custom rule's
+  action panel offers the action, the execution order and the status, and
+  nothing else, so a block returns the CDN's own page and its own status.
+- **A response code on a block** follows from the same limitation, which is why
+  a write is refused with 403 rather than 405.
+
+The result is that every status is correct and no body is machine-readable. For
+a client that checks `response.ok` before parsing, which it should do anyway,
+the difference is cosmetic.
+
+## What an upgrade would change
+
+With Custom Errors, each status below gets a small JSON body and the whole set
+takes about ten minutes. Bodies worth using, kept under a kilobyte:
 
 ```json
 {"error":"not_found","status":404,"message":"No object at this path.","docs":"https://github.com/sadkinglabs/sorcery-registry/blob/main/docs/api.md","discovery":"https://api.kairosarchive.net/versions.json"}
@@ -53,7 +77,7 @@ a bad deal for a crawler and for the bill.
 ```
 
 ```json
-{"error":"method_not_allowed","status":405,"message":"The archive is read-only. Use GET, HEAD or OPTIONS.","docs":"https://github.com/sadkinglabs/sorcery-registry/blob/main/docs/api.md"}
+{"error":"read_only","status":403,"message":"The archive is read-only. Use GET, HEAD or OPTIONS.","docs":"https://github.com/sadkinglabs/sorcery-registry/blob/main/docs/api.md"}
 ```
 
 ```json
@@ -64,28 +88,20 @@ a bad deal for a crawler and for the bill.
 {"error":"unavailable","status":503,"message":"Temporarily unavailable. Retry with backoff, or read the same release from the GitHub mirror.","mirror":"https://raw.githubusercontent.com/sadkinglabs/sorcery-registry"}
 ```
 
-## 3. The headers each one needs
+Each would also want `Access-Control-Allow-Origin: *` so a browser can read the
+status, `Cache-Control: public, max-age=60` on the 404 so a crawler's repeated
+misses are absorbed at the edge, and `Retry-After` on the 429.
 
-- `Access-Control-Allow-Origin: *` on every error, so a browser can read the
-  status instead of seeing an opaque network failure. The 403 and the 401 lack
-  it today.
-- `Allow: GET, HEAD, OPTIONS` on the 405.
-- `Retry-After` in seconds on the 429, matching the rate rule's block duration.
-- `Cache-Control: public, max-age=60` on the 404 so a crawler's repeated misses
-  are absorbed at the edge, and `no-store` on the rest.
+A Worker in front of the bucket could do the same without an upgrade, and is
+deliberately not used: it would run on every request, not just the failures,
+and would add a hop and a failure mode to a service whose whole virtue is being
+static bytes on a CDN. Three cosmetic bodies do not pay for that.
 
-## 4. Turning writes into 405
+## Proving any of it
 
-The 401 comes from R2 answering an unauthenticated S3 write. **Rules → WAF →
-Custom rules**: when `http.host eq "api.kairosarchive.net" and
-http.request.method ne "GET" and http.request.method ne "HEAD" and
-http.request.method ne "OPTIONS"`, block with a custom response of 405 and the
-body above. Order it before the User-Agent rule so a write with no User-Agent
-still reads as a method problem.
-
-## 5. Proving it
-
-Push any branch named `audit/**`, or wait for the weekly run, and read cases
-S1 to S6. Each one names the status, the content type, the body size and
-whether the response is readable cross-origin. They stop being notes and start
-being assertions the moment the bodies are JSON.
+Run the audit (`workflow_dispatch` on `api-audit`, or push any `audit/**`
+branch) and read cases S1 to S6. Each names the status, the content type, the
+body size and whether the response is readable cross-origin. The error cases
+report as notes while the bodies are the CDN's, and become assertions the
+moment a status answers with JSON, so configuring custom errors later turns
+them into guards with no code change.

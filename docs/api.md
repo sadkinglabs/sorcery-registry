@@ -48,36 +48,39 @@ A slug object exists for every slug in `slug_history`, current or superseded. Th
 
 ## When something goes wrong
 
-Every failure answers with the same small JSON envelope, so a client can tell
-a missing card from a blocked request without parsing prose:
+**Read the status, not the body.** The status codes below are exact and are
+what a client should branch on. The bodies are the CDN's own pages: HTML for
+most, a line of plain text for one, and none of them JSON. Calling `.json()`
+on a failed response will throw, so check `response.ok` first.
 
-```json
-{"error": "not_found",
- "status": 404,
- "message": "No object at this path.",
- "docs": "https://github.com/sadkinglabs/sorcery-registry/blob/main/docs/api.md",
- "discovery": "https://api.kairosarchive.net/versions.json"}
-```
+| Status | When | What to do |
+|---|---|---|
+| `404` | No object at that path: an id that does not exist, a slug never issued, a typo, a path outside any release root | Check the id against `index/` or `versions.json`. Under a pinned root a 404 is permanent; under `/v3/` a later release may add the object. The body is a 27 KB HTML page, so do not read it |
+| `403` | Two different cases. Either the request carried no `User-Agent` at all, or it used a method other than `GET`, `HEAD` or `OPTIONS` | Send a `User-Agent` naming your project and a contact, e.g. `my-deck-tool/1.2 (me@example.com)`, and only read. The archive is read-only: there is no write API, and no credential that would make one work |
+| `429` | The per-IP rate limit tripped | Back off, then fetch `registry.json` or an `index/` file once instead of crawling object by object |
+| `5xx` | The origin or the edge is having trouble | Retry with backoff. Every release is also on GitHub: `raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json`. A pinned root's bytes never change, so a copy you already hold stays valid |
 
-| Status | `error` | When | What to do |
-|---|---|---|---|
-| `404` | `not_found` | No object at that path: an id that does not exist, a slug never issued, a typo, a path outside any release root | Check the id against `index/` or `versions.json`. Under a pinned root a 404 is permanent; under `/v3/` a later release may add the object |
-| `403` | `no_user_agent` | The request carried no `User-Agent` header at all | Send one naming your project and a contact, e.g. `my-deck-tool/1.2 (me@example.com)`. This identifies clients; it is not a security control |
-| `405` | `method_not_allowed` | Anything but `GET`, `HEAD` or `OPTIONS` | The archive is read-only. The `Allow` header lists what is accepted |
-| `429` | `rate_limited` | The per-IP rate limit tripped | Back off for the `Retry-After` seconds, then fetch `registry.json` or an `index/` file once instead of crawling object by object |
-| `5xx` | `unavailable` | The origin or the edge is having trouble | Retry with backoff. Every release is also on GitHub: `raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json`. A pinned root's bytes never change, so a copy you already hold stays valid |
+A write is refused with `403`, not `405`, and carries no `Allow` header. That
+is a limitation of the zone's plan rather than a statement about the request:
+the edge can refuse a method but cannot currently name the ones it accepts.
+They are `GET`, `HEAD` and `OPTIONS`.
 
-Error responses carry `Access-Control-Allow-Origin: *` like every other
-response, so a browser can read the status rather than seeing an opaque
-network failure. `GET https://api.kairosarchive.net/` redirects to
-`versions.json`, which is where a client should start anyway.
+A 404 carries `Access-Control-Allow-Origin: *`, so a browser can read the
+status rather than seeing an opaque network failure. A refusal from the edge
+(either `403` case) does not, so a cross-origin caller sees a network error
+instead of a status. Browsers send a `User-Agent` automatically and cannot
+write, so this affects only non-browser clients, which can read the status
+directly.
+
+`GET https://api.kairosarchive.net/` redirects to `versions.json`, which is
+where a client should start anyway.
 
 `OPTIONS` is answered with the CORS preflight a conditional cross-origin
 `GET` needs, so a browser can revalidate a cached object with `If-None-Match`
 and get a 304 rather than re-downloading it.
 
-The zone-side configuration behind this section is written down in
-[`docs/error-responses.md`](error-responses.md), with the exact rules and bodies.
+What the zone is configured to do, what its plan prevents, and what an upgrade
+would change, is recorded in [`docs/error-responses.md`](error-responses.md).
 
 ## Images
 
