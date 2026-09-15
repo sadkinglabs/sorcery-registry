@@ -180,28 +180,37 @@ def main():
           f"{len(listed_p)} listed, {len(listed_p - in_set)} foreign")
 
     # ---------- E. indexes ----------
+    # The field lists come from the publisher itself rather than a third copy
+    # here: tests/test_publish.py already holds docs/api.md to those tuples, so
+    # docs -> code -> what the domain serves is checked end to end.
+    from registry.publish import CARD_INDEX, PRINTING_INDEX
     for cid, path, want_keys, claimed in [
-        ("E1", "index/cards.json",
-         {"codex_id", "name", "type", "category", "rarity", "elements", "keywords", "subtypes",
-          "cost", "errata", "set_codes", "default_printing_id", "image_status"}, 230),
-        ("E2", "index/printings.json",
-         {"printing_id", "codex_id", "slug", "set_code", "product", "finish",
-          "printed_as_current", "retired_at", "image_hash", "image_status"}, 600),
+        ("E1", "index/cards.json", set(CARD_INDEX), 330),
+        ("E2", "index/printings.json", set(PRINTING_INDEX), 690),
     ]:
         status, _, idx, body, _ = jget(f"{root}/{path}")
         got = set(idx[0]) if status == 200 and idx else set()
         kb = len(body) / 1024
-        check(cid, f"{path} carries the documented per-record fields",
-              status == 200 and want_keys == got,
+        check(cid, f"{path} carries exactly the documented per-record fields",
+              status == 200 and want_keys == got and claimed * 0.8 <= kb <= claimed * 1.2,
               f"HTTP {status}, {kb:.0f} KB (doc says ~{claimed} KB), missing={sorted(want_keys - got)}, extra={sorted(got - want_keys)}")
     status, _, slugidx, body, _ = jget(f"{root}/index/slugs.json")
     check("E3", "index/slugs.json maps every slug ever to a printing id",
           status == 200 and isinstance(slugidx, dict) and len(slugidx) == len(registry["slug_history"]),
           f"HTTP {status}, {len(slugidx or {})} entries vs {len(registry['slug_history'])} slug_history rows, {len(body)/1024:.0f} KB")
+    # The docs say the indexes leave the record URLs out to stay small, and that
+    # both are a template away from the id. Test the promise, not the omission:
+    # build each URL from the index record alone and fetch what it names.
     status, _, cidx, _, _ = jget(f"{root}/index/cards.json")
-    has_urls = "api_url" in cidx[0] and "kairos_url" in cidx[0]
-    check("E4", "docs/api.md: records carry api_url and kairos_url 'in the indexes' too",
-          has_urls, f"index/cards.json record keys lack them: api_url={'api_url' in cidx[0]}, kairos_url={'kairos_url' in cidx[0]}")
+    lean = not ({"api_url", "kairos_url"} & set(cidx[0]))
+    built = f"{BASE}/v3/cards/{cidx[0]['codex_id']}.json"
+    status, _, built_card, _, _ = jget(built)
+    check("E4", "an index record is lean, and its api_url is derivable from the id it carries",
+          lean and status == 200 and built_card.get("codex_id") == cidx[0]["codex_id"],
+          f"index keys carry no URLs: {lean}; built {built} -> HTTP {status}")
+    status, _, _, _ = get(f"https://kairosarchive.net/cards/{cidx[0]['codex_id']}", method="HEAD")
+    check("E5", "the kairos_url template resolves from an index record too",
+          status == 200, f"HEAD https://kairosarchive.net/cards/{cidx[0]['codex_id']} -> {status}")
 
     # ---------- F. history ----------
     for cid, path, section in [("F1", "history/slugs.json", "slug_history"),
