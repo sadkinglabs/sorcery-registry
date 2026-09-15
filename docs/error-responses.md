@@ -6,14 +6,16 @@ to do, what its plan prevents, and what an upgrade would change. The contract a
 client should rely on is in [`docs/api.md`](api.md#when-something-goes-wrong);
 this file is the operational record behind it.
 
-Measured on 15 September 2026 by `scripts/audit_api2.py`, cases S1 to S6.
+Measured on 15 September 2026 by `scripts/audit_api2.py`, cases S1 to S6. Body sizes are
+approximate on purpose: the CDN's pages embed a Ray ID, so their exact length moves by a
+byte or two between requests. Run the audit for the current figures.
 
 | Case | Status | Body | CORS |
 |---|---|---|---|
-| Missing object | 404 | 27,150 bytes of HTML | present |
-| Path outside a release root | 404 | 27,150 bytes of HTML | present |
+| Missing object | 404 | about 27 KB of HTML | present |
+| Path outside a release root | 404 | about 27 KB of HTML | present |
 | No `User-Agent` | 403 | 17 bytes of plain text (`error code: 1020`) | absent |
-| A write (any method but `GET`, `HEAD`, `OPTIONS`) | 403 | 4,552 bytes of HTML | absent |
+| A write (any method but `GET`, `HEAD`, `OPTIONS`) | 403 | about 4.5 KB of HTML | absent |
 | Bare domain `/` | 302 to `versions.json` | none | n/a |
 | `OPTIONS` preflight | 204 | none, correct headers | present |
 
