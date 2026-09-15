@@ -44,9 +44,40 @@ Every card, printing and set record - in the export and in the per-object files 
 | `sets.json` | the set catalogue | the export's `sets` section |
 | `sets/{set_code}.json` | one set and everything in it | the set entry, plus `cards`: `{codex_id, name, printing_ids}` for every card in the set, ordered by name (the official data has no collector numbers), with only that set's printings |
 
-A miss on any of these paths is a 404 from the CDN, whose body is an HTML error page rather than JSON: check the status before parsing.
-
 A slug object exists for every slug in `slug_history`, current or superseded. That is the migration path as a URL: a tool holding a pre-rename slug fetches `slugs/{old}.json` and receives the permanent ids and the current slug. A 404 here means the slug never existed in the registry under any naming convention.
+
+## When something goes wrong
+
+Every failure answers with the same small JSON envelope, so a client can tell
+a missing card from a blocked request without parsing prose:
+
+```json
+{"error": "not_found",
+ "status": 404,
+ "message": "No object at this path.",
+ "docs": "https://github.com/sadkinglabs/sorcery-registry/blob/main/docs/api.md",
+ "discovery": "https://api.kairosarchive.net/versions.json"}
+```
+
+| Status | `error` | When | What to do |
+|---|---|---|---|
+| `404` | `not_found` | No object at that path: an id that does not exist, a slug never issued, a typo, a path outside any release root | Check the id against `index/` or `versions.json`. Under a pinned root a 404 is permanent; under `/v3/` a later release may add the object |
+| `403` | `no_user_agent` | The request carried no `User-Agent` header at all | Send one naming your project and a contact, e.g. `my-deck-tool/1.2 (me@example.com)`. This identifies clients; it is not a security control |
+| `405` | `method_not_allowed` | Anything but `GET`, `HEAD` or `OPTIONS` | The archive is read-only. The `Allow` header lists what is accepted |
+| `429` | `rate_limited` | The per-IP rate limit tripped | Back off for the `Retry-After` seconds, then fetch `registry.json` or an `index/` file once instead of crawling object by object |
+| `5xx` | `unavailable` | The origin or the edge is having trouble | Retry with backoff. Every release is also on GitHub: `raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json`. A pinned root's bytes never change, so a copy you already hold stays valid |
+
+Error responses carry `Access-Control-Allow-Origin: *` like every other
+response, so a browser can read the status rather than seeing an opaque
+network failure. `GET https://api.kairosarchive.net/` redirects to
+`versions.json`, which is where a client should start anyway.
+
+`OPTIONS` is answered with the CORS preflight a conditional cross-origin
+`GET` needs, so a browser can revalidate a cached object with `If-None-Match`
+and get a 304 rather than re-downloading it.
+
+The zone-side configuration behind this section is written down in
+[`docs/error-responses.md`](error-responses.md), with the exact rules and bodies.
 
 ## Images
 
