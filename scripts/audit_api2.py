@@ -160,6 +160,45 @@ except ImportError:
 except Exception as e:
     check("Q9", "the served export validates against the served schema", False, str(e)[:200])
 
+# ---------- S. the error contract ----------
+# What a client meets when something goes wrong. Until custom errors are
+# configured these report as notes; once a status answers with JSON the
+# full contract is asserted, so configuring it turns these into guards.
+ERROR_CASES = [
+    ("S1", "a missing object", f"{root}/cards/C999999.json", {}, "GET"),
+    ("S2", "a request with no User-Agent", f"{root}/index.json", None, "GET"),
+    ("S3", "a method the bucket does not serve", f"{root}/index.json", {}, "DELETE"),
+    ("S4", "a path outside any release root", f"{BASE}/not-a-release/index.json", {}, "GET"),
+    ("S5", "the bare domain", f"{BASE}/", {}, "GET"),
+]
+for cid, what, url, extra, method in ERROR_CASES:
+    headers = None if extra is None else dict(extra)
+    if headers is None:
+        req = urllib.request.Request(url, method=method)  # no User-Agent at all
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                status, hdrs, body = r.status, r.headers, r.read()
+        except urllib.error.HTTPError as e:
+            status, hdrs, body = e.code, e.headers, e.read()
+    else:
+        headers["Origin"] = "https://example.com"
+        status, hdrs, body = raw(url, headers=headers, method=method)
+    ct = (hdrs.get("content-type") or "").split(";")[0]
+    acao = hdrs.get("access-control-allow-origin")
+    retry = hdrs.get("retry-after")
+    facts = (f"HTTP {status}, {ct or 'no content-type'}, {len(body)} bytes, "
+             f"CORS header: {acao or 'absent'}" + (f", Retry-After: {retry}" if retry else ""))
+    if ct == "application/json":
+        try:
+            payload = json.loads(body)
+        except Exception:
+            payload = None
+        check(cid, f"{what} answers with the JSON error contract",
+              payload is not None and "error" in payload and acao == "*" and len(body) < 1024,
+              f"{facts}; body={str(payload)[:120]}")
+    else:
+        note(cid, f"{what} (custom error not configured)", facts)
+
 # ---------- R. the documented curl commands, verbatim ----------
 cmds = [
     ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", "-H", "User-Agent: my-deck-tool/1.0 (me@example.com)",
