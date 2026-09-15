@@ -156,6 +156,8 @@ Every push and PR: the test suite, then `registry.validate`, which checks that
 
 If any of those fail, the PR does not merge. There is deliberately no way to "fix up" a violation in place; revert and redo the change through the pipeline.
 
+Every Wednesday (and on demand, with a tag), the `check-domain` workflow verifies the newest release root on the domain: the served export matches its digest, the index and sample objects answer, the `/v3/` alias redirects to it, CORS is open, an anonymous request is refused, and one served image of each resolution family is inspected. A failure is a hosting problem, not a data problem: nothing on `main` changes, and the run page says which step broke.
+
 Every Monday (and on demand), the `drift` workflow fetches the official API and runs `python -m registry.sync --dry-run`. When the result is anything but "nothing to do" - attribute changes, new cards, an override that no longer matches, quarantined cases, or the adapter failing on a payload it cannot read - it opens one issue labelled `upstream-drift` (or comments on the open one) with the plan, and keeps the raw payload as a run artifact so you can reproduce the plan with `--from-file`. It never applies anything: the set-release runbook above is still how changes land. `Run workflow` with `force_report` files the report even when nothing changed, to test the plumbing.
 
 ## Style
