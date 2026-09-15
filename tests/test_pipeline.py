@@ -143,7 +143,7 @@ def two_faced_snapshot():
 class OverridesTest(unittest.TestCase):
     def test_override_corrects_the_card(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
-        unmatched = apply_overrides(snapshot, [{
+        unmatched, _ = apply_overrides(snapshot, [{
             "match": {"card_name": "Broken Site"},
             "set_fields": {"life": None},
             "reason": "API data error: only Avatars have life."}])
@@ -154,7 +154,7 @@ class OverridesTest(unittest.TestCase):
 
     def test_override_restricted_to_a_set_touches_printings_only(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
-        unmatched = apply_overrides(snapshot, [{
+        unmatched, _ = apply_overrides(snapshot, [{
             "match": {"card_name": "Apprentice Wizard", "set_name": "Alpha"},
             "set_fields": {"artist": "Corrected Artist"},
             "reason": "misattributed upstream"}])
@@ -166,7 +166,7 @@ class OverridesTest(unittest.TestCase):
     def test_override_corrects_one_field_of_the_back_face(self):
         snapshot = two_faced_snapshot()
         back = dict(snapshot["cards"]["Apprentice Wizard"]["back"])
-        unmatched = apply_overrides(snapshot, [{
+        unmatched, _ = apply_overrides(snapshot, [{
             "match": {"card_name": "Apprentice Wizard"},
             "set_fields": {"rules_text": "Front, corrected.",
                            "back.rules_text": "Back, corrected."},
@@ -195,6 +195,21 @@ class OverridesTest(unittest.TestCase):
                 "match": {"card_name": "Broken Site"},
                 "set_fields": {"back.rules_text": "x"}, "reason": "no back face"}])
 
+    def test_a_retroactive_override_may_not_name_printing_fields(self):
+        snapshot = two_faced_snapshot()
+        for entry in ({"match": {"card_name": "Apprentice Wizard"},
+                       "set_fields": {"artist": "Someone"}, "retroactive": True,
+                       "reason": "a printing keeps no history of its own"},
+                      {"match": {"card_name": "Apprentice Wizard", "set_name": "Alpha"},
+                       "set_fields": {"category": "Site"}, "retroactive": True,
+                       "reason": "a card fact cannot belong to one set"}):
+            with self.assertRaises(ValueError):
+                apply_overrides(snapshot, [entry])
+        with self.assertRaises(ValueError):
+            apply_overrides(snapshot, [{"match": {"card_name": "Apprentice Wizard"},
+                                        "set_fields": {"category": "Site"},
+                                        "retroactive": "yes", "reason": "not a boolean"}])
+
     def test_override_will_not_restrict_a_back_face_to_one_set(self):
         snapshot = two_faced_snapshot()
         with self.assertRaises(ValueError):
@@ -204,7 +219,7 @@ class OverridesTest(unittest.TestCase):
 
     def test_unmatched_override_is_reported_not_fatal(self):
         snapshot = build_snapshot(copy.deepcopy(RAW_API))
-        unmatched = apply_overrides(snapshot, [{
+        unmatched, _ = apply_overrides(snapshot, [{
             "match": {"card_name": "No Such Card"},
             "set_fields": {"life": None},
             "reason": "upstream fixed it"}])
@@ -546,6 +561,57 @@ class CardHistoryTest(unittest.TestCase):
         _, rows = self.rows_for(build_export(con), "Apprentice Wizard")
         self.assertEqual([(r["valid_from"], r["valid_to"], r.get("source")) for r in rows], [
             ("2026-08-19", "2026-08-19", "card"), ("2026-08-19", None, "api")])
+
+    def mis_recorded(self):
+        """A registry that took upstream's word for a classification the card
+        never had - the Rubble case: served as a Token, printed as a Site."""
+        raw = copy.deepcopy(RAW_API)
+        next(c for c in raw if c["name"] == "Broken Site")["engine"]["category"] = "Token"
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        return con, raw
+
+    def test_a_retroactive_correction_rewrites_the_record_rather_than_the_card(self):
+        con, raw = self.mis_recorded()
+        # Correcting it is not a change the card underwent, so no row opens,
+        # every row already written is corrected, and no printing is reported
+        # as showing older values - a claim about the printed card, which did
+        # not change. Upstream still serves Token; the override still corrects.
+        snapshot = build_snapshot(copy.deepcopy(raw))
+        unmatched, retroactive = apply_overrides(snapshot, [{
+            "match": {"card_name": "Broken Site"}, "set_fields": {"category": "Site"},
+            "retroactive": True, "reason": "served as a Token, which it never was"}])
+        self.assertEqual(unmatched, [])
+        self.assertEqual(retroactive, {"Broken Site": {"category"}})
+        plan = diff(load_registry_state(con), snapshot)
+        self.assertEqual([u["name"] for u in plan["card_updates"]], ["Broken Site"])
+        apply_plan(con, plan, "2026-09-01", retroactive)
+
+        export = build_export(con)
+        card, rows = self.rows_for(export, "Broken Site")
+        self.assertEqual(card["category"], "Site")
+        self.assertFalse(card["errata"])
+        self.assertEqual([(r["valid_from"], r["valid_to"], r["category"]) for r in rows],
+                         [("2026-08-19", None, "Site")])
+        self.assertTrue(all(p["printed_as_current"] for p in export["printings"]
+                            if p["codex_id"] == card["codex_id"]))
+
+    def test_the_same_correction_without_retroactive_reads_as_a_change(self):
+        # The flag is what makes the difference, so the default stays literal:
+        # a face field that changes opens a row and dates the printings.
+        con, raw = self.mis_recorded()
+        snapshot = build_snapshot(copy.deepcopy(raw))
+        apply_overrides(snapshot, [{
+            "match": {"card_name": "Broken Site"}, "set_fields": {"category": "Site"},
+            "reason": "upstream changed it today"}])
+        apply_plan(con, diff(load_registry_state(con), snapshot), "2026-09-01")
+        export = build_export(con)
+        card, rows = self.rows_for(export, "Broken Site")
+        self.assertEqual([(r["valid_from"], r["valid_to"], r["category"]) for r in rows],
+                         [("2026-08-19", "2026-09-01", "Token"), ("2026-09-01", None, "Site")])
+        self.assertFalse(any(p["printed_as_current"] for p in export["printings"]
+                             if p["codex_id"] == card["codex_id"]))
 
     def test_retagging_is_history_but_not_errata(self):
         con = self.populated()

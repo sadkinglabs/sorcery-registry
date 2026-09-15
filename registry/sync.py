@@ -43,24 +43,32 @@ SNAPSHOT_PATH = Path("review") / "upstream-snapshot.json"
 OVERRIDES_PATH = Path("data") / "overrides.json"
 
 
-def apply_plan(con, plan, as_of):
+def apply_plan(con, plan, as_of, retroactive=None):
     """Write an unambiguous plan to the database in one transaction.
     Ids are only ever allocated here, from the meta counters, and no
     branch updates or deletes an id: the schema's triggers would abort
     the transaction if one tried.
 
+    `retroactive` names, per card, the fields an override corrected
+    retroactively: the card always had that value and the registry's
+    record was wrong. Those are written to every history row rather than
+    opening a new one, because a card whose classification we mis-recorded
+    did not change - and a new row would report every printing of it as
+    showing older values, which is a claim about the printed card.
+
     Any failure rolls the whole thing back before re-raising: the caller
     keeps the connection, and a half-applied transaction left open on it
     would otherwise still be visible to every later read."""
     try:
-        _apply_plan(con, plan, as_of)
+        _apply_plan(con, plan, as_of, retroactive or {})
     except Exception:
         con.rollback()
         raise
 
 
-def _apply_plan(con, plan, as_of):
+def _apply_plan(con, plan, as_of, retroactive=None):
     cur = con.cursor()
+    retroactive = retroactive or {}
 
     for rename in plan["card_renames"]:
         cur.execute("UPDATE cards SET name = ? WHERE card_id = ?",
@@ -101,6 +109,20 @@ def _apply_plan(con, plan, as_of):
             cur.execute(f"UPDATE cards SET {field} = ? WHERE card_id = ?",
                         (encode_field(field, value), update["card_id"]))
         changed = set(update["changes"])
+        # A retroactively corrected field was never otherwise: rewrite it into
+        # every face already recorded, and leave it out of what counts as a
+        # change the card underwent.
+        corrected = changed & set(retroactive.get(update.get("name"), ()))
+        if corrected:
+            for row in con.execute(
+                    "SELECT rowid, face FROM card_history WHERE card_id = ?",
+                    (update["card_id"],)).fetchall():
+                face = json.loads(row["face"])
+                for field in corrected:
+                    face[field] = update["changes"][field]["new"]
+                cur.execute("UPDATE card_history SET face = ? WHERE rowid = ?",
+                            (face_of(face), row["rowid"]))
+        changed -= corrected
         if changed & set(HISTORY_FIELDS):
             row = con.execute("SELECT * FROM cards WHERE card_id = ?",
                               (update["card_id"],)).fetchone()
@@ -242,7 +264,7 @@ def main():
               f"(re-run with --from-file to act on these exact bytes)")
     snapshot = build_snapshot(raw)
     if OVERRIDES_PATH.exists():
-        unmatched = apply_overrides(snapshot, load_overrides(OVERRIDES_PATH))
+        unmatched, retroactive = apply_overrides(snapshot, load_overrides(OVERRIDES_PATH))
         for entry in unmatched:
             print(f"note: override no longer matches anything (upstream fixed?): "
                   f"{entry['match']} - {entry['reason']}")
@@ -292,7 +314,7 @@ def main():
             print("aborted, nothing applied")
             return 2 if plan["ambiguous"] else 0
 
-    apply_plan(con, plan, as_of)
+    apply_plan(con, plan, as_of, retroactive)
     write_export(con)
     print("\napplied and exported")
 

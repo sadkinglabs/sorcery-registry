@@ -161,5 +161,15 @@
       "back.rules_text": "Tap → Play or draw a site.\nNearby allied sites have \"Whenever an enemy enters here, it takes 1 damage.\""
     },
     "reason": "API data error: the served faces do not match the card. The front carries the back's text (\"Nearby allied sites have ...\") while the back still reads the wording it replaced (\"Whenever an enemy enters a nearby site ...\"), and the front's Tawny clause is not the card's current wording either. Both faces supplied by the registry owner, 2026-09-15; arrows and line breaks follow the corpus (→, one newline between abilities). The text every printing to date actually shows is recorded separately in data/errata.json."
+  },
+  {
+    "match": {
+      "card_name": "Rubble"
+    },
+    "set_fields": {
+      "category": "Site"
+    },
+    "retroactive": true,
+    "reason": "API data error: served as category Token, which it is not. Rubble is the Site a destroyed site leaves behind - its own type is Site, it is printed as a Box Topper in Alpha, Beta, Arthurian Legends and Gothic and as a Dust foil promo, and it is not created by another card the way the six real tokens are (Bruin, Tawny, Lance, Skeleton, Foot Soldier, Frog, each a Minion or Artifact some card makes). Category corrected to Site, matching its type. Confirmed by the registry owner, 2026-09-15. Retroactive: the card was never a Token, so the correction is written into every history row rather than reading as a change the card underwent - its printings still show current values."
   }
 ]

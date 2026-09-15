@@ -32,6 +32,7 @@ one request.
 """
 
 import json
+from typing import NamedTuple
 
 from . import API_URL, SCHEMA_VERSION, SITE_BASE
 from .canon import canon_text, released_date
@@ -149,6 +150,13 @@ def build_snapshot(raw_cards):
     return {"cards": cards, "printings": printings}
 
 
+class Applied(NamedTuple):
+    """What applying the overrides left to say: the entries that matched
+    nothing, and, per card, the fields corrected retroactively."""
+    unmatched: list
+    retroactive: dict
+
+
 def apply_overrides(snapshot, overrides):
     """Apply data corrections to the snapshot in place.
 
@@ -158,6 +166,13 @@ def apply_overrides(snapshot, overrides):
         set_fields       column -> corrected value; "back.<field>" corrects
                          one field of the back face and leaves the rest of
                          that face as upstream serves it
+        retroactive      optional: the card always had this value and the
+                         registry's record was wrong, so the correction is
+                         written to every history row instead of opening one
+                         (see sync.apply_plan). Without it a correction reads
+                         as a change the card underwent, which is right when
+                         the card did change and upstream has it wrong, and
+                         wrong when only our record ever said otherwise.
         reason           required free text, the audit trail
 
     Without set_name the fields are applied to the card record and every
@@ -165,11 +180,12 @@ def apply_overrides(snapshot, overrides):
     is only ever written where the record has that column (life is a card
     fact, artist a printing fact), so one entry can name fields of either.
     A field name the registry does not have is an error rather than a line
-    that quietly corrects nothing. Returns the list of entries that matched
-    nothing, so the sync report can flag corrections the upstream has since
-    fixed.
+    that quietly corrects nothing. Returns the entries that matched nothing,
+    so the sync report can flag corrections the upstream has since fixed,
+    and which card fields were corrected retroactively, for apply_plan.
     """
     unmatched = []
+    retroactive = {}
     for entry in overrides:
         if not entry.get("reason"):
             raise ValueError(f"override without a reason: {entry!r}")
@@ -193,6 +209,12 @@ def apply_overrides(snapshot, overrides):
                     f"override sets {column!r} for one set: a back face is a card "
                     f"fact, the same in every printing")
             back_fields[face_field] = value
+        if not isinstance(entry.get("retroactive", False), bool):
+            raise ValueError(f"override: retroactive must be true or false: {entry!r}")
+        if entry.get("retroactive") and (printing_fields or set_name is not None):
+            raise ValueError(
+                f"override for {card_name!r} is retroactive but names printing fields: "
+                f"only a card's own history is rewritten, a printing has none")
         hit = False
         card = snapshot["cards"].get(card_name)
         if set_name is None and (card_fields or back_fields) and card is not None:
@@ -203,6 +225,9 @@ def apply_overrides(snapshot, overrides):
                         f"override corrects the back face of {card_name!r}, "
                         f"which upstream serves with no back face")
                 card["back"].update(back_fields)
+            if entry.get("retroactive"):
+                corrected = set(card_fields) | ({"back"} if back_fields else set())
+                retroactive.setdefault(card_name, set()).update(corrected)
             hit = True
         for printing in snapshot["printings"].values():
             if printing["card_name"] != card_name or not printing_fields:
@@ -213,4 +238,4 @@ def apply_overrides(snapshot, overrides):
             hit = True
         if not hit:
             unmatched.append(entry)
-    return unmatched
+    return Applied(unmatched, retroactive)
