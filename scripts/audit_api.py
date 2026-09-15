@@ -11,6 +11,11 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from pathlib import Path
+
+# Run as `python scripts/audit_api.py` from the repository root: sys.path[0] is
+# scripts/, so the repository's own package needs adding by hand.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 BASE = "https://api.kairosarchive.net"
 UA = "sorcery-registry-audit/1.0 (+https://kairosarchive.net)"
