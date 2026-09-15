@@ -105,14 +105,26 @@ def _apply_plan(con, plan, as_of):
             row = con.execute("SELECT * FROM cards WHERE card_id = ?",
                               (update["card_id"],)).fetchone()
             face = face_of({f: decode_field(f, row[f]) for f in HISTORY_FIELDS})
-            cur.execute(
-                "UPDATE card_history SET valid_to = ? "
-                "WHERE card_id = ? AND valid_to IS NULL",
-                (as_of, update["card_id"]))
-            cur.execute(
-                "INSERT INTO card_history (card_id, valid_from, valid_to, face) "
-                "VALUES (?, ?, NULL, ?)",
-                (update["card_id"], as_of, face))
+            open_row = con.execute(
+                "SELECT rowid, valid_from, source FROM card_history "
+                "WHERE card_id = ? AND valid_to IS NULL", (update["card_id"],)).fetchone()
+            # History is kept by date. A second change on the same day rewrites
+            # that day's row rather than closing it at its own start, which
+            # would claim a face was current from a day to the same day - never.
+            # A row transcribed from the printed card is never rewritten here:
+            # a sync only ever speaks for what the API serves.
+            if open_row and open_row["valid_from"] == as_of and open_row["source"] == "api":
+                cur.execute("UPDATE card_history SET face = ? WHERE rowid = ?",
+                            (face, open_row["rowid"]))
+            else:
+                cur.execute(
+                    "UPDATE card_history SET valid_to = ? "
+                    "WHERE card_id = ? AND valid_to IS NULL",
+                    (as_of, update["card_id"]))
+                cur.execute(
+                    "INSERT INTO card_history (card_id, valid_from, valid_to, face) "
+                    "VALUES (?, ?, NULL, ?)",
+                    (update["card_id"], as_of, face))
         if changed & set(ERRATA_FIELDS):
             cur.execute("UPDATE cards SET errata = 1 WHERE card_id = ?",
                         (update["card_id"],))

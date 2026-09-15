@@ -151,5 +151,15 @@
       "life": null
     },
     "reason": "API data error: only Avatars have a life value. The first 17 cards of Gothic shipped with life=20 (the game's life cap) on non-Avatar cards. Confirmed by the registry owner, 2026-08-19."
+  },
+  {
+    "match": {
+      "card_name": "Druid"
+    },
+    "set_fields": {
+      "rules_text": "Tap → Play or draw a site. If this is your first turn, summon Tawny here.\nTap → Summon Bruin here. Flip this card.",
+      "back.rules_text": "Tap → Play or draw a site.\nNearby allied sites have \"Whenever an enemy enters here, it takes 1 damage.\""
+    },
+    "reason": "API data error: the served faces do not match the card. The front carries the back's text (\"Nearby allied sites have ...\") while the back still reads the wording it replaced (\"Whenever an enemy enters a nearby site ...\"), and the front's Tawny clause is not the card's current wording either. Both faces supplied by the registry owner, 2026-09-15; arrows and line breaks follow the corpus (→, one newline between abilities). The text every printing to date actually shows is recorded separately in data/errata.json."
   }
 ]
