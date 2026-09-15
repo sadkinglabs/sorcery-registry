@@ -1,6 +1,7 @@
 """The release workflow's hosted-side checks and pointer flip.
 
-    python -m registry.hosted check-images --export dist/registry.json
+    python -m registry.hosted check-images --export dist/registry.json \
+        [--verified-in PREVIOUS_EXPORT]
     python -m registry.hosted verify-root --base-url URL --tag vX.Y.Z --dist dist
     python -m registry.hosted flip-alias --base-url URL --major v3 --tag vX.Y.Z \
         --versions versions.json --zone ZONE_ID [--rule-id RULE_ID]
@@ -11,6 +12,13 @@ and before the GitHub release is created, in this order:
   check-images   every image_urls value in the export answers HEAD 200
                  through the CDN - no published record may reference an
                  object that is not served (a no-op while all are null).
+                 --verified-in names an export that was already released,
+                 whose addresses this run may take as served: an image
+                 object is content-addressed (its name carries the art
+                 key), so an address that answered once cannot come to
+                 mean different bytes. It can only stop being served if
+                 the object is deleted from the bucket, which no release
+                 does and the weekly image sync is what would catch.
   verify-root    what the CDN serves at the release root is, byte for byte,
                  what was built: registry.json hashes to the committed
                  digest, index.json names the tag, a card object and a slug
@@ -170,15 +178,27 @@ def missing_images(urls, status=None, workers=8, per_second=15, sleep=None, atte
         return [problem for problem in pool.map(check, urls) if problem]
 
 
-def check_images(export_path):
+def check_images(export_path, verified_in=None):
     export = json.loads(Path(export_path).read_text(encoding="utf-8"))
     urls = image_urls_in(export)
-    missing = missing_images(urls)
+    already = []
+    if verified_in:
+        path = Path(verified_in)
+        if path.exists():
+            already = image_urls_in(json.loads(path.read_text(encoding="utf-8")))
+        else:
+            print(f"::warning::{verified_in} is not there; checking every address")
+    unchecked = sorted(set(urls) - set(already))
+    missing = missing_images(unchecked)
     if missing:
         print("::error::published records reference images the CDN does not serve:")
         print("\n".join(missing))
         return 1
-    print(f"images: {len(urls)} referenced, all served")
+    if already:
+        print(f"images: {len(urls)} referenced, {len(unchecked)} new since the release checked "
+              f"against, all served ({len(urls) - len(unchecked)} taken as served)")
+    else:
+        print(f"images: {len(urls)} referenced, all served")
     return 0
 
 
@@ -285,6 +305,8 @@ def main(argv=None):
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("check-images")
     p.add_argument("--export", default="dist/registry.json")
+    p.add_argument("--verified-in", default=None,
+                   help="an already released export whose addresses were checked then")
     p = sub.add_parser("verify-root")
     p.add_argument("--base-url", required=True)
     p.add_argument("--tag", required=True)
@@ -298,7 +320,7 @@ def main(argv=None):
     p.add_argument("--rule-id", default=None, help="optional: otherwise the rule named '<major> alias'")
     args = parser.parse_args(argv)
     if args.command == "check-images":
-        return check_images(args.export)
+        return check_images(args.export, args.verified_in)
     if args.command == "verify-root":
         return verify_root(args.base_url, args.tag, args.dist)
     return flip_alias(args.base_url, args.major, args.tag, args.versions, args.zone, args.rule_id)
