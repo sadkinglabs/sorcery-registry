@@ -3,7 +3,9 @@
 A fast path to using the registry: what the ids mean, how to find the
 newest release, what each endpoint answers, and three working examples.
 For the full URL contract read [`docs/api.md`](api.md); for what you may
-do with the data read [`docs/usage.md`](usage.md).
+do with the data read [`docs/usage.md`](usage.md). The same material, with
+a reference page per record type, is on the web at
+[kairosarchive.net/docs](https://kairosarchive.net/docs).
 
 ## Two id spaces, one rule
 

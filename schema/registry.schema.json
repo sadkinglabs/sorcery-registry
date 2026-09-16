@@ -97,13 +97,15 @@
           "type": [
             "integer",
             "null"
-          ]
+          ],
+          "description": "Printed attack; null when the card has none."
         },
         "defense": {
           "type": [
             "integer",
             "null"
-          ]
+          ],
+          "description": "Printed defense; null when the card has none."
         },
         "power": {
           "type": [
@@ -120,16 +122,20 @@
           "description": "Only Avatars have a life value."
         },
         "thr_air": {
-          "$ref": "#/$defs/threshold"
+          "$ref": "#/$defs/threshold",
+          "description": "Air threshold: the number of Air the card needs in play to be cast. 0 when none."
         },
         "thr_earth": {
-          "$ref": "#/$defs/threshold"
+          "$ref": "#/$defs/threshold",
+          "description": "Earth threshold. 0 when none."
         },
         "thr_fire": {
-          "$ref": "#/$defs/threshold"
+          "$ref": "#/$defs/threshold",
+          "description": "Fire threshold. 0 when none."
         },
         "thr_water": {
-          "$ref": "#/$defs/threshold"
+          "$ref": "#/$defs/threshold",
+          "description": "Water threshold. 0 when none."
         },
         "rules_text": {
           "type": "string",
@@ -166,7 +172,8 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "description": "The artist as credited; null when unrecorded."
         },
         "artist_slug": {
           "type": [
@@ -179,7 +186,8 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "description": "The flavour text as printed; empty or null when the card has none."
         },
         "typeline": {
           "type": [
@@ -259,29 +267,37 @@
       "type": "object",
       "properties": {
         "schema_version": {
-          "type": "integer"
+          "type": "integer",
+          "description": "The shape of the file. Goes up when a field is added; a breaking change is a new major release instead."
         },
         "source": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "The official API the data was read from."
         },
         "sets": {
-          "type": "integer"
+          "type": "integer",
+          "description": "How many records the sets section holds."
         },
         "cards": {
-          "type": "integer"
+          "type": "integer",
+          "description": "How many records the cards section holds."
         },
         "printings": {
-          "type": "integer"
+          "type": "integer",
+          "description": "How many records the printings section holds."
         },
         "slug_history": {
-          "type": "integer"
+          "type": "integer",
+          "description": "How many rows the slug_history section holds."
         },
         "name_history": {
-          "type": "integer"
+          "type": "integer",
+          "description": "How many rows the name_history section holds."
         },
         "card_history": {
-          "type": "integer"
+          "type": "integer",
+          "description": "How many rows the card_history section holds."
         }
       },
       "required": [
@@ -310,10 +326,12 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The official three-digit code. A label, not an order: 003 is unused."
           },
           "set_name": {
-            "type": "string"
+            "type": "string",
+            "description": "The official display name."
           },
           "released_at": {
             "anyOf": [
@@ -327,10 +345,12 @@
             "description": "Derived: the earliest released_at among the set's printings."
           },
           "cards": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Distinct cards in the set."
           },
           "printings": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Printings in the set."
           },
           "api_url": {
             "type": [
@@ -368,10 +388,12 @@
         "type": "object",
         "properties": {
           "codex_id": {
-            "$ref": "#/$defs/codexId"
+            "$ref": "#/$defs/codexId",
+            "description": "The card's permanent ID."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The current name. Earlier names are in name_history."
           },
           "type": {
             "type": [
@@ -440,13 +462,15 @@
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "Printed attack; null when the card has none."
           },
           "defense": {
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "Printed defense; null when the card has none."
           },
           "power": {
             "type": [
@@ -463,16 +487,20 @@
             "description": "Only Avatars have a life value."
           },
           "thr_air": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Air threshold: the number of Air the card needs in play to be cast. 0 when none."
           },
           "thr_earth": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Earth threshold. 0 when none."
           },
           "thr_fire": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Fire threshold. 0 when none."
           },
           "thr_water": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Water threshold. 0 when none."
           },
           "rules_text": {
             "type": "string",
@@ -585,17 +613,20 @@
         "type": "object",
         "properties": {
           "printing_id": {
-            "$ref": "#/$defs/printingId"
+            "$ref": "#/$defs/printingId",
+            "description": "This printing's permanent ID."
           },
           "codex_id": {
-            "$ref": "#/$defs/codexId"
+            "$ref": "#/$defs/codexId",
+            "description": "The card this is a printing of."
           },
           "card_name": {
             "type": "string",
             "description": "Derived from the card record so a printing is readable without a join."
           },
           "set_name": {
-            "type": "string"
+            "type": "string",
+            "description": "The set's official display name."
           },
           "set_code": {
             "anyOf": [
@@ -605,7 +636,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The set's official three-digit code."
           },
           "released_at": {
             "anyOf": [
@@ -640,7 +672,8 @@
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "The artist as credited; null when unrecorded."
           },
           "artist_slug": {
             "type": [
@@ -653,7 +686,8 @@
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "The flavour text as printed; empty or null when the card has none."
           },
           "typeline": {
             "type": [
@@ -720,7 +754,8 @@
             "description": "Derived: the front face's image renditions, null while the registry holds none."
           },
           "image_status": {
-            "$ref": "#/$defs/imageStatus"
+            "$ref": "#/$defs/imageStatus",
+            "description": "How good the source of the front image was: missing, lowres or ok."
           }
         },
         "required": [
@@ -756,13 +791,16 @@
         "type": "object",
         "properties": {
           "slug": {
-            "type": "string"
+            "type": "string",
+            "description": "The slug, exactly as the official API issued it."
           },
           "printing_id": {
-            "$ref": "#/$defs/printingId"
+            "$ref": "#/$defs/printingId",
+            "description": "The printing it belonged to. A slug belongs to one printing, ever."
           },
           "valid_from": {
-            "$ref": "#/$defs/date"
+            "$ref": "#/$defs/date",
+            "description": "The first date the registry saw this slug."
           },
           "valid_to": {
             "anyOf": [
@@ -772,7 +810,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The date it was replaced; null while it is the current slug."
           }
         },
         "required": [
@@ -791,13 +830,16 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The name, exactly as the official API gave it."
           },
           "codex_id": {
-            "$ref": "#/$defs/codexId"
+            "$ref": "#/$defs/codexId",
+            "description": "The card that carried the name."
           },
           "valid_from": {
-            "$ref": "#/$defs/date"
+            "$ref": "#/$defs/date",
+            "description": "The first date the registry saw this name."
           },
           "valid_to": {
             "anyOf": [
@@ -807,7 +849,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The date it was replaced; null while it is the current name."
           }
         },
         "required": [
@@ -826,10 +869,12 @@
         "type": "object",
         "properties": {
           "codex_id": {
-            "$ref": "#/$defs/codexId"
+            "$ref": "#/$defs/codexId",
+            "description": "The card this face belongs to."
           },
           "valid_from": {
-            "$ref": "#/$defs/date"
+            "$ref": "#/$defs/date",
+            "description": "Start of the range this face was in force. What the date means depends on source."
           },
           "valid_to": {
             "anyOf": [
@@ -839,7 +884,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "End of the range; null for the current face."
           },
           "source": {
             "type": "string",
@@ -916,13 +962,15 @@
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "Printed attack; null when the card has none."
           },
           "defense": {
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "Printed defense; null when the card has none."
           },
           "power": {
             "type": [
@@ -939,16 +987,20 @@
             "description": "Only Avatars have a life value."
           },
           "thr_air": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Air threshold: the number of Air the card needs in play to be cast. 0 when none."
           },
           "thr_earth": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Earth threshold. 0 when none."
           },
           "thr_fire": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Fire threshold. 0 when none."
           },
           "thr_water": {
-            "$ref": "#/$defs/threshold"
+            "$ref": "#/$defs/threshold",
+            "description": "Water threshold. 0 when none."
           },
           "rules_text": {
             "type": "string",
@@ -962,7 +1014,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The back face at that time; null unless the card is double-faced."
           }
         },
         "required": [
