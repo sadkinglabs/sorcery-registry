@@ -88,6 +88,15 @@ jobs:
             curl -sSI -A "$ua" "$BASE/$TAG/cards/C000001.json$q" | grep -i -E '^(HTTP|cf-cache-status|access-control-allow-origin)' | tr -d '\r' | tr '\n' ' '
             echo
           done
+          # Those three warmed the object without an Origin header, and R2
+          # only adds CORS headers to requests that send one. If the edge now
+          # serves that cached response to a browser, the browser sees no
+          # access-control-allow-origin and a cross-origin fetch fails - the
+          # one way an "ignore query string" rule can break a public API.
+          # So ask as a browser would, on the object just warmed.
+          echo "== a browser's request on the warmed object (expect access-control-allow-origin: *)"
+          curl -sSI -A "$ua" -H "Origin: https://example.com" "$BASE/$TAG/cards/C000001.json?kairos_check=three" | grep -i -E '^(HTTP|cf-cache-status|access-control-allow-origin)' | tr -d '\r' | tr '\n' ' '
+          echo
 
       - name: Inspect served images (alpha channel, corners) on one face of each resolution family
         run: |
