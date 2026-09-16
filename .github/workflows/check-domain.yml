@@ -75,6 +75,28 @@ jobs:
           curl -sSI -A "$ua" -H "Origin: https://example.com" -H "Access-Control-Request-Method: GET" -X OPTIONS "$BASE/$TAG/index.json" | grep -i -E '^(HTTP|access-control)' || true
           echo "== anonymous client (no User-Agent): expect 403 from the WAF rule"
           curl -sS -o /dev/null -A "" -H "User-Agent:" -w "%{http_code}\n" "$BASE/$TAG/index.json"
+          # The cache key must ignore the query string: a review found that
+          # ?anything= on a warm object was a fresh origin read, so a client
+          # could turn every cached read into a billable one. Warm the bare
+          # URL, then ask twice with different junk queries. Both must be HIT
+          # and still carry the CORS header. All three requests leave one
+          # runner, so they should reach the same edge; a MISS on the third
+          # line is the rule not applying, not a different colo.
+          echo "== cache key ignores the query string: warm, then two junk queries (expect HIT, HIT)"
+          for q in "" "?kairos_check=one" "?kairos_check=two"; do
+            printf '%-22s ' "${q:-(bare)}"
+            curl -sSI -A "$ua" "$BASE/$TAG/cards/C000001.json$q" | grep -i -E '^(HTTP|cf-cache-status|access-control-allow-origin)' | tr -d '\r' | tr '\n' ' '
+            echo
+          done
+          # Those three warmed the object without an Origin header, and R2
+          # only adds CORS headers to requests that send one. If the edge now
+          # serves that cached response to a browser, the browser sees no
+          # access-control-allow-origin and a cross-origin fetch fails - the
+          # one way an "ignore query string" rule can break a public API.
+          # So ask as a browser would, on the object just warmed.
+          echo "== a browser's request on the warmed object (expect access-control-allow-origin: *)"
+          curl -sSI -A "$ua" -H "Origin: https://example.com" "$BASE/$TAG/cards/C000001.json?kairos_check=three" | grep -i -E '^(HTTP|cf-cache-status|access-control-allow-origin)' | tr -d '\r' | tr '\n' ' '
+          echo
 
       - name: Inspect served images (alpha channel, corners) on one face of each resolution family
         run: |
