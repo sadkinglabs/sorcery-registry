@@ -1,6 +1,6 @@
 # The URL contract
 
-New here? [`docs/quickstart.md`](quickstart.md) is a shorter, example-driven walkthrough of the ids, discovery flow and images; this page is the complete reference.
+New here? The web documentation at [kairosarchive.net/docs](https://kairosarchive.net/docs) is written for that, with a reference page per record type generated from the schema and a changelog of releases; [`docs/quickstart.md`](quickstart.md) is the same walkthrough in this repository. This page is the complete reference.
 
 The registry is published as one object per thing, so that every card, printing, slug and set has an address and the common questions are one HTTP request each. The objects are produced from the export by `python -m registry.publish` (into `dist/`, never committed) and uploaded at release time; a CDN in front of the bucket serves them. There is no server: every answer was computed at release time.
 
