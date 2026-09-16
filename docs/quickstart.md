@@ -68,6 +68,7 @@ major alias (`/v3/`) - both serve the same shapes.
 | `registry.json` | the full export - everything in one file |
 | `registry.json.sha256` | that export's checksum, for freshness polling |
 | `schema.json` | the export's JSON Schema (draft 2020-12) |
+| `changes.json` | what this release changed against the previous one: counts, the ids behind them, and `identifiers_removed`, always 0 within a major |
 | `cards/{codex_id}.json` | one card, plus its `printings` summary, `name_history` and `card_history` |
 | `printings/{printing_id}.json` | one physical print, plus its `slug_history` |
 | `slugs/{slug}.json` | what a slug (current or historical) resolves to |

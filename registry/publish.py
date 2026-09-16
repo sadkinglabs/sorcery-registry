@@ -5,6 +5,7 @@
                                [--base-url https://api.kairosarchive.net/v3.1.0]
                                [--latest-url https://api.kairosarchive.net/v3]
                                [--manifest manifest.json]
+                               [--previous prev/registry.json --previous-tag v3.0.0]
 
 The registry's data is a few thousand records with permanent keys that
 change a handful of times a year, so the API needs no server: every
@@ -21,6 +22,8 @@ Layout (every path relative to the version root the uploader chooses):
     index.json                  discovery: versions, counts, endpoint patterns,
                                 where this root and the moving alias live,
                                 and the usage terms
+    changes.json                what changed since the previous release
+                                (--previous/--previous-tag; see registry.changes)
     manifest.json               the release manifest, when --manifest is given
     registry.json               the full export, byte for byte, + .sha256
     schema.json                 the export's JSON Schema
@@ -42,6 +45,7 @@ import shutil
 from pathlib import Path
 
 from . import TERMS_URL
+from .changes import diff_exports
 from .export import EXPORT_PATH, SCHEMA_PATH, checksum_path
 
 DIST_PATH = Path("dist")
@@ -62,6 +66,7 @@ SAFE_KEY = re.compile(r"^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$")
 ENDPOINTS = {
     "export": "registry.json",
     "checksum": "registry.json.sha256",
+    "changes": "changes.json",
     "schema": "schema.json",
     "card": "cards/{codex_id}.json",
     "printing": "printings/{printing_id}.json",
@@ -83,13 +88,16 @@ def render(obj):
 
 
 def build_objects(export, dataset_version=None, base_url=None, latest_url=None,
-                  manifest=False):
+                  manifest=False, previous=None, previous_tag=None):
     """Every object the API serves, as {path: json-able}. Pure: no files.
 
     base_url is the absolute root these objects are uploaded to (an
     immutable release root); latest_url the moving major alias that always
     redirects to the newest release. Both are advertised in index.json so a
-    consumer holding any copy can find its origin and the current data."""
+    consumer holding any copy can find its origin and the current data.
+    previous is the previous release's export (and previous_tag its tag):
+    changes.json describes the way from it to this release; without one,
+    the document says the release came from nothing."""
     cards = {c["codex_id"]: c for c in export["cards"]}
     printings_by_card = {}
     for printing in export["printings"]:
@@ -190,6 +198,8 @@ def build_objects(export, dataset_version=None, base_url=None, latest_url=None,
     objects["history/slugs.json"] = export["slug_history"]
     objects["history/names.json"] = export["name_history"]
     objects["history/cards.json"] = export["card_history"]
+    objects["changes.json"] = diff_exports(previous, export,
+                                           previous_tag if previous else None, dataset_version)
 
     header = export["header"]
     objects["index.json"] = {
@@ -216,12 +226,16 @@ def _looks_like_dist(path):
 
 
 def write_dist(export_path=EXPORT_PATH, schema_path=SCHEMA_PATH, out=DIST_PATH,
-               dataset_version=None, base_url=None, latest_url=None, manifest_path=None):
+               dataset_version=None, base_url=None, latest_url=None, manifest_path=None,
+               previous_path=None, previous_tag=None):
     export_path, schema_path, out = Path(export_path), Path(schema_path), Path(out)
     manifest_path = Path(manifest_path) if manifest_path else None
     export_bytes = export_path.read_bytes()
+    previous = (json.loads(Path(previous_path).read_text(encoding="utf-8"))
+                if previous_path else None)
     objects = build_objects(json.loads(export_bytes.decode("utf-8")), dataset_version,
-                            base_url, latest_url, manifest=manifest_path is not None)
+                            base_url, latest_url, manifest=manifest_path is not None,
+                            previous=previous, previous_tag=previous_tag)
 
     if out.exists():
         if not _looks_like_dist(out):
@@ -256,11 +270,17 @@ def main():
                         help="absolute URL of the moving major alias (e.g. .../v3)")
     parser.add_argument("--manifest", default=None,
                         help="release manifest to copy into the root as manifest.json")
+    parser.add_argument("--previous", default=None,
+                        help="the previous release's registry.json, for changes.json")
+    parser.add_argument("--previous-tag", default=None,
+                        help="the previous release's tag, named in changes.json")
     args = parser.parse_args()
+    if bool(args.previous) != bool(args.previous_tag):
+        parser.error("--previous and --previous-tag go together")
     count = write_dist(args.export, args.schema, args.out, args.dataset_version,
                        args.base_url.rstrip("/") if args.base_url else None,
                        args.latest_url.rstrip("/") if args.latest_url else None,
-                       args.manifest)
+                       args.manifest, args.previous, args.previous_tag)
     print(f"wrote {count} objects to {args.out}")
 
 

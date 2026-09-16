@@ -223,7 +223,7 @@ def verify_root(base_url, tag, dist):
     card = json.loads((dist / "index" / "cards.json").read_text(encoding="utf-8"))[0]["codex_id"]
     slug = next(iter(json.loads((dist / "index" / "slugs.json").read_text(encoding="utf-8"))))
     for path in (f"cards/{card}.json", f"slugs/{slug}.json", "registry.json.sha256",
-                 "schema.json", "manifest.json"):
+                 "schema.json", "manifest.json", "changes.json"):
         status, headers = _status(f"{root}/{path}", method="GET")
         if status != 200:
             problems.append(f"{status} {root}/{path}")

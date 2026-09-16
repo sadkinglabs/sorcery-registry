@@ -1,0 +1,127 @@
+"""changes.json: what one release changed against the previous one. The
+document is a pure function of two exports, so these tests build small
+exports by hand and pin the counts, the lists and the identifier rule."""
+
+import copy
+import unittest
+
+from registry.changes import check, diff_exports, summary_line
+
+
+def export(cards, printings, sets=("001",), history=(), schema_version=11):
+    return {
+        "header": {"schema_version": schema_version},
+        "sets": [{"set_code": code, "set_name": f"Set {code}"} for code in sets],
+        "cards": cards,
+        "printings": printings,
+        "card_history": list(history),
+    }
+
+
+def card(codex_id, **fields):
+    base = {"codex_id": codex_id, "name": f"Card {codex_id}", "rules_text": "Text.", "errata": False}
+    base.update(fields)
+    return base
+
+
+def printing(printing_id, codex_id, image_hash=None, back=None, **fields):
+    base = {"printing_id": printing_id, "codex_id": codex_id, "slug": f"001-{printing_id.lower()}",
+            "image_hash": image_hash, "back": back}
+    base.update(fields)
+    return base
+
+
+BEFORE = export(
+    [card("C000001"), card("C000002")],
+    [printing("P000001", "C000001", image_hash="aaaaaaaaaaaa"),
+     printing("P000002", "C000002")],
+    history=[{"codex_id": "C000001", "valid_from": "2026-01-01", "valid_to": None, "source": "api"}],
+)
+
+
+class DiffTest(unittest.TestCase):
+    def test_nothing_changed_is_all_zeros(self):
+        changes = diff_exports(BEFORE, copy.deepcopy(BEFORE), "v3.0.0", "v3.0.1")
+        self.assertEqual(changes["from"], "v3.0.0")
+        self.assertEqual(changes["to"], "v3.0.1")
+        self.assertEqual(changes["schema_version"], {"from": 11, "to": 11})
+        self.assertEqual(set(changes["summary"].values()), {0})
+        self.assertEqual(summary_line(changes), "0 identifiers removed")
+        self.assertEqual(check(changes), [])
+
+    def test_counts_and_lists_name_what_changed(self):
+        after = copy.deepcopy(BEFORE)
+        after["cards"][0]["rules_text"] = "New text."
+        after["cards"][0]["errata"] = True
+        after["cards"].append(card("C000003"))
+        after["printings"][1]["image_hash"] = "bbbbbbbbbbbb"            # image added
+        after["printings"][0]["image_hash"] = "cccccccccccc"            # image replaced
+        after["printings"][0]["slug"] = "001-renamed"
+        after["printings"].append(printing("P000003", "C000003", image_hash="dddddddddddd"))
+        after["sets"].append({"set_code": "002", "set_name": "Set 002"})
+        after["card_history"][0]["valid_to"] = "2026-06-01"
+        after["card_history"].append({"codex_id": "C000001", "valid_from": "2026-06-01",
+                                      "valid_to": None, "source": "card"})
+        changes = diff_exports(BEFORE, after, "v3.0.0", "v3.1.0")
+        self.assertEqual(changes["summary"], {
+            "cards_added": 1, "cards_changed": 1, "cards_removed": 0,
+            "printings_added": 1, "printings_changed": 2, "printings_removed": 0,
+            "sets_added": 1, "images_added": 2, "images_replaced": 1,
+            "history_rows_added": 1, "identifiers_removed": 0})
+        self.assertEqual(changes["cards"]["changed"],
+                         [{"codex_id": "C000001", "name": "Card C000001", "fields": ["rules_text", "errata"]}])
+        self.assertEqual(changes["cards"]["added"], ["C000003"])
+        self.assertEqual([p["printing_id"] for p in changes["printings"]["changed"]], ["P000001", "P000002"])
+        self.assertEqual(changes["printings"]["changed"][0]["fields"], ["slug", "image_hash"])
+        self.assertEqual(changes["images"], {"added": ["P000002", "P000003"], "replaced": ["P000001"]})
+        self.assertEqual(changes["sets"]["added"], ["002"])
+        self.assertEqual(changes["history"]["added"],
+                         [{"codex_id": "C000001", "valid_from": "2026-06-01", "source": "card"}])
+        self.assertEqual(summary_line(changes),
+                         "1 card added · 1 card changed · 1 printing added · 2 printings changed · "
+                         "1 set added · 2 images added · 1 image replaced · 1 history row added · "
+                         "0 identifiers removed")
+
+    def test_a_back_face_image_counts_too(self):
+        after = copy.deepcopy(BEFORE)
+        after["printings"][0]["back"] = {"image_urls": {"original": "https://x/P000001.k1.back.original.png"}}
+        changes = diff_exports(BEFORE, after, "v3.0.0", "v3.0.1")
+        self.assertEqual(changes["images"], {"added": ["P000001"], "replaced": []})
+        later = copy.deepcopy(after)
+        later["printings"][0]["back"]["image_urls"]["original"] = "https://x/P000001.k2.back.original.png"
+        self.assertEqual(diff_exports(after, later, "v3.0.1", "v3.0.2")["images"],
+                         {"added": [], "replaced": ["P000001"]})
+
+    def test_removed_identifiers_are_counted_and_refused_within_a_major(self):
+        after = copy.deepcopy(BEFORE)
+        del after["cards"][1]
+        del after["printings"][1]
+        changes = diff_exports(BEFORE, after, "v3.0.0", "v3.0.1")
+        self.assertEqual(changes["summary"]["identifiers_removed"], 2)
+        self.assertEqual(changes["cards"]["removed"], ["C000002"])
+        self.assertEqual(changes["printings"]["removed"], ["P000002"])
+        self.assertEqual(len(check(changes)), 1)
+        self.assertIn("C000002, P000002", check(changes)[0])
+        # A new major may break: the check passes, the counts still tell.
+        self.assertEqual(check(diff_exports(BEFORE, after, "v3.0.0", "v4.0.0")), [])
+
+    def test_first_release_comes_from_nothing(self):
+        changes = diff_exports(None, BEFORE, None, "v1.0.0")
+        self.assertIsNone(changes["from"])
+        self.assertEqual(changes["schema_version"], {"from": None, "to": 11})
+        self.assertEqual(changes["summary"]["cards_added"], 2)
+        self.assertEqual(changes["summary"]["printings_added"], 2)
+        self.assertEqual(changes["summary"]["images_added"], 1)
+        self.assertEqual(changes["summary"]["history_rows_added"], 1)
+        self.assertEqual(changes["summary"]["identifiers_removed"], 0)
+        self.assertEqual(check(changes), [])
+
+    def test_is_deterministic(self):
+        a = diff_exports(BEFORE, copy.deepcopy(BEFORE), "v3.0.0", "v3.0.1")
+        b = diff_exports(copy.deepcopy(BEFORE), copy.deepcopy(BEFORE), "v3.0.0", "v3.0.1")
+        self.assertEqual(list(a), list(b))
+        self.assertEqual(a, b)
+
+
+if __name__ == "__main__":
+    unittest.main()
