@@ -5,7 +5,9 @@ name: release
 #   - run the workflow by hand with a version and notes: the workflow creates
 #     that annotated tag on the chosen ref first.
 # Either way it then proves the invariants on the tagged commit, builds the
-# release manifest and the published objects, and - once hosting is
+# release manifest and the published objects (changes.json among them,
+# describing the way from the previous release and refusing a release that
+# removes an identifier within a major), and - once hosting is
 # configured (vars.R2_BUCKET) - uploads the release to its own immutable
 # root on api.kairosarchive.net, verifies byte for byte what the CDN serves,
 # marks the root RELEASED, lists it in versions.json and points the moving
@@ -138,10 +140,29 @@ jobs:
       - name: Build the manifest
         run: python -m registry.manifest --dataset-version "$TAG" --out manifest.json
 
+      - name: Find the previous release
+        run: |
+          # The newest release tag reachable from the commit being tagged:
+          # changes.json describes the way from it, and the image check
+          # trusts the addresses it already verified. The export is read
+          # from git by tag, so no download and no dependence on the bucket.
+          PREVIOUS=$(git tag --list 'v*' --sort=-v:refname --merged "$TAG^" 2> /dev/null | head -n 1)
+          if [ -n "$PREVIOUS" ] && git cat-file -e "$PREVIOUS:export/registry.json" 2> /dev/null; then
+            git show "$PREVIOUS:export/registry.json" > "$RUNNER_TEMP/previous.json"
+            echo "PREVIOUS=$PREVIOUS" >> "$GITHUB_ENV"
+            echo "previous release: $PREVIOUS"
+          else
+            echo "::notice::no earlier release found; changes.json will say this release came from nothing"
+          fi
+
       - name: Build the published objects
         run: |
           MAJOR="${TAG%%.*}"
           echo "MAJOR=$MAJOR" >> "$GITHUB_ENV"
+          PREVIOUS_ARGS=""
+          if [ -n "$PREVIOUS" ]; then
+            PREVIOUS_ARGS="--previous $RUNNER_TEMP/previous.json --previous-tag $PREVIOUS"
+          fi
           # The base URL variable is accepted with or without a scheme or a
           # trailing slash; everything downstream needs the canonical form.
           if [ -n "$REGISTRY_BASE_URL" ]; then
@@ -152,10 +173,19 @@ jobs:
           fi
           if [ -n "$R2_BUCKET" ]; then
             python -m registry.publish --dataset-version "$TAG" --manifest manifest.json \
-              --base-url "$REGISTRY_BASE_URL/$TAG" --latest-url "$REGISTRY_BASE_URL/$MAJOR" --out dist
+              --base-url "$REGISTRY_BASE_URL/$TAG" --latest-url "$REGISTRY_BASE_URL/$MAJOR" \
+              --out dist $PREVIOUS_ARGS
           else
-            python -m registry.publish --dataset-version "$TAG" --manifest manifest.json --out dist
+            python -m registry.publish --dataset-version "$TAG" --manifest manifest.json \
+              --out dist $PREVIOUS_ARGS
           fi
+
+      - name: What this release changes
+        run: |
+          # Prints the summary and fails the release if an identifier was
+          # removed within a major: ids are permanent, and a release that
+          # drops one is a breaking change that needs a new major.
+          python -m registry.changes --check dist/changes.json
 
       - name: Hosting is not configured
         if: env.R2_BUCKET == ''
@@ -219,9 +249,7 @@ jobs:
           # images then costs no requests. What this no longer catches is an
           # object deleted from the bucket behind an address nothing changed;
           # the weekly image sync re-verifies every held object for that.
-          PREVIOUS=$(git tag --list 'v*' --sort=-v:refname --merged "$TAG^" 2> /dev/null | head -n 1)
-          if [ -n "$PREVIOUS" ] && git cat-file -e "$PREVIOUS:export/registry.json" 2> /dev/null; then
-            git show "$PREVIOUS:export/registry.json" > "$RUNNER_TEMP/previous.json"
+          if [ -n "$PREVIOUS" ]; then
             echo "checking against $PREVIOUS"
             python -m registry.hosted check-images --export dist/registry.json \
               --verified-in "$RUNNER_TEMP/previous.json"
@@ -269,7 +297,7 @@ jobs:
             echo "GitHub release $TAG already exists; nothing to publish (re-run)"
             exit 0
           fi
-          gh release create "$TAG" manifest.json \
+          gh release create "$TAG" manifest.json dist/changes.json \
             --title "$TAG" --notes-from-tag --verify-tag
 
       - name: Rebuild the website

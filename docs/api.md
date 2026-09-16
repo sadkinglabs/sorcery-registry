@@ -16,7 +16,7 @@ Base URL: **`https://api.kairosarchive.net`** (Cloudflare R2 behind the zone's C
 
 Pick how much change you want to see. **Pin a release** (`/v3.1.0/`) and nothing you fetch ever changes under you; **follow the alias** (`/v3/`) and you always get the newest data of a shape you already understand; **poll `versions.json`** (≤ hourly is plenty; the data changes a few times a year) to learn when a new release exists and what its digest is. A breaking change to the shape is a new major - a new alias (`/v4/`) - so nothing breaks in place, and the previous major keeps its alias and its roots.
 
-A release appears in `versions.json`, and the alias moves, only after the release workflow has verified byte for byte that the CDN serves the new root; `latest` only ever moves forward. Each root also carries `manifest.json` (the release manifest: counts, artifact digests) and a `RELEASED` marker (the `registry.json` digest and the workflow run that verified it), so a root without the marker is a partial upload, never a release. CORS allows `GET`/`HEAD` from any origin, so a browser can fetch the objects directly.
+A release appears in `versions.json`, and the alias moves, only after the release workflow has verified byte for byte that the CDN serves the new root; `latest` only ever moves forward. Each root also carries `changes.json` (what the release changed against the previous one, see below), `manifest.json` (the release manifest: counts, artifact digests) and a `RELEASED` marker (the `registry.json` digest and the workflow run that verified it), so a root without the marker is a partial upload, never a release. CORS allows `GET`/`HEAD` from any origin, so a browser can fetch the objects directly.
 
 All paths below are relative to a release root or the major alias.
 
@@ -95,6 +95,28 @@ Card images live under `https://api.kairosarchive.net/images/`, hosted by the re
 Image addresses are permanent and independent of where the registry obtained a file: the name carries the printing id and an art-version key, never the source. The publisher's folder is one intake among possible others; if their distribution changes, new files get new keys and new addresses, and every address already published keeps serving the same bytes.
 
 Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680, `large` 672×936, all WebP with the aspect preserved (a rendition may be a pixel narrower than nominal), plus `original`, the publisher's file untouched in its own format. Object names are self-describing and permanent: `{printing_id}.{key}.{rendition}.{ext}`, with `.back` before the rendition for a back face (`P000937.ab12cd34ef56.normal.webp`, `P001762.9f8e7d6c5b4a.back.large.webp`). `key` is the art-version key, sha256(original bytes ‖ encoding recipe) truncated to 12 hex, published on the printing as `image_hash`: new art or a new recipe is a new key and a new address, and the bytes at an old address never change, so cache them forever. The indexes carry `image_hash` and `image_status` so a client can build any address from the scheme above without fetching the printing object. The renditions keep whatever the publisher's file has at the corners: WebP carries transparency, so transparent rounded corners survive into every size, and square corners stay square. Either way, display cards with a radius proportional to the card, `border-radius: 4.75% / 3.5%` (the same advice Scryfall gives), which lands on the physical corner at any rendition size. Images are © Erik's Curiosa, served for archive, identification and site function; hotlinking is allowed, with credit ([usage terms](usage.md)).
+
+## What changed since the previous release
+
+`changes.json` at every release root (and attached to the GitHub release) describes the way from the previous release to this one, so a consumer can decide whether to move before downloading anything:
+
+```json
+{
+  "from": "v3.3.0", "to": "v3.3.1",
+  "schema_version": {"from": 11, "to": 11},
+  "summary": {"cards_added": 0, "cards_changed": 1, "cards_removed": 0,
+              "printings_added": 0, "printings_changed": 0, "printings_removed": 0,
+              "sets_added": 0, "images_added": 0, "images_replaced": 0,
+              "history_rows_added": 0, "identifiers_removed": 0},
+  "cards": {"added": [], "changed": [{"codex_id": "C000459", "name": "Druid", "fields": ["rules_text", "back"]}], "removed": []},
+  "printings": {"added": [], "changed": [], "removed": []},
+  "sets": {"added": []},
+  "images": {"added": [], "replaced": []},
+  "history": {"added": []}
+}
+```
+
+`cards.changed` and `printings.changed` name the fields that differ, in the record's own key order. `images` counts printings whose front or back art was added or replaced (a replaced image is a new address; the old one keeps serving). `history.added` lists the `card_history` rows new in this release, by card and start date. `identifiers_removed` is the sum of removed cards and printings and is always `0` within a major: the release workflow refuses to publish otherwise, so the promise that ids are permanent is checked at release time rather than merely stated. A new major may remove ids, and its `changes.json` says exactly which. The first release to carry the file is the one after v3.3.1; earlier roots have none.
 
 ## Indexes, for client-side search
 
