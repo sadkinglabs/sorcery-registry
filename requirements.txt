@@ -1,2 +1,5 @@
-requests
-mcp  # only needed to run mcp_server.py; the data pipeline is requests-only
+# Runtime dependencies, pinned. The data pipeline needs requests only; mcp
+# is for running mcp_server.py. Dependabot proposes updates (see
+# .github/dependabot.yml); CI runs the suite against exactly these.
+requests==2.34.2
+mcp==2.2.0

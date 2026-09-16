@@ -1,0 +1,18 @@
+# Keeps the pins fresh: one pull request per update, weekly, for the
+# Actions the workflows run (pinned to commits) and the Python packages.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps"
