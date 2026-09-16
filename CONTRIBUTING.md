@@ -27,7 +27,7 @@ Found a card whose registry data is wrong?
 
 ## Running the pipeline
 
-Requirements: Python 3.10+, `pip install requests`. No other dependencies.
+Requirements: Python 3.10+, `pip install -r requirements.txt` (requests, and mcp for the MCP server; both pinned). The workflows and the test suite install `requirements-ci.txt`, which adds jsonschema, pillow and google-auth, also pinned. Dependabot opens a pull request when a pin or a pinned Action has a newer release; the Actions are pinned to commits, with the version in a comment beside each.
 
 ```bash
 python -m unittest discover -s tests   # test suite
@@ -108,7 +108,7 @@ What the registry holds is [`data/images.json`](data/images.json), registry-owne
 **Running the image sync from your own machine** (the whole folder at once, no per-address limit): in the Drive web UI, download the publisher's folder as a zip and unpack it anywhere. Then, in a checkout of this repository with Python 3.10+:
 
 ```bash
-pip install pillow jsonschema google-auth requests
+pip install -r requirements-ci.txt
 export GDRIVE_SERVICE_ACCOUNT="$(cat kairos-images-key.json)"             # or GDRIVE_API_KEY=... for the anonymous fallback
 python -m registry.images list --out review/image-listing.json          # a handful of requests
 python -m registry.images fetch --listing review/image-listing.json \

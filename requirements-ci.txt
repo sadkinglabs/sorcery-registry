@@ -1,0 +1,7 @@
+# Everything the workflows install, pinned: the runtime set plus what the
+# tests, the publisher's schema check, the image pipeline and the release
+# verification need. One file so every job resolves the same versions.
+-r requirements.txt
+jsonschema==4.26.0
+pillow==12.3.0
+google-auth==2.58.0

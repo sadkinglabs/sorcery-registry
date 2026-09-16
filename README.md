@@ -146,7 +146,7 @@ With [uv](https://docs.astral.sh/uv/) installed, add this to your MCP configurat
 }
 ```
 
-Without uv: clone the repo, `pip install mcp requests`, and use `python mcp_server.py` as the command instead.
+Without uv: clone the repo, `pip install -r requirements.txt`, and use `python mcp_server.py` as the command instead.
 
 Seven tools, each returning a small, focused answer rather than the whole database:
 
