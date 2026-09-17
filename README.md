@@ -54,7 +54,7 @@ If you need local play pieces, mint IDs in your own namespace and **do not use t
 
 ## What this is not
 
-- Not a live service. The data is files - one export, or one object per thing on `api.kairosarchive.net` - computed at release time; there is no query endpoint (run the bundled MCP server locally for questions, see below).
+- Not a live database. The data is files - one export, or one object per thing on `api.kairosarchive.net` - computed at release time. The one computed endpoint is the query API on `query.kairosarchive.net` (the site's search syntax over the same records, rate-limited, see [docs/api.md](docs/api.md)); for anything heavier than a lookup, fetch the export and query locally, or run the bundled MCP server (see below).
 - No prices, no rulings, no legality data. Card images are served from `api.kairosarchive.net/images/` as the publisher's API guidance asks ("host images yourself"); every printing and card carries `image_urls` and `image_status` (see the practical notes).
 - Not a second opinion on card data. Attributes mirror the official API, with a short, public list of corrections for confirmed upstream errors (see [`data/overrides.json`](data/overrides.json)).
 
