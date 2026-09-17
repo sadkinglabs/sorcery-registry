@@ -7,6 +7,10 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.audit_http import opened  # noqa: E402
 
 BASE = "https://api.kairosarchive.net"
 UA = "sorcery-registry-audit/1.0 (+https://kairosarchive.net)"
@@ -24,7 +28,7 @@ def raw(url, headers=None, method="GET", follow=True):
                 return None
         opener = urllib.request.build_opener(NoRedirect)
     try:
-        with opener.open(req, timeout=60) as r:
+        with opened(opener, req, identified="User-Agent" in h) as r:
             return r.status, r.headers, r.read()
     except urllib.error.HTTPError as e:
         return e.code, e.headers, e.read()
@@ -40,7 +44,11 @@ def note(cid, what, evidence):
     print(f"NOTE  {cid:7} {what}\n        {str(evidence)[:300]}")
 
 
-versions = json.loads(raw(f"{BASE}/versions.json")[2])
+status, _, body = raw(f"{BASE}/versions.json")
+if status != 200:
+    print(f"FAIL  K0     versions.json could not be read: HTTP {status}\n        {body[:200]!r}")
+    sys.exit(1)
+versions = json.loads(body)
 tag = versions["latest"]["v3"]
 root = f"{BASE}/{tag}"
 

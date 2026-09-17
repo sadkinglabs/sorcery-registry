@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from registry.versions import add_release, latest_tag, parse_tag, render
+from registry.versions import add_release, latest_tag, parse_tag, read_previous, render, validate
 
 BASE = "https://api.kairosarchive.net"
 
@@ -82,19 +82,81 @@ class VersionsTest(unittest.TestCase):
             first = json.loads(out.read_text())
             self.assertEqual(first["base_url"], BASE)
             self.assertEqual(first["releases"][0]["schema_version"], 9)
-            # Second run reads the first document back; the empty-file case
-            # (a fresh bucket answers nothing) is treated as "no previous".
+            # Second run reads the first document back.
             run("--add", "v3.2.0", "--sha256", "b" * 64, "--previous", str(out),
                 "--released-at", "2026-11-01")
             second = json.loads(out.read_text())
             self.assertEqual(second["latest"], {"v3": "v3.2.0"})
             self.assertEqual(len(second["releases"]), 2)
             self.assertEqual(out.read_text(), render(second))
+            # An empty previous file is no longer "no previous": the workflow
+            # says so by omitting --previous, and an empty file is refused.
             empty = Path(tmp) / "empty.json"
             empty.write_text("")
-            run("--add", "v3.0.0", "--sha256", "c" * 64, "--previous", str(empty),
-                "--base-url", BASE)
-            self.assertEqual(json.loads(out.read_text())["latest"], {"v3": "v3.0.0"})
+            with self.assertRaises(subprocess.CalledProcessError):
+                run("--add", "v3.0.0", "--sha256", "c" * 64, "--previous", str(empty), "--base-url", BASE)
+            self.assertEqual(json.loads(out.read_text())["latest"], {"v3": "v3.2.0"})
+
+
+
+
+class ReadingThePreviousDocumentTest(unittest.TestCase):
+    """The release workflow used to turn a failed download into an empty
+    file, which the generator took for "no releases yet": a rerun of an
+    old tag would then have listed only that tag and moved latest back.
+    The generator now refuses anything but a well-formed document; the
+    workflow decides explicitly when there is none (fetch_versions.sh)."""
+
+    def write(self, text):
+        path = Path(tempfile.mkdtemp()) / "previous.json"
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    def test_a_missing_empty_or_malformed_previous_is_refused(self):
+        with self.assertRaisesRegex(ValueError, "no such file"):
+            read_previous(Path(tempfile.mkdtemp()) / "nope.json")
+        with self.assertRaisesRegex(ValueError, "empty"):
+            read_previous(self.write(""))
+        with self.assertRaisesRegex(ValueError, "not JSON"):
+            read_previous(self.write("<html>blocked</html>"))
+        with self.assertRaisesRegex(ValueError, "base_url"):
+            read_previous(self.write("{}"))
+
+    def test_a_document_with_the_right_shape_is_accepted_and_shapes_are_checked(self):
+        good = add(add(None, "v3.3.2"), "v3.3.3", sha="b" * 64)
+        self.assertEqual(read_previous(self.write(render(good))), good)
+        self.assertEqual(validate(good), good)
+        broken = dict(good, latest={"v3": "v3.3.2"})           # latest not the newest listed
+        self.assertEqual(validate(broken), broken)             # allowed: forward-only is add_release's job
+        with self.assertRaisesRegex(ValueError, "not a listed release"):
+            validate(dict(good, latest={"v3": "v9.9.9"}))
+        with self.assertRaisesRegex(ValueError, "digest"):
+            validate(dict(good, releases=[{"tag": "v3.3.3"}]))
+
+    def test_rerunning_an_old_tag_against_the_real_previous_keeps_latest(self):
+        # The failure mode the workflow change closes, at the generator level.
+        previous = add(add(None, "v3.3.2"), "v3.3.3", sha="b" * 64)
+        rerun = add(previous, "v3.3.2")
+        self.assertEqual(latest_tag(rerun, "v3"), "v3.3.3")
+        self.assertEqual([r["tag"] for r in rerun["releases"]], ["v3.3.3", "v3.3.2"])
+        # ...whereas treating the document as absent forgets v3.3.3.
+        fresh = add(None, "v3.3.2")
+        self.assertEqual(latest_tag(fresh, "v3"), "v3.3.2")
+
+    def test_cli_validate_and_previous_exit_nonzero_on_a_bad_file(self):
+        bad = self.write("")
+        r = subprocess.run([sys.executable, "-m", "registry.versions", "--validate", str(bad)],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("empty", r.stderr)
+        r = subprocess.run([sys.executable, "-m", "registry.versions", "--add", "v3.3.2", "--sha256", "a" * 64,
+                            "--schema-version", "9", "--base-url", BASE, "--previous", str(bad)],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)
+        good = self.write(render(add(None, "v3.3.3")))
+        r = subprocess.run([sys.executable, "-m", "registry.versions", "--validate", str(good)],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
 
 
 if __name__ == "__main__":

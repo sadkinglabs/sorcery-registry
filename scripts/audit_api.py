@@ -16,6 +16,7 @@ from pathlib import Path
 # Run as `python scripts/audit_api.py` from the repository root: sys.path[0] is
 # scripts/, so the repository's own package needs adding by hand.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.audit_http import NOTES as HTTP_NOTES, opened  # noqa: E402
 
 BASE = "https://api.kairosarchive.net"
 UA = "sorcery-registry-audit/1.0 (+https://kairosarchive.net)"
@@ -36,7 +37,7 @@ def get(url, headers=None, method="GET", follow=True):
         opener = urllib.request.build_opener(NoRedirect)
     start = time.time()
     try:
-        with opener.open(request, timeout=60) as r:
+        with opened(opener, request, identified="User-Agent" in h) as r:
             body = r.read()
             elapsed = time.time() - start
             TIMINGS.append((url, elapsed, len(body)))

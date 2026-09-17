@@ -32,6 +32,7 @@ import argparse
 import datetime
 import json
 import re
+import sys
 from pathlib import Path
 
 TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
@@ -86,6 +87,47 @@ def add_release(previous, tag, schema_version, released_at, sha256, base_url=Non
     return doc
 
 
+def validate(doc):
+    """Raise ValueError unless `doc` has the shape of a discovery document:
+    a base_url, a latest map and a releases list whose entries carry a
+    release tag and a digest. Guards the workflow against publishing from
+    a truncated or foreign file."""
+    if not isinstance(doc, dict):
+        raise ValueError("not a JSON object")
+    if not isinstance(doc.get("base_url"), str) or not doc["base_url"]:
+        raise ValueError("base_url missing")
+    if not isinstance(doc.get("latest"), dict) or not isinstance(doc.get("releases"), list):
+        raise ValueError("latest or releases missing")
+    for entry in doc["releases"]:
+        if not isinstance(entry, dict) or not isinstance(entry.get("sha256"), str):
+            raise ValueError("a release entry lacks a digest")
+        parse_tag(entry.get("tag"))
+    for major, tag in doc["latest"].items():
+        if major_of(tag) != major or tag not in {r["tag"] for r in doc["releases"]}:
+            raise ValueError(f"latest.{major} = {tag} is not a listed release of that major")
+    return doc
+
+
+def read_previous(path):
+    """The document at `path`, validated. A missing, empty or malformed
+    file is an error: the workflow decides separately, and explicitly,
+    that there is no previous document (scripts/fetch_versions.sh)."""
+    p = Path(path)
+    if not p.exists():
+        raise ValueError(f"--previous {path}: no such file")
+    text = p.read_text(encoding="utf-8").strip()
+    if not text:
+        raise ValueError(f"--previous {path}: empty file")
+    try:
+        doc = json.loads(text)
+    except json.JSONDecodeError as err:
+        raise ValueError(f"--previous {path}: not JSON ({err})") from None
+    try:
+        return validate(doc)
+    except ValueError as err:
+        raise ValueError(f"--previous {path}: {err}") from None
+
+
 def latest_tag(doc, major):
     """The newest listed release of a major ('v3'), or None."""
     return doc.get("latest", {}).get(major)
@@ -97,8 +139,10 @@ def render(doc):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--add", required=True, metavar="TAG")
-    parser.add_argument("--sha256", required=True, help="digest of the release's registry.json")
+    parser.add_argument("--add", metavar="TAG")
+    parser.add_argument("--validate", metavar="PATH",
+                        help="check that PATH is a discovery document and exit (0 yes, 2 no)")
+    parser.add_argument("--sha256", help="digest of the release's registry.json")
     parser.add_argument("--base-url", help="domain root; required for the first document")
     parser.add_argument("--previous", help="the versions.json currently served (omit on first run)")
     parser.add_argument("--export", default="export/registry.json",
@@ -108,10 +152,23 @@ def main():
     parser.add_argument("--out", help="write here instead of stdout")
     args = parser.parse_args()
 
+    if args.validate:
+        try:
+            read_previous(args.validate)
+        except ValueError as err:
+            print(f"versions: {err}", file=sys.stderr)
+            sys.exit(2)
+        return
+    if not args.add or not args.sha256:
+        parser.error("--add TAG and --sha256 DIGEST are required (or --validate PATH)")
+
     previous = None
     if args.previous:
-        text = Path(args.previous).read_text(encoding="utf-8").strip()
-        previous = json.loads(text) if text else None
+        try:
+            previous = read_previous(args.previous)
+        except ValueError as err:
+            print(f"versions: {err}", file=sys.stderr)
+            sys.exit(2)
     schema_version = args.schema_version
     if schema_version is None:
         header = json.loads(Path(args.export).read_text(encoding="utf-8"))["header"]

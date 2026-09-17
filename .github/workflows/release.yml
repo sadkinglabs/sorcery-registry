@@ -277,10 +277,14 @@ jobs:
       - name: List the release in versions.json
         if: env.R2_BUCKET != ''
         run: |
-          aws s3 cp "s3://$R2_BUCKET/versions.json" "$RUNNER_TEMP/previous.json" > /dev/null 2>&1 \
-            || : > "$RUNNER_TEMP/previous.json"
+          # Read what the domain serves now. A confirmed 404 with nothing
+          # released is the first release; any other failure stops here,
+          # before discovery or the alias could change (see the script).
+          scripts/fetch_versions.sh "$R2_BUCKET" "$TAG" "$RUNNER_TEMP/previous.json"
+          previous=()
+          [ -f "$RUNNER_TEMP/previous.json" ] && previous=(--previous "$RUNNER_TEMP/previous.json")
           python -m registry.versions --add "$TAG" --sha256 "$(cut -d' ' -f1 dist/registry.json.sha256)" \
-            --base-url "$REGISTRY_BASE_URL" --previous "$RUNNER_TEMP/previous.json" --out versions.json
+            --base-url "$REGISTRY_BASE_URL" "${previous[@]}" --out versions.json
           cat versions.json
           aws s3 cp versions.json "s3://$R2_BUCKET/versions.json" \
             --content-type "application/json" --cache-control "public, max-age=60"
