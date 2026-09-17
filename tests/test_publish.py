@@ -118,7 +118,7 @@ class ObjectsTest(unittest.TestCase):
             # concrete instances exist.
             concrete = re.sub(r"\{[a-z_]+\}", "X", pattern)
             self.assertTrue(pattern in self.objects or pattern in ("registry.json",
-                            "registry.json.sha256", "schema.json") or "{" in pattern,
+                            "registry.json.sha256", "schema.json", "types.d.ts") or "{" in pattern,
                             concrete)
 
     def test_objects_say_where_they_and_the_current_data_live(self):

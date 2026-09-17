@@ -8,3 +8,4 @@ dist/
 work/
 review/image-listing.json
 review/image-failures.json
+tests/ts/sample.ts

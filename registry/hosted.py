@@ -223,12 +223,17 @@ def verify_root(base_url, tag, dist):
     card = json.loads((dist / "index" / "cards.json").read_text(encoding="utf-8"))[0]["codex_id"]
     slug = next(iter(json.loads((dist / "index" / "slugs.json").read_text(encoding="utf-8"))))
     for path in (f"cards/{card}.json", f"slugs/{slug}.json", "registry.json.sha256",
-                 "schema.json", "manifest.json", "changes.json"):
+                 "schema.json", "manifest.json", "changes.json", "types.d.ts"):
         status, headers = _status(f"{root}/{path}", method="GET")
+        content_type = headers.get("content-type", "")
         if status != 200:
             problems.append(f"{status} {root}/{path}")
-        elif path.endswith(".json") and "application/json" not in headers.get("content-type", ""):
-            problems.append(f"{root}/{path} served as {headers.get('content-type')!r}")
+        elif path.endswith(".json") and "application/json" not in content_type:
+            problems.append(f"{root}/{path} served as {content_type!r}")
+        elif path.endswith(".ts") and not content_type.startswith("text/"):
+            # By extension alone .ts is MPEG transport stream; the upload
+            # sets the type explicitly, and this is where that is proven.
+            problems.append(f"{root}/{path} served as {content_type!r}, not text")
 
     if problems:
         print("::error::the release root does not serve what was built:")

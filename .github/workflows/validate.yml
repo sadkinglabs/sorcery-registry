@@ -31,6 +31,9 @@ jobs:
       - name: Tests
         run: python -m unittest discover -s tests -v
 
+      - name: The committed TypeScript declarations match the schema
+        run: python -m registry.types --check
+
       - name: The publisher produces the release objects
         run: |
           python -m registry.publish --dataset-version vX.Y.Z --out "$RUNNER_TEMP/dist" \
@@ -64,3 +67,22 @@ jobs:
           else
             python -m registry.validate
           fi
+
+      # The declarations are only worth shipping if the real data satisfies
+      # them: a literal-typed slice of the export is assigned to the
+      # generated types under strict tsc, and two deliberate misuses must
+      # be rejected, so the types are neither too loose nor too tight.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: The export type-checks against types.d.ts
+        run: |
+          python -m registry.types --sample tests/ts/sample.ts
+          npx --yes --package typescript@6 tsc -p tests/ts/tsconfig.json
+          errors=$(npx --yes --package typescript@6 tsc -p tests/ts/tsconfig.bad.json 2>&1 | grep -c "error TS" || true)
+          if [ "$errors" != "2" ]; then
+            echo "::error::expected exactly 2 type errors from tests/ts/bad.ts, got $errors"
+            npx --yes --package typescript@6 tsc -p tests/ts/tsconfig.bad.json || true
+            exit 1
+          fi
+          echo "types.d.ts: sample satisfies the declarations; both misuses rejected"

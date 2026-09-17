@@ -27,6 +27,7 @@ Layout (every path relative to the version root the uploader chooses):
     manifest.json               the release manifest, when --manifest is given
     registry.json               the full export, byte for byte, + .sha256
     schema.json                 the export's JSON Schema
+    types.d.ts                  TypeScript declarations generated from it
     cards/{codex_id}.json       the card, its printings (summaries), its history
     printings/{printing_id}.json  the printing and its slug history
     slugs/{slug}.json           any slug that has ever existed -> its ids
@@ -47,6 +48,7 @@ from pathlib import Path
 from . import TERMS_URL
 from .changes import diff_exports
 from .export import EXPORT_PATH, SCHEMA_PATH, checksum_path
+from .types import render_types
 
 DIST_PATH = Path("dist")
 
@@ -68,6 +70,7 @@ ENDPOINTS = {
     "checksum": "registry.json.sha256",
     "changes": "changes.json",
     "schema": "schema.json",
+    "types": "types.d.ts",
     "card": "cards/{codex_id}.json",
     "printing": "printings/{printing_id}.json",
     "slug": "slugs/{slug}.json",
@@ -251,11 +254,14 @@ def write_dist(export_path=EXPORT_PATH, schema_path=SCHEMA_PATH, out=DIST_PATH,
     # holds for the served file too.
     (out / ENDPOINTS["export"]).write_bytes(export_bytes)
     (out / ENDPOINTS["checksum"]).write_bytes(checksum_path(export_path).read_bytes())
-    (out / ENDPOINTS["schema"]).write_bytes(schema_path.read_bytes())
+    schema_bytes = schema_path.read_bytes()
+    (out / ENDPOINTS["schema"]).write_bytes(schema_bytes)
+    (out / ENDPOINTS["types"]).write_text(render_types(json.loads(schema_bytes.decode("utf-8"))),
+                                          encoding="utf-8", newline="\n")
     if manifest_path is None:
-        return len(objects) + 3
+        return len(objects) + 4
     (out / "manifest.json").write_bytes(manifest_path.read_bytes())
-    return len(objects) + 4
+    return len(objects) + 5
 
 
 def main():
