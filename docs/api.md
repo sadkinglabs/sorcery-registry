@@ -79,6 +79,10 @@ The same file is committed as [`schema/registry.d.ts`](../schema/registry.d.ts);
 
 A slug object exists for every slug in `slug_history`, current or superseded. That is the migration path as a URL: a tool holding a pre-rename slug fetches `slugs/{old}.json` and receives the permanent ids and the current slug. A 404 here means the slug never existed in the registry under any naming convention.
 
+## Query API
+
+One part of the API computes: `GET https://api.kairosarchive.net/cards?q=…` runs the site's search syntax ([kairosarchive.net/syntax](https://kairosarchive.net/syntax)) over the same compact records the search page uses and returns a page of card records as JSON, with `unique:`, `sort:` and `order:` honoured and `page` / `page_size` (up to 200) for paging. `/cards/named?exact=…` (or `fuzzy=…`), `/cards/random?q=…` and `/cards/autocomplete?q=…` answer the three questions a bot asks most; `/cards/C000230` redirects to the static object. Every answer is JSON with an `object` field (`list`, `card`, `catalog` or `error`), allows any origin, and names the `release` it came from; a query the parser cannot read is a `400` with the parser's messages, an empty result a `200`, an unknown path a JSON `404`. The Worker lives in the site repository beside the grammar and reads the site's `/data/query/` payloads, so an answer and the search page agree to the card. Full reference: [kairosarchive.net/docs/query](https://kairosarchive.net/docs/query). For anything heavier than a lookup, fetch `registry.json` and query locally.
+
 ## When something goes wrong
 
 **Read the status, not the body.** The status codes below are exact and are
