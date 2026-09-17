@@ -31,13 +31,14 @@ This page says nothing about commercial use of Erik's Curiosa's content, either 
 
 ## What we count
 
-To know what the archive is used for, three things are counted, and nothing else.
+To know what the archive is used for, four things are counted, and nothing else.
 
 - **Page views and referrers** on the site, through Cloudflare Web Analytics, which sets no cookie and keeps no identifier.
 - **Clicks on links that leave the site:** the host they go to and the page they were on.
+- **Searches,** on the site and through the query API: the words typed and how many results they found, so that what people look for and fail to find shapes what the archive does next.
 - **Requests to the query API and the Discord bot:** the route or command, how it ended, the client's software as a family name ("firefox", "curl", "kairos-bot"), the country, the keys a query used, and the time taken.
 
-Not stored: addresses, user ids, query text, message text, or the full `User-Agent`. The bot counts distinct servers through a keyed hash that cannot be turned back into a server id. When a card's name misses, the text that missed is kept, because that is how the matching improves. The counts live in Cloudflare's Analytics Engine and are read only by the archive's owner.
+Not stored: addresses, user ids, message text, or the full `User-Agent`; a search is never tied to who typed it. The bot counts distinct servers through a keyed hash that cannot be turned back into a server id. When a card's name misses in the bot, the text that missed is kept, because that is how the matching improves. Requests to the data itself, on the API host, are read from Cloudflare's sampled request analytics: paths, client software, referers and countries, no addresses. The counts live in Cloudflare's Analytics Engine and are read only by the archive's owner.
 
 ## Links to sellers
 
