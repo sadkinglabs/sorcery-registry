@@ -220,12 +220,16 @@ jobs:
           aws configure set default.s3.max_concurrent_requests 64
           aws configure set default.s3.max_queue_size 10000
           # JSON objects get their content type from the extension; the
-          # checksum file is text.
+          # checksum file is text, and so is types.d.ts, which by extension
+          # alone would be guessed as video/mp2t (MPEG transport stream).
           aws s3 sync dist "s3://$R2_BUCKET/$TAG/" --no-progress --size-only \
-            --exclude "registry.json.sha256" \
+            --exclude "registry.json.sha256" --exclude "types.d.ts" \
             --cache-control "public, max-age=31536000, immutable" | tail -n 3
           aws s3 cp dist/registry.json.sha256 "s3://$R2_BUCKET/$TAG/registry.json.sha256" \
             --content-type "text/plain; charset=utf-8" \
+            --cache-control "public, max-age=31536000, immutable"
+          aws s3 cp dist/types.d.ts "s3://$R2_BUCKET/$TAG/types.d.ts" \
+            --content-type "text/typescript; charset=utf-8" \
             --cache-control "public, max-age=31536000, immutable"
           # CORS is a bucket setting, which an Object Read & Write token may
           # not change; the release does not depend on it, so a refusal is a

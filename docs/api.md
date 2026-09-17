@@ -33,6 +33,39 @@ Every card, printing and set record - in the export and in the per-object files 
 - `registry.json` - the full export, byte for byte the committed file, so its checksum holds for the served copy (~6.4 MB, ~380 KB over the wire: the edge serves it Brotli-compressed to any client that asks).
 - `registry.json.sha256` - `sha256sum` format. Poll this (~80 bytes) to learn whether the export changed.
 - `schema.json` - the export's JSON Schema (draft 2020-12).
+- `types.d.ts` - TypeScript declarations generated from that schema (see below).
+
+## Typed records for TypeScript
+
+Every release root carries `types.d.ts`, generated from `schema.json` at release time, so a TypeScript project gets typed records with one import and nothing to install. Every field carries the schema's description as JSDoc, and a field added to the schema appears in the types on the next release.
+
+```sh
+curl --fail --location -O 'https://api.kairosarchive.net/v3/types.d.ts'
+curl --fail --location -O 'https://api.kairosarchive.net/v3/registry.json'
+```
+
+```ts
+// registry.ts - next to the two files above
+import { readFile } from "node:fs/promises";
+import type { Registry, Card } from "./types";
+
+const registry: Registry = JSON.parse(await readFile("registry.json", "utf8"));
+const bears: Card | undefined = registry.cards.find((c) => c.name === "Polar Bears");
+console.log(bears?.codex_id, bears?.power);
+```
+
+Run it with Node 22.18 or newer, which strips the types itself: `node registry.ts`. To type-check it, install the compiler and Node's own type definitions once (`npm i -D typescript @types/node`; the registry's types need nothing, these two are for `tsc` and for `node:fs`), then `npx tsc --strict --noEmit --target es2022 --module esnext --moduleResolution bundler --types node registry.ts`. In a browser or a Worker the same declarations apply to a fetch and need no Node types at all:
+
+```ts
+import type { Registry } from "./types";
+const registry = await (await fetch("https://api.kairosarchive.net/v3/registry.json")).json() as Registry;
+```
+
+(type-check that one with `--lib es2022,dom` instead of `--types node`).
+
+What the file declares: `Registry` (the whole export) and one interface per record, `Card`, `Printing`, `RegistrySet` (not `Set`, which would shadow the built-in), `CardHistoryRow`, `NameHistoryRow`, `SlugHistoryRow` and `Header`; the shared shapes `Face` (the gameplay fields; `Card` and `CardHistoryRow` extend it, so a function that takes a `Face` accepts either), `PrintingFace` and `ImageUrls`; and the aliases `CodexId`, `PrintingId`, `SetCode`, `IsoDate`, `Threshold` and `ImageStatus` (`"missing" | "lowres" | "ok"`). Nothing is optional and no record has an index signature, because the schema lists every field and allows no others. The declarations are only a description: `JSON.parse` does not validate, so a file that is not a registry export is not caught here; validate against `schema.json` for that.
+
+The same file is committed as [`schema/registry.d.ts`](../schema/registry.d.ts); CI fails if it drifts from the schema, and type-checks a slice of the real export against it under strict `tsc`, so the types are proven neither too loose nor too tight before a release.
 
 ## One object per thing
 

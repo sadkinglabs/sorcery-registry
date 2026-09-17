@@ -108,7 +108,7 @@ No keys, no signup. Two courtesies are required of automated clients: send a `Us
 }
 ```
 
-The file's exact shape is formally described by [`schema/registry.schema.json`](schema/registry.schema.json) (JSON Schema, draft 2020-12) - CI validates every commit's export against it. Built on a v1.x export? [`docs/migrating-to-v2.md`](docs/migrating-to-v2.md) maps every field that changed in v2.0. A [`registry.json.sha256`](export/registry.json.sha256) checksum sits next to the export for integrity checks and cheap freshness polling (fetch the ~80 byte checksum; re-download only when it changed).
+The file's exact shape is formally described by [`schema/registry.schema.json`](schema/registry.schema.json) (JSON Schema, draft 2020-12) - CI validates every commit's export against it - and, for TypeScript, by [`schema/registry.d.ts`](schema/registry.d.ts), generated from the schema and served as `types.d.ts` at every release root (`import type { Registry, Card } from "./types"`; see [`docs/api.md`](docs/api.md#typed-records-for-typescript)). Built on a v1.x export? [`docs/migrating-to-v2.md`](docs/migrating-to-v2.md) maps every field that changed in v2.0. A [`registry.json.sha256`](export/registry.json.sha256) checksum sits next to the export for integrity checks and cheap freshness polling (fetch the ~80 byte checksum; re-download only when it changed).
 
 Practical notes:
 

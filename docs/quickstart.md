@@ -68,6 +68,7 @@ major alias (`/v3/`) - both serve the same shapes.
 | `registry.json` | the full export - everything in one file |
 | `registry.json.sha256` | that export's checksum, for freshness polling |
 | `schema.json` | the export's JSON Schema (draft 2020-12) |
+| `types.d.ts` | TypeScript declarations generated from that schema: `import type { Registry, Card } from "./types"` |
 | `changes.json` | what this release changed against the previous one: counts, the ids behind them, and `identifiers_removed`, always 0 within a major |
 | `cards/{codex_id}.json` | one card, plus its `printings` summary, `name_history` and `card_history` |
 | `printings/{printing_id}.json` | one physical print, plus its `slug_history` |
@@ -203,3 +204,24 @@ if (card.image_urls) {
   document.body.appendChild(img);
 }
 ```
+
+## Example: TypeScript
+
+Every release root carries `types.d.ts`, generated from `schema.json`, so typed records need one import and no package:
+
+```sh
+curl --fail --location -O 'https://api.kairosarchive.net/v3/types.d.ts'
+curl --fail --location -O 'https://api.kairosarchive.net/v3/registry.json'
+```
+
+```ts
+// registry.ts - next to the two files above
+import { readFile } from "node:fs/promises";
+import type { Registry, Card } from "./types";
+
+const registry: Registry = JSON.parse(await readFile("registry.json", "utf8"));
+const bears: Card | undefined = registry.cards.find((c) => c.name === "Polar Bears");
+console.log(bears?.codex_id, bears?.power);
+```
+
+`node registry.ts` runs it on Node 22.18 or newer, which strips the types itself. `Card` and `CardHistoryRow` extend `Face`, the gameplay fields, so one function can read either; `RegistrySet` is the set record (not `Set`, which is a built-in). See the [API documentation](api.md#typed-records-for-typescript) for the full list of names.
