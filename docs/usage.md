@@ -29,6 +29,16 @@ This page says nothing about commercial use of Erik's Curiosa's content, either 
 - **Availability is best effort.** The domain is a CDN in front of object storage and has no maintenance windows, but it has no SLA either. Every release is mirrored on GitHub as a tagged release (`raw.githubusercontent.com/sadkinglabs/sorcery-registry/<tag>/export/registry.json`), and the registry's own guarantee - identifiers never change - means a copy you hold is never wrong, only older.
 - **Rate limit:** 30 requests per 10 seconds per address on JSON objects, at the edge; a `429` clears after 10 seconds. Images are not limited. It is a tripwire against per-object crawling, not a quota: a client that fetches `registry.json` or the indexes never meets it, and one that looks up a card at a time never meets it either. What does meet it is resolving a whole deck by fetching each card's object in parallel from one server - fetch the index instead, it is one request. If you were blocked and believe you should not have been, open an issue with your `User-Agent` and the time.
 
+## What we count
+
+To know what the archive is used for, three things are counted, and nothing else.
+
+- **Page views and referrers** on the site, through Cloudflare Web Analytics, which sets no cookie and keeps no identifier.
+- **Clicks on links that leave the site:** the host they go to and the page they were on.
+- **Requests to the query API and the Discord bot:** the route or command, how it ended, the client's software as a family name ("firefox", "curl", "kairos-bot"), the country, the keys a query used, and the time taken.
+
+Not stored: addresses, user ids, query text, message text, or the full `User-Agent`. The bot counts distinct servers through a keyed hash that cannot be turned back into a server id. When a card's name misses, the text that missed is kept, because that is how the matching improves. The counts live in Cloudflare's Analytics Engine and are read only by the archive's owner.
+
 ## Links to sellers
 
 Kairos Archive may link card printings to third-party sellers, including through affiliate programmes; such links are ordinary outbound links, disclosed on the site, and the registry data never carries seller information.
