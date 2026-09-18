@@ -136,12 +136,12 @@ def _request(url, method="GET", data=None, headers=None, timeout=30, follow_redi
     return opener.open(request, timeout=timeout)
 
 
-def _status(url, method="HEAD", follow_redirects=True):
+def _status(url, method="HEAD", follow_redirects=True, headers=None):
     """(status, headers) with header names lower-cased: servers differ in
     case (Content-Type, content-type) and the checks must not. With
     follow_redirects=False a 3xx is returned as such, Location included."""
     try:
-        with _request(url, method, follow_redirects=follow_redirects) as response:
+        with _request(url, method, headers=headers, follow_redirects=follow_redirects) as response:
             return response.status, {k.lower(): v for k, v in response.headers.items()}
     except urllib.error.HTTPError as error:
         return error.code, {k.lower(): v for k, v in error.headers.items()}

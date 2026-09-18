@@ -915,7 +915,9 @@ def verify_objects(objects, status=None, workers=VERIFY_WORKERS, per_second=VERI
     from concurrent.futures import ThreadPoolExecutor
     if status is None:
         from .hosted import _status
-        status = _status
+        # Attribute scheduled image verification separately from releases.
+        def status(url):
+            return _status(url, headers={"User-Agent": USER_AGENT})
     pacer = Pacer(per_second, clock=clock, sleep=sleep)
 
     def check(item):
