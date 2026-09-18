@@ -37,7 +37,7 @@ To know what the archive is used for, three things are counted, and nothing else
 - **Clicks on links that leave the site:** the host they go to and the page they were on.
 - **Requests to the query API, searches on the site, and the Discord bot:** the route or command, how it ended, the client's software as a family name ("firefox", "curl", "kairos-bot"), the country, the keys a query used (`t e is:errata`, never its words), how many results it found, and the time taken.
 
-Not stored: addresses, user ids, query text, message text, or the full `User-Agent`. The bot counts distinct servers through a keyed hash that cannot be turned back into a server id. When a card's name misses in the bot, the text that missed is kept, because that is how the matching improves. Requests to the data itself, on the API host, are read from Cloudflare's sampled request analytics: paths, client software, referers and countries, no addresses. The counts live in Cloudflare's Analytics Engine and are read only by the archive's owner.
+Not stored: addresses, user ids, query text, message text, or the full `User-Agent`. The bot counts distinct servers through a keyed hash that cannot be turned back into a server id. When a card's name misses in the bot, the text that missed is kept, because that is how the matching improves. Requests to the data itself, on the API host, are read from Cloudflare's sampled request analytics: paths, client software and countries, no addresses. The counts live in Cloudflare's Analytics Engine and are read only by the archive's owner.
 
 ## Links to sellers
 
