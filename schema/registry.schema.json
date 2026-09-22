@@ -259,6 +259,32 @@
         "ok"
       ],
       "description": "missing: the registry holds no image for this face (image_urls null). lowres: held and served in every rendition, but the publisher's file was too small for the large rendition and was upscaled (the early sets ship at 380x531). ok: held at full size."
+    },
+    "note": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The fact, in plain words."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Where the fact came from: a document, a product, a community report. Names a place, not a person, unless that person asked to be credited."
+        },
+        "recorded": {
+          "$ref": "#/$defs/date",
+          "description": "The day the note was written down, not the day the fact became true."
+        }
+      },
+      "required": [
+        "text",
+        "source",
+        "recorded"
+      ],
+      "additionalProperties": false,
+      "description": "Something known about a record that the official API does not say, with where it came from. A note never contradicts a field: a fact that fits a field is a correction and changes the field instead."
     }
   },
   "type": "object",
@@ -298,6 +324,10 @@
         "card_history": {
           "type": "integer",
           "description": "How many rows the card_history section holds."
+        },
+        "gaps": {
+          "type": "integer",
+          "description": "How many entries the gaps section holds."
         }
       },
       "required": [
@@ -308,7 +338,8 @@
         "printings",
         "slug_history",
         "name_history",
-        "card_history"
+        "card_history",
+        "gaps"
       ],
       "additionalProperties": false,
       "description": "Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a byte-identical file."
@@ -570,6 +601,13 @@
           "image_status": {
             "$ref": "#/$defs/imageStatus",
             "description": "Derived: the default printing's image_status."
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/note"
+            },
+            "description": "What the registry knows about this card that the official API does not say, oldest first. Empty for most records."
           }
         },
         "required": [
@@ -601,7 +639,8 @@
           "api_url",
           "kairos_url",
           "image_urls",
-          "image_status"
+          "image_status",
+          "notes"
         ],
         "additionalProperties": false,
         "description": "One record per card as a game piece; reprints share one record."
@@ -756,6 +795,13 @@
           "image_status": {
             "$ref": "#/$defs/imageStatus",
             "description": "How good the source of the front image was: missing, lowres or ok."
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/note"
+            },
+            "description": "What the registry knows about this printing that the official API does not say, oldest first. Empty for most records."
           }
         },
         "required": [
@@ -779,7 +825,8 @@
           "api_url",
           "kairos_url",
           "image_urls",
-          "image_status"
+          "image_status",
+          "notes"
         ],
         "additionalProperties": false,
         "description": "One record per physical print: a specific set, product and finish. Gameplay data is on the card it points at."
@@ -1046,6 +1093,53 @@
         "additionalProperties": false,
         "description": "Every state a card's gameplay face has been in, as observed by syncs: the face's fields flattened into the row. valid_to null = the current face, which equals the card record. A closed row is how the card played until valid_to; a printing released within a row's dates was printed with that row's values. Seeded with every card's face on 2026-09-09."
       }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The card's name as far as it is known."
+          },
+          "codex_id": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/codexId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The card a missing printing belongs to, or null when the card itself is not recorded."
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What is missing, in plain words."
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Where the report came from. Names a place, not a person."
+          },
+          "recorded": {
+            "$ref": "#/$defs/date",
+            "description": "The day the gap was written down."
+          }
+        },
+        "required": [
+          "name",
+          "codex_id",
+          "text",
+          "source",
+          "recorded"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Cards and printings known to exist that the registry does not record, usually because the official API does not serve them. An entry is removed once what it describes has a record. A gap has no id: it is a pointer to go and look, not a record."
     }
   },
   "required": [
@@ -1055,7 +1149,8 @@
     "printings",
     "slug_history",
     "name_history",
-    "card_history"
+    "card_history",
+    "gaps"
   ],
   "additionalProperties": false
 }

@@ -46,7 +46,7 @@ There is also [`mcp_server.py`](mcp_server.py), a read-only MCP server over the 
 
 **The upstream contract.** Their page also publishes the response type, `CardAPIDTO`; it is checked in verbatim as [`schema/upstream-cards.dto.ts`](schema/upstream-cards.dto.ts) so a diff of their page is a diff of ours, and [`schema/upstream-cards.schema.json`](schema/upstream-cards.schema.json) is our machine-checked reading of it: structure and types only, every vocabulary left open. `build_snapshot` checks every payload against it before reading a field (`registry/contract.py`, stdlib-only) and stops with the path of the first field that no longer fits - a missing `engine.rules`, a `set` that became a string - rather than flattening a changed shape into wrong data; a new field or a new product spelling passes through as data. When their page changes, update both files in one PR and let the tests say what the adapter must do about it.
 
-The registry mirrors the shape the official API serves today: its field names (`set_code`, `defense`, `typeline`, `BoxTopper`), its list fields in its order, and its split between gameplay data on the card and physical facts on the printing. When upstream changes shape again, the adapter in `registry/fetch.py` is the one place that knows the upstream layout; everything downstream works from the snapshot it builds. A schema bump that restructures the database ships with a migration script (see `registry/migrate_v8.py`) that rebuilds the file from the new DDL and proves every id survived; a bump that only adds derived export fields ships a script that just records the new version (`registry/migrate_v11.py`), because the validator insists the database and the code agree on it. The previous bump's script is removed once it has run, since it can never run again.
+The registry mirrors the shape the official API serves today: its field names (`set_code`, `defense`, `typeline`, `BoxTopper`), its list fields in its order, and its split between gameplay data on the card and physical facts on the printing. When upstream changes shape again, the adapter in `registry/fetch.py` is the one place that knows the upstream layout; everything downstream works from the snapshot it builds. A schema bump that restructures the database ships with a migration script (see `registry/migrate_v8.py`) that rebuilds the file from the new DDL and proves every id survived; a bump that only adds derived export fields ships a script that just records the new version (`registry/migrate_v12.py`), because the validator insists the database and the code agree on it. The previous bump's script is removed once it has run, since it can never run again.
 
 A sync PR should contain: the updated `registry.sqlite`, the regenerated `export/registry.json`, and nothing hand-written except (when relevant) override or decision files. Run `python -m registry.validate --against origin/main` before pushing; CI runs the same check.
 
@@ -60,7 +60,7 @@ When a new set drops, this is the whole flow. Existing IDs never change; a set r
 4. Watch the override notes: if upstream fixed an error we correct in `data/overrides.json`, the sync reports the entry as matching nothing - delete it in this same PR.
 5. Apply against the exact reviewed bytes: `python -m registry.sync --from-file review/upstream-snapshot.json`.
 6. `python -m registry.validate --against origin/main`, then push and open the PR. CI re-proves everything, including that every pre-existing ID survived.
-7. After merge: tag a data release. Bump the minor version for data (a new set, corrections); bump the major version when the export's shape changes (a `schema_version` bump). Write the release notes as the tag message and push the tag:
+7. After merge: tag a data release. Bump the minor version for data (a new set, corrections) and for additive shape changes: a `schema_version` bump that only adds fields or sections is a minor release, as v3.1 through v3.4 were. Bump the major version only for a breaking change, one that removes or renames a field or changes what a value means. Write the release notes as the tag message and push the tag:
 
    ```bash
    git tag -a vX.Y.0 -m "<what changed, for consumers>"
@@ -164,6 +164,22 @@ Each entry answers one pending question: *this* vanished printing is now *that* 
 
 Include the pending file, your decisions and your reasoning in the PR so reviewers can check the pairing.
 
+## Notes and the gap register
+
+Some things the registry knows have no field and no place in the official API: that a promo was prize support in a particular store kit, or that a card was printed and never served. Two hand-kept files hold them, and both are read at export time, never stored in the database.
+
+- **[`data/notes.json`](data/notes.json)** attaches notes to cards (`cards`, keyed by `codex_id`) and printings (`printings`, keyed by `printing_id`). Each note is `{"text", "source", "recorded"}`: one fact in plain words, where it came from, and the day you wrote it down.
+- **[`data/gaps.json`](data/gaps.json)** lists what is known to exist but is not recorded. Each gap is `{"name", "codex_id", "text", "source", "recorded"}`, where `codex_id` is the card a missing printing belongs to, or `null` when the card itself is unrecorded. When the thing a gap describes gets a record, delete the gap in the same PR; the release diff reports it as closed.
+
+Rules for both:
+
+- **Sources name a place, never a person.** Write "Community report, Sorcery Discord", "TCGplayer product catalogue, from its published sitemap" or "Arthurian Legends store kit insert, photographed". Every release is immutable, so a name written into one stays in it for good. Credit a person by name only if they have asked to be credited.
+- **One fact per note.** Say how sure it is in the text: "reportedly", "community reports disagree". A listing or a single report is a reason to go and look, not a record.
+- **A note never contradicts a field.** A fact that fits a field, such as an artist, a date or a finish, is a correction. Make it in [`data/overrides.json`](data/overrides.json), where it changes the field and carries a reason.
+- **Adding a note is a data release.** Run `python -m registry.export` and commit the regenerated export with the note. `changes.json` reports notes and gaps in sections of their own, never as a change to the record.
+
+Both files are shape-checked on load, so a typo is an error rather than a silently dropped note. The validator checks that every note sits on a record that exists, that a gap with a `codex_id` names that card by its current name, and that a gap without one does not name a card the registry already holds.
+
 ## What runs in CI
 
 Every push and PR: the test suite, then `registry.validate`, which checks that
@@ -172,6 +188,7 @@ Every push and PR: the test suite, then `registry.validate`, which checks that
 - no ID exceeds its allocation counter (nothing bypassed ID assignment),
 - every printing's slug agrees with its open `slug_history` row, and every card's name and rules text agree with their open history rows,
 - the committed JSON is byte-identical to what the committed database generates, and every record's addresses name the record they sit on,
+- every note sits on a card or printing that exists, and every gap agrees with the card it names,
 - and against the base branch: every ID that existed before still exists, printings still point at the same card, counters never decreased, and every slug change is explained by `slug_history`.
 
 If any of those fail, the PR does not merge. There is deliberately no way to "fix up" a violation in place; revert and redo the change through the pipeline.

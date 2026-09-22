@@ -75,7 +75,7 @@ No keys, no signup. Two courtesies are required of automated clients: send a `Us
 
 ```jsonc
 {
-  "header":        { "schema_version": 10, "source": "...", "sets": 6, "cards": 1100, ... },
+  "header":        { "schema_version": 12, "source": "...", "sets": 6, "cards": 1100, ... },
   "sets":          [ { "set_code": "001", "set_name": "Alpha", "released_at": "2023-06-22",
                        "cards": 407, "printings": 817,
                        "api_url": "https://api.kairosarchive.net/v3/sets/001.json",
@@ -91,7 +91,7 @@ No keys, no signup. Two courtesies are required of automated clients: send a `Us
                        "default_printing_id": "P000002",
                        "api_url": "https://api.kairosarchive.net/v3/cards/C000001.json",
                        "kairos_url": "https://kairosarchive.net/cards/C000001",
-                       "image_urls": null, "image_status": "missing" } ],
+                       "image_urls": null, "image_status": "missing", "notes": [] } ],
   "printings":     [ { "printing_id": "P000001", "codex_id": "C000001", "card_name": "Apprentice Wizard",
                        "set_name": "Alpha", "set_code": "001", "released_at": "2023-06-22",
                        "product": "Booster", "finish": "Standard", "slug": "001-apprentice_wizard-b-s",
@@ -100,11 +100,13 @@ No keys, no signup. Two courtesies are required of automated clients: send a `Us
                        "printed_as_current": true, "retired_at": null,
                        "api_url": "https://api.kairosarchive.net/v3/printings/P000001.json",
                        "kairos_url": "https://kairosarchive.net/printings/P000001",
-                       "image_urls": null, "image_status": "missing" } ],
+                       "image_urls": null, "image_status": "missing", "notes": [] } ],
   "slug_history":  [ { "slug": "...", "printing_id": "P000001", "valid_from": "2026-08-19", "valid_to": null } ],
   "name_history":  [ { "name": "...", "codex_id": "C000001", "valid_from": "2026-08-19", "valid_to": null } ],
   "card_history":  [ { "codex_id": "C000001", "valid_from": "2026-09-09", "valid_to": null,
-                       "type": "Minion", ..., "cost": 3, "attack": 1, ..., "rules_text": "...", "back": null } ]
+                       "type": "Minion", ..., "cost": 3, "attack": 1, ..., "rules_text": "...", "back": null } ],
+  "gaps":          [ { "name": "The Champion", "codex_id": null, "text": "...",
+                       "source": "Community reports, Sorcery Discord", "recorded": "2026-09-22" } ]
 }
 ```
 
@@ -123,6 +125,7 @@ Practical notes:
 - **`card_history` and `errata` are the registry's own record of updated cards.** Upstream publishes only the current values and marks nothing (the old API prefixed updated text with `UPDATED:`; the rebuilt one does not). So the registry records what it observes: `card_history` holds every state a card's gameplay face has been in - type, elements, cost, attack, defense, life, thresholds, rules text, keywords, back face - one row per state with `valid_from`/`valid_to`. A reprint that changes a card's cost or power is recorded exactly like a rewording: the old face closes, the new face opens. Every card has exactly one open row, which equals the card record. `errata` is `true` once any *gameplay* field has changed since the card was printed (a re-tag of keywords, subtypes, rarity or slot is history but not errata) - seeded from the old marker, set by observed changes, corrected only through [`data/overrides.json`](data/overrides.json). Each row says where its face came from: `source` is `api` for a face the registry observed upstream, and `card` for one transcribed from the printed card - the 28 cards the publisher changed after printing, whose earlier text the API never served. Those transcriptions live in [`data/errata.json`](data/errata.json) with the printing each was read from, and CI checks they agree with the history and the release dates.
 - **Which printings show the current values?** Each printing carries `printed_as_current`: `true` when it was released on or after the current face took effect - or entered the registry with it, as a reprint carrying a change does - and `false` for a printing that physically shows older values (`true` for everything while a card's face has never changed). It is `null` when no answer is possible: a printing with no release date, or one that shows no rules text at all, as the textless promos do. Each card carries `default_printing_id`, a representative printing chosen by a fixed rule - not retired, showing the card's current face over older values, Booster over other products, Standard over other finishes, most recent release, lowest id - so every consumer picks the same one; a reprint that changed a card's stats becomes its default even if it is a promo, and otherwise a promo never outranks a Booster printing. Want a different policy? The full `printings` list is there; ignore the field. Think the rule picked wrong for one card? Pin another of its printings through [`data/overrides.json`](data/overrides.json) with a reason, and the pin wins.
 - **Every record says where it lives.** Cards, printings and sets carry `api_url` (the record's own JSON object on `api.kairosarchive.net`) and `kairos_url` (its page on `kairosarchive.net`), derived from the id at export time so they can never name a different record - CI checks that too. `api_url` points at the moving major alias (`/v3/`), which always redirects to the newest verified v3.x release: follow it from any copy, however old, and you reach the current record. A consumer that wants the snapshot it fetched uses that release root's paths instead. Printings (and cards, through their default printing) also carry `image_urls` - the four renditions `small` (146×204), `normal` (488×680), `large` (672×936) as WebP, and `original`, the publisher's file untouched - and `image_status`: `missing` while the registry holds no image, `lowres` when the publisher's file (380×531 for the early sets) was upscaled to fill the large rendition, `ok` at full size. Image addresses are permanent: the name carries the printing id and an art-version key (`P000937.ab12cd34ef56.normal.webp`), and new art or a new encoding gets a new name rather than new bytes at the old one. What the registry holds is recorded in [`data/images.json`](data/images.json), with the publisher's file each image came from. The committed `registry.json` therefore contains `kairosarchive.net` addresses, and the GitHub mirror points at the domain by design.
+- **Notes and gaps hold what the official API does not say.** Every card and printing carries `notes`, usually empty: facts the API has no place for, such as a promo that was prize support in a particular store kit. Each note gives its `source` and the date it was `recorded`. The `gaps` section lists cards and printings known to exist that the registry does not record, such as a store-kit card the API never served; a gap is removed once what it describes has a record. Both are kept by hand in [`data/notes.json`](data/notes.json) and [`data/gaps.json`](data/gaps.json), and CI checks every note sits on a real record. A note never contradicts a field: a fact that fits a field is a correction, made through [`data/overrides.json`](data/overrides.json). Notes and gaps are reports, not official data, so quote the source with the fact.
 - **Migrating existing data keyed on slugs:** look each slug up in `slug_history`, which maps every slug that has ever existed (current and superseded) to its `printing_id`. Do it once and the next naming convention change costs you nothing.
 - **Retired printings** (removed upstream) keep their rows and IDs, marked with a `retired_at` date, so old references never dangle. Cards are never removed at all.
 - **Text is canonicalised**: `\n` line endings, no trailing whitespace, one line per ability. The official API is inconsistent about all three; the registry is not.

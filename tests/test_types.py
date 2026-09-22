@@ -109,19 +109,25 @@ class SampleTest(unittest.TestCase):
             "cards": [{"codex_id": "C000001", "back": None, "errata": False},
                       {"codex_id": "C000002", "back": None, "errata": False},
                       {"codex_id": "C000003", "back": {"type": "Site"}, "errata": False},
-                      {"codex_id": "C000004", "back": None, "errata": True}],
+                      {"codex_id": "C000004", "back": None, "errata": True},
+                      {"codex_id": "C000005", "back": None, "errata": False}],
             "printings": [{"printing_id": "P000001", "codex_id": "C000001"},
-                          {"printing_id": "P000004", "codex_id": "C000004"}],
+                          {"printing_id": "P000004", "codex_id": "C000004"},
+                          {"printing_id": "P000005", "codex_id": "C000005",
+                           "notes": [{"text": "t", "source": "s", "recorded": "2026-09-22"}]}],
             "slug_history": [{"printing_id": "P000004", "slug": "x"}],
             "name_history": [{"codex_id": "C000004", "name": "n"}],
             "card_history": [{"codex_id": "C000003"}],
+            "gaps": [{"name": "g", "codex_id": None}],
         }
         text = render_sample(export, cards=1)
         self.assertTrue(text.startswith("// A slice"))
         self.assertTrue(text.rstrip().endswith("as const;"))
         sample = json.loads(text.split("export default ", 1)[1].rsplit(" as const;", 1)[0])
-        self.assertEqual([c["codex_id"] for c in sample["cards"]], ["C000001", "C000003", "C000004"])
-        self.assertEqual([p["printing_id"] for p in sample["printings"]], ["P000001", "P000004"])
+        self.assertEqual([c["codex_id"] for c in sample["cards"]], ["C000001", "C000003", "C000004", "C000005"])
+        self.assertEqual([p["printing_id"] for p in sample["printings"]],
+                         ["P000001", "P000004", "P000005"])
+        self.assertEqual(sample["gaps"], [{"name": "g", "codex_id": None}])
         self.assertEqual(sample["card_history"], [{"codex_id": "C000003"}])
 
 

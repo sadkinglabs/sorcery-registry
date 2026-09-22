@@ -48,7 +48,12 @@ API slug demoted to an ordinary, mutable column.
 # the card (data/errata.json) so that printings whose printed text differs
 # from the current text stop counting as showing current values. Database:
 # card_history gains the source column.
-SCHEMA_VERSION = 11
+# v12: cards and printings carry notes - what the registry knows that the
+# official API does not say, each with its source and the day it was
+# recorded (data/notes.json) - and the export gains the gaps section, the
+# register of cards and printings known to exist but not recorded
+# (data/gaps.json). Both read at export time. No database change.
+SCHEMA_VERSION = 12
 API_URL = "https://api.sorcerytcg.com/api/cards"
 
 # Where the published records live. api_url on every record points at the

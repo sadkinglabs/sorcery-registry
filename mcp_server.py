@@ -457,7 +457,10 @@ def build_server():
             "Cards carry a derived power (attack when attack equals defense, "
             "else floor((attack+defense)/2), null if either is null); printings "
             "(and cards, via their default printing) carry image_status "
-            "(missing/lowres/ok) and image_urls (small/normal/large/original)."
+            "(missing/lowres/ok) and image_urls (small/normal/large/original). "
+            "Cards and printings carry notes: facts the official API does not "
+            "say, each with its source and the date it was recorded. Quote the "
+            "source with the fact; a note is a report, not an official record."
         ),
     )
     registry = Registry(load_registry())

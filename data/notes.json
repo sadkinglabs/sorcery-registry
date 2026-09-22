@@ -1,0 +1,13 @@
+{
+  "_comment": "What the registry knows about a card or printing that the official API does not say. One note per fact, each with where it came from and the day it was written down. A fact that fits a field is a correction and belongs in data/overrides.json. Sources say where, not who: releases are immutable, so name a person only if they asked to be credited. See registry/notes.py.",
+  "cards": {},
+  "printings": {
+    "P001640": [
+      {
+        "text": "Prize support in the Arthurian Legends store kit, sent to stores for Organised Play when the set released. Each kit held three of this Sorcerer. Stores could reportedly request a second kit, which shipped with a Cornerstone kit.",
+        "source": "Community report, Sorcery Discord. The release date on record, 2024-10-04, is Arthurian Legends' own.",
+        "recorded": "2026-09-22"
+      }
+    ]
+  }
+}

@@ -8,14 +8,26 @@ import unittest
 from registry.changes import check, diff_exports, summary_line
 
 
-def export(cards, printings, sets=("001",), history=(), schema_version=11):
-    return {
+def export(cards, printings, sets=("001",), history=(), schema_version=11, gaps=None):
+    doc = {
         "header": {"schema_version": schema_version},
         "sets": [{"set_code": code, "set_name": f"Set {code}"} for code in sets],
         "cards": cards,
         "printings": printings,
         "card_history": list(history),
     }
+    if gaps is not None:
+        doc["gaps"] = gaps
+    return doc
+
+
+def note(text, source="Community report, Sorcery Discord", recorded="2026-09-22"):
+    return {"text": text, "source": source, "recorded": recorded}
+
+
+def gap(name, codex_id=None, text="Known to exist, not recorded."):
+    return {"name": name, "codex_id": codex_id, "text": text,
+            "source": "TCGplayer product catalogue", "recorded": "2026-09-22"}
 
 
 def card(codex_id, **fields):
@@ -67,7 +79,8 @@ class DiffTest(unittest.TestCase):
             "cards_added": 1, "cards_changed": 1, "cards_removed": 0,
             "printings_added": 1, "printings_changed": 2, "printings_removed": 0,
             "sets_added": 1, "images_added": 2, "images_replaced": 1,
-            "history_rows_added": 1, "identifiers_removed": 0})
+            "history_rows_added": 1, "notes_added": 0, "notes_removed": 0,
+            "gaps_added": 0, "gaps_closed": 0, "identifiers_removed": 0})
         self.assertEqual(changes["cards"]["changed"],
                          [{"codex_id": "C000001", "name": "Card C000001", "fields": ["rules_text", "errata"]}])
         self.assertEqual(changes["cards"]["added"], ["C000003"])
@@ -115,6 +128,73 @@ class DiffTest(unittest.TestCase):
         self.assertEqual(changes["summary"]["history_rows_added"], 1)
         self.assertEqual(changes["summary"]["identifiers_removed"], 0)
         self.assertEqual(check(changes), [])
+
+    def test_a_field_a_release_adds_changes_only_the_records_that_carry_something(self):
+        # schema 12 adds notes to every record: [] on most, one note on one.
+        after = copy.deepcopy(BEFORE)
+        for record in after["cards"] + after["printings"]:
+            record["notes"] = []
+            record["new_field"] = None
+        after["cards"][1]["other_field"] = "set"
+        changes = diff_exports(BEFORE, after, "v3.3.3", "v3.4.0")
+        self.assertEqual(changes["cards"]["changed"],
+                         [{"codex_id": "C000002", "name": "Card C000002", "fields": ["other_field"]}])
+        self.assertEqual(changes["printings"]["changed"], [])
+        # And the other way: a field dropped while empty is no change either.
+        self.assertEqual(diff_exports(after, BEFORE, "v3.4.0", "v4.0.0")["cards"]["changed"],
+                         [{"codex_id": "C000002", "name": "Card C000002", "fields": ["other_field"]}])
+
+    def test_notes_have_their_own_section_and_never_change_a_record(self):
+        before = copy.deepcopy(BEFORE)
+        for record in before["cards"] + before["printings"]:
+            record["notes"] = []
+        before["cards"][0]["notes"] = [note("Old wording.")]
+        after = copy.deepcopy(before)
+        after["printings"][1]["notes"] = [note("Store kit prize support.")]
+        after["cards"][0]["notes"] = [note("New wording.")]
+        changes = diff_exports(before, after, "v3.4.0", "v3.4.1")
+        self.assertEqual(changes["cards"]["changed"], [])
+        self.assertEqual(changes["printings"]["changed"], [])
+        self.assertEqual(changes["notes"], {
+            "added": [{"id": "C000001", **note("New wording.")},
+                      {"id": "P000002", **note("Store kit prize support.")}],
+            "removed": [{"id": "C000001", **note("Old wording.")}]})
+        self.assertEqual(changes["summary"]["notes_added"], 2)
+        self.assertEqual(changes["summary"]["notes_removed"], 1)
+        self.assertEqual(summary_line(changes), "2 notes added · 1 note removed · 0 identifiers removed")
+
+    def test_a_notes_only_release_says_so(self):
+        # Against an export from before notes existed, as v3.3.3 -> v3.4.0.
+        after = copy.deepcopy(BEFORE)
+        for record in after["cards"] + after["printings"]:
+            record["notes"] = []
+        after["printings"][0]["notes"] = [note("Prize support.")]
+        changes = diff_exports(BEFORE, after, "v3.3.3", "v3.4.0")
+        self.assertEqual(summary_line(changes), "1 note added · 0 identifiers removed")
+        self.assertEqual(changes["printings"]["changed"], [])
+
+    def test_gaps_recorded_and_closed_by_what_they_name(self):
+        before = export(BEFORE["cards"], BEFORE["printings"],
+                        gaps=[gap("The Champion"), gap("Blink", "C000045")])
+        after = export(BEFORE["cards"], BEFORE["printings"],
+                       gaps=[gap("The Champion", text="Reworded, same gap."),
+                             gap("Silver Bullet", "C001016")])
+        changes = diff_exports(before, after, "v3.4.0", "v3.4.1")
+        self.assertEqual(changes["gaps"], {
+            "added": [{"name": "Silver Bullet", "codex_id": "C001016"}],
+            "closed": [{"name": "Blink", "codex_id": "C000045"}]})
+        self.assertEqual(summary_line(changes),
+                         "1 gap recorded · 1 gap closed · 0 identifiers removed")
+        # An export from before the register existed has no gaps.
+        first = diff_exports(BEFORE, after, "v3.3.3", "v3.4.0")
+        self.assertEqual(first["summary"]["gaps_added"], 2)
+        self.assertEqual(first["summary"]["gaps_closed"], 0)
+
+    def test_summary_line_reads_documents_from_before_notes(self):
+        changes = diff_exports(BEFORE, copy.deepcopy(BEFORE), "v3.3.2", "v3.3.3")
+        for key in ("notes_added", "notes_removed", "gaps_added", "gaps_closed"):
+            del changes["summary"][key]
+        self.assertEqual(summary_line(changes), "0 identifiers removed")
 
     def test_is_deterministic(self):
         a = diff_exports(BEFORE, copy.deepcopy(BEFORE), "v3.0.0", "v3.0.1")

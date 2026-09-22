@@ -120,6 +120,23 @@ export interface ImageUrls {
 export type ImageStatus = "missing" | "lowres" | "ok";
 
 /**
+ * Something known about a record that the official API does not say, with where it came from. A
+ * note never contradicts a field: a fact that fits a field is a correction and changes the field
+ * instead.
+ */
+export interface Note {
+  /** The fact, in plain words. */
+  text: string;
+  /**
+   * Where the fact came from: a document, a product, a community report. Names a place, not a
+   * person, unless that person asked to be credited.
+   */
+  source: string;
+  /** The day the note was written down, not the day the fact became true. */
+  recorded: IsoDate;
+}
+
+/**
  * Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a
  * byte-identical file.
  */
@@ -143,6 +160,8 @@ export interface Header {
   name_history: number;
   /** How many rows the card_history section holds. */
   card_history: number;
+  /** How many entries the gaps section holds. */
+  gaps: number;
 }
 
 /** Derived catalogue of the sets themselves, with distinct-card and printing counts. */
@@ -213,6 +232,11 @@ export interface Card extends Face {
   image_urls: ImageUrls | null;
   /** Derived: the default printing's image_status. */
   image_status: ImageStatus;
+  /**
+   * What the registry knows about this card that the official API does not say, oldest first.
+   * Empty for most records.
+   */
+  notes: Note[];
 }
 
 /**
@@ -278,6 +302,11 @@ export interface Printing {
   image_urls: ImageUrls | null;
   /** How good the source of the front image was: missing, lowres or ok. */
   image_status: ImageStatus;
+  /**
+   * What the registry knows about this printing that the official API does not say, oldest first.
+   * Empty for most records.
+   */
+  notes: Note[];
 }
 
 /** Every slug that has ever existed, mapped to its printing. valid_to null = the current slug. */
@@ -331,6 +360,24 @@ export interface CardHistoryRow extends Face {
 }
 
 /**
+ * Cards and printings known to exist that the registry does not record, usually because the
+ * official API does not serve them. An entry is removed once what it describes has a record. A gap
+ * has no id: it is a pointer to go and look, not a record.
+ */
+export interface Gap {
+  /** The card's name as far as it is known. */
+  name: string;
+  /** The card a missing printing belongs to, or null when the card itself is not recorded. */
+  codex_id: CodexId | null;
+  /** What is missing, in plain words. */
+  text: string;
+  /** Where the report came from. Names a place, not a person. */
+  source: string;
+  /** The day the gap was written down. */
+  recorded: IsoDate;
+}
+
+/**
  * Stable identifiers for every card and printing in Sorcery: Contested Realm. codex_id (C000042)
  * identifies a card across all its reprints; printing_id (P000042) identifies one physical print.
  * Key on those two - every other field is data that can change. The shape mirrors the official
@@ -350,4 +397,10 @@ export interface Registry {
   slug_history: SlugHistoryRow[];
   name_history: NameHistoryRow[];
   card_history: CardHistoryRow[];
+  /**
+   * Cards and printings known to exist that the registry does not record, usually because the
+   * official API does not serve them. An entry is removed once what it describes has a record. A
+   * gap has no id: it is a pointer to go and look, not a record.
+   */
+  gaps: Gap[];
 }

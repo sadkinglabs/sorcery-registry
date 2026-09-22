@@ -1,5 +1,19 @@
 # Migrating to v3.2 (from v3.1), v3.1 (from v3.0), v3.0 (from v2.0) and v2.0 (from v1.x)
 
+## v3.3 to v3.4 (schema 12)
+
+Additive; **no identifier changed** and no existing value changed.
+
+| New | On | Value |
+|---|---|---|
+| `notes` | cards and printings, after `image_status` | a list of `{text, source, recorded}`: what the registry knows that the official API does not say, with where it came from and the day it was recorded. Empty for almost every record |
+| `gaps` | a new top-level section, after `card_history`, and `gaps.json` at every release root | cards and printings known to exist that the registry does not record: `{name, codex_id, text, source, recorded}`, with `codex_id` null for an unrecorded card |
+| `header.gaps` | the header, and `counts.gaps` in `index.json` | the number of gaps |
+| `notes_*`, `gaps_*` | `changes.json` summary, and `notes`/`gaps` sections | notes added and removed, gaps recorded and closed |
+
+A strict parser that rejects unknown keys needs the new schema; everything else reads v3.4 unchanged. `changes.json` also stops counting a field a release adds as a change to records where that field is empty.
+
+
 ## v3.2 to v3.3 (schema 11)
 
 Additive. `card_history` rows gain `source`: `"api"` for a face the registry observed in the official API (every row until now), `"card"` for a face recorded by hand from what is printed on the card (`data/errata.json`). Cards the publisher changed after printing gain a closed `"card"` row holding their printed face, dated from the first printing that carries it, and their older printings' `printed_as_current` becomes `false`; `errata` was already `true` for them. Nothing else changes.
