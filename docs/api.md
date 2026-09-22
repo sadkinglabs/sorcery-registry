@@ -142,13 +142,14 @@ Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680
   "from": "v3.3.3", "to": "v3.4.0",
   "schema_version": {"from": 11, "to": 12},
   "summary": {"cards_added": 0, "cards_changed": 0, "cards_removed": 0,
-              "printings_added": 0, "printings_changed": 0, "printings_removed": 0,
+              "printings_added": 0, "printings_changed": 1, "printings_removed": 0,
               "sets_added": 0, "images_added": 0, "images_replaced": 0,
               "history_rows_added": 0, "notes_added": 1, "notes_removed": 0,
               "manual_added": 0, "manual_confirmed": 0, "manual_withdrawn": 0,
               "identifiers_removed": 0},
   "cards": {"added": [], "changed": [], "removed": []},
-  "printings": {"added": [], "changed": [], "removed": []},
+  "printings": {"added": [], "changed": [{"printing_id": "P001640", "codex_id": "C000403",
+                                          "fields": ["released_with"]}], "removed": []},
   "sets": {"added": []},
   "images": {"added": [], "replaced": []},
   "history": {"added": []},
@@ -159,7 +160,7 @@ Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680
 }
 ```
 
-`cards.changed` and `printings.changed` name the fields that differ, in the record's own key order. `images` counts printings whose front or back art was added or replaced (a replaced image is a new address; the old one keeps serving). `history.added` lists the `card_history` rows new in this release, by card and start date. `notes.added` and `notes.removed` list whole notes with the `id` of the card or printing they sit on; a note is never counted as a change to its record, and rewording one reads as one removed and one added. Only fields both releases have are compared. A release that adds a field changes the shape, which `schema_version` reports, not every record that carries the field. `manual.added` lists the cards and printings recorded by hand in this release, which are also counted as added. `manual.confirmed` lists manual records that upstream now serves and a person confirmed, and `manual.withdrawn` lists manual records marked as wrong. Documents from before schema 12 have no `notes_*` or `manual_*` keys; read them as 0. `identifiers_removed` is the sum of removed cards and printings and is always `0` within a major: the release workflow refuses to publish otherwise, so the promise that ids are permanent is checked at release time rather than merely stated. A new major may remove ids, and its `changes.json` says exactly which. The first release to carry the file is the one after v3.3.1; earlier roots have none.
+`cards.changed` and `printings.changed` name the fields that differ, in the record's own key order. `images` counts printings whose front or back art was added or replaced (a replaced image is a new address; the old one keeps serving). `history.added` lists the `card_history` rows new in this release, by card and start date. `notes.added` and `notes.removed` list whole notes with the `id` of the card or printing they sit on; a note is never counted as a change to its record, and rewording one reads as one removed and one added. A release that adds a field changes the shape, which `schema_version` reports, not every record that carries the field. A new field counts as a change only on records where it says something beyond its default: a promo's `released_with` recorded by hand, a record whose `origin` is `manual`. `manual.added` lists the cards and printings recorded by hand in this release, which are also counted as added. `manual.confirmed` lists manual records that upstream now serves and a person confirmed, and `manual.withdrawn` lists manual records marked as wrong. Documents from before schema 12 have no `notes_*` or `manual_*` keys; read them as 0. `identifiers_removed` is the sum of removed cards and printings and is always `0` within a major: the release workflow refuses to publish otherwise, so the promise that ids are permanent is checked at release time rather than merely stated. A new major may remove ids, and its `changes.json` says exactly which. The first release to carry the file is the one after v3.3.1; earlier roots have none.
 
 ## Indexes, for client-side search
 

@@ -38,9 +38,10 @@ reported there, not as the printing changing. `manual` names the records
 added by hand (also counted as added above), the manual records upstream
 now serves and a person confirmed, and those withdrawn as wrong.
 
-Only fields both releases have are compared: a release that adds a field
-changes the shape, which schema_version reports, not every record that
-carries it.
+A release that adds a field changes the shape, which schema_version
+reports, not every record that carries it: a new field counts only on
+records where it says something beyond its default, such as a promo's
+released_with recorded by hand.
 
 `identifiers_removed` is the sum of removed cards and printings and is
 zero by the registry's first rule: ids are permanent. `--check` enforces
@@ -70,13 +71,39 @@ def _by(records, key):
 _OWN_SECTION = ("notes",)
 
 
+def _says_nothing(record, key, value):
+    """Whether a field that is new in this release holds only what every
+    record gets by default, rather than something learned about this one.
+    Empty is always a default. A new field whose default is not empty is
+    listed here: origin is "api" for every record the API serves, and
+    released_with repeats the printing's own set unless it was recorded
+    by hand for a promo or curio."""
+    if value in (None, [], {}, ""):
+        return True
+    if key == "origin":
+        return value == "api"
+    if key == "released_with":
+        return value == record.get("set_code")
+    return False
+
+
 def _changed_fields(before, after):
     """Field names whose values differ, in the record's own key order.
-    Only fields both releases have are compared: a field one release adds
-    or drops is a change to the shape, which schema_version reports, not
-    a change to every record that carries it."""
-    return [key for key in after
-            if key in before and key not in _OWN_SECTION and before[key] != after[key]]
+    A field this release adds counts only where it says something about
+    this record (_says_nothing): adding a field changes the shape, which
+    schema_version reports, not every record that carries it - but a
+    value recorded for one record is news about that record. A field this
+    release drops is a change of shape alone."""
+    fields = []
+    for key in after:
+        if key in _OWN_SECTION:
+            continue
+        if key not in before:
+            if not _says_nothing(after, key, after[key]):
+                fields.append(key)
+        elif before[key] != after[key]:
+            fields.append(key)
+    return fields
 
 
 def _notes(export):

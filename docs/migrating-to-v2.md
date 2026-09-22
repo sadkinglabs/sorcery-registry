@@ -16,7 +16,7 @@ Additive; **no identifier changed** and no existing value changed.
 | `manual_*` | `changes.json` summary, and its `manual` section | records added by hand, confirmed upstream or withdrawn |
 | `origin`, `released_with` | `index/cards.json`, `index/printings.json` and the printing summaries in `cards/{codex_id}.json` | as above |
 
-A strict parser that rejects unknown keys needs the new schema. So does code that assumes a set code is three digits, or that every printing has a `slug_history` row: manual printings have none until upstream confirms them. Everything else reads v3.4 unchanged. `changes.json` also stops counting a field that a release adds or drops as a change to every record that carries it: only fields both releases have are compared.
+A strict parser that rejects unknown keys needs the new schema. So does code that assumes a set code is three digits, or that every printing has a `slug_history` row: manual printings have none until upstream confirms them. Everything else reads v3.4 unchanged. `changes.json` also stops counting a field that a release adds or drops as a change to every record that carries it. A new field counts only on records where it says something beyond its default, such as a promo's `released_with` recorded by hand.
 
 
 ## v3.2 to v3.3 (schema 11)

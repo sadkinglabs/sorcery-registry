@@ -124,24 +124,42 @@ class DiffTest(unittest.TestCase):
         self.assertEqual(changes["summary"]["identifiers_removed"], 0)
         self.assertEqual(check(changes), [])
 
-    def test_a_field_a_release_adds_or_drops_changes_no_record(self):
-        # schema 12 adds notes, origin and released_with to every record,
-        # most of them with a value: the shape changed, no record did.
-        after = copy.deepcopy(BEFORE)
+    def test_a_new_field_counts_only_where_it_says_something(self):
+        # schema 12 adds notes, origin and released_with to every record:
+        # the shape changed. Only a value learned about one record is news.
+        before = copy.deepcopy(BEFORE)
+        for record in before["printings"]:
+            record["set_code"] = "001"
+        after = copy.deepcopy(before)
         after["header"]["schema_version"] = 12
         for record in after["cards"] + after["printings"]:
             record["notes"] = []
             record["origin"] = "api"
+            record["manual"] = None
+        for record in after["printings"]:
+            record["released_with"] = record["set_code"]          # its own set: a default
+        after["printings"][1]["set_code"] = "999"                 # a promo...
+        before["printings"][1]["set_code"] = "999"
+        after["printings"][1]["released_with"] = "004"            # ...recorded by hand
         after["cards"][1]["rules_text"] = "Changed."
-        changes = diff_exports(BEFORE, after, "v3.3.3", "v3.4.0")
+        changes = diff_exports(before, after, "v3.3.3", "v3.4.0")
         self.assertEqual(changes["schema_version"], {"from": 11, "to": 12})
         self.assertEqual(changes["cards"]["changed"],
                          [{"codex_id": "C000002", "name": "Card C000002", "fields": ["rules_text"]}])
-        self.assertEqual(changes["printings"]["changed"], [])
-        self.assertEqual(diff_exports(after, BEFORE, "v3.4.0", "v4.0.0")["printings"]["changed"], [])
-        # Once both releases have the field, a new value is a change.
+        self.assertEqual(changes["printings"]["changed"],
+                         [{"printing_id": "P000002", "codex_id": "C000002",
+                           "fields": ["released_with"]}])
+        # A manual record is news the first time it carries the fields.
+        after["printings"][0]["origin"] = "manual"
+        after["printings"][0]["manual"] = {"source": "s", "recorded": "2026-09-22",
+                                           "confirmed_at": None, "withdrawn": None}
+        self.assertEqual(diff_exports(before, after, "v3.3.3", "v3.4.0")
+                         ["printings"]["changed"][0]["fields"], ["origin", "manual"])
+        # A field a release drops is a change of shape alone.
+        self.assertEqual(diff_exports(after, before, "v3.4.0", "v4.0.0")["printings"]["changed"], [])
+        # Once both releases have the field, any new value is a change.
         later = copy.deepcopy(after)
-        later["printings"][0]["origin"] = "manual"
+        later["printings"][1]["origin"] = "manual"
         self.assertEqual(diff_exports(after, later, "v3.4.0", "v3.4.1")["printings"]["changed"][0]["fields"],
                          ["origin"])
 
