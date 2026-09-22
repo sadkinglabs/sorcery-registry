@@ -1,0 +1,10 @@
+{
+  "_comment": "The set release an official promo belongs to, which the API does not say: it files every promo under set 999. Keyed by printing_id; set_code names the release (001 Alpha, 002 Beta, ...). Printings in a release set need no entry, and manual printings give theirs in data/manual.json. Sources name a place, never a person. See registry/manual.py.",
+  "printings": {
+    "P001640": {
+      "set_code": "004",
+      "source": "Community report, Sorcery Discord: prize support in the Arthurian Legends store kit.",
+      "recorded": "2026-09-22"
+    }
+  }
+}

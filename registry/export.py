@@ -13,6 +13,7 @@ from pathlib import Path
 from . import API_BASE, API_URL, IMAGE_BASE, SCHEMA_VERSION, SITE_BASE
 from .errata import load_errata, unknown_printings
 from .images import load_images
+from .manual import is_release_set, load_released_with
 from .notes import load_notes
 from .db import (CARD_FIELDS, FACE_FIELDS, HISTORY_FIELDS, PRINTING_FACE_FIELDS,
                  PRINTING_FIELDS, decode_field, open_db)
@@ -111,11 +112,13 @@ def image_status(held):
 def default_printing(printings):
     """The representative printing of a card, by a fixed rule so every
     consumer picks the same one: not retired; showing the card's current
-    face (printed_as_current) over one with older values; Booster over other
+    face (printed_as_current) over one with older values (a withdrawn manual
+    printing counts as retired); Booster over other
     products; Standard over other finishes; most recently released; lowest
     id. So a reprint that changed the card's stats becomes the default even
     when it is a promo, and otherwise a promo never outranks a Booster."""
-    live = [p for p in printings if p["retired_at"] is None] or list(printings)
+    live = [p for p in printings if p["retired_at"] is None
+            and p.get("withdrawn_at") is None] or list(printings)
     if not live:
         return None
     return min(live, key=lambda p: (p.get("printed_as_current") is not True,
@@ -153,16 +156,31 @@ def printed_as_current(released_at, history, added_on=None):
     return released_at >= current["valid_from"]
 
 
-def build_export(con, images=None, errata=None, notes=None):
+def manual_of(row):
+    """Where a hand-recorded record came from, or None for a record the
+    registry only ever observed upstream. Kept after upstream confirms it,
+    as the record of where it started."""
+    if row["manual_source"] is None:
+        return None
+    withdrawn = None
+    if row["withdrawn_at"] is not None:
+        withdrawn = {"on": row["withdrawn_at"], "reason": row["withdrawn_reason"]}
+    return {"source": row["manual_source"], "recorded": row["manual_recorded"],
+            "confirmed_at": row["confirmed_at"], "withdrawn": withdrawn}
+
+
+def build_export(con, images=None, errata=None, notes=None, released_with=None):
     """The export, from the database plus data/images.json (what images the
-    registry holds), data/errata.json (printed faces recorded by hand) and
-    data/notes.json (what the official API does not say about a record) -
-    registry-owned data kept in git, like overrides."""
+    registry holds), data/errata.json (printed faces recorded by hand),
+    data/notes.json (what the official API does not say about a record)
+    and data/released-with.json (the release an official promo belongs to)
+    - registry-owned data kept in git, like overrides."""
     held_images = (images if images is not None else load_images()).get("printings", {})
     notes = notes if notes is not None else load_notes()
     # Every record carries its notes as a list, empty for almost all of
     # them: a consumer never has to ask whether the field is there.
     card_notes, printing_notes = notes.get("cards", {}), notes.get("printings", {})
+    promo_releases = released_with if released_with is not None else load_released_with()
     # A textless promo shows no face, so no date can say whether it is
     # current: data/errata.json names such printings and they report null.
     faceless = unknown_printings(errata if errata is not None else load_errata())
@@ -173,7 +191,7 @@ def build_export(con, images=None, errata=None, notes=None):
     printings_by_card = {}
     for row in con.execute(
             "SELECT card_id, printing_id, set_code, released_at, product, finish, "
-            "retired_at FROM printings ORDER BY printing_id"):
+            "retired_at, withdrawn_at FROM printings ORDER BY printing_id"):
         printing_ids_by_card.setdefault(row["card_id"], []).append(
             format_printing_id(row["printing_id"]))
         printings_by_card.setdefault(row["card_id"], []).append(dict(row))
@@ -205,10 +223,11 @@ def build_export(con, images=None, errata=None, notes=None):
     # database artefact and is never read.
     set_agg = {}
     for row in con.execute(
-            "SELECT set_code, set_name, released_at, card_id FROM printings"):
+            "SELECT set_code, set_name, released_at, card_id, origin FROM printings"):
         entry = set_agg.setdefault(row["set_code"], {
             "set_code": row["set_code"], "set_name": row["set_name"],
-            "released_at": None, "card_ids": set(), "printings": 0})
+            "released_at": None, "card_ids": set(), "printings": 0, "origins": set()})
+        entry["origins"].add(row["origin"])
         if row["released_at"] is not None and (
                 entry["released_at"] is None or row["released_at"] < entry["released_at"]):
             entry["released_at"] = row["released_at"]
@@ -222,6 +241,9 @@ def build_export(con, images=None, errata=None, notes=None):
                      "released_at": entry["released_at"],
                      "cards": len(entry["card_ids"]),
                      "printings": entry["printings"],
+                     # A set only the registry's own records are in - a
+                     # code of ours, such as CUR - is itself manual.
+                     "origin": "manual" if entry["origins"] == {"manual"} else "api",
                      **set_urls(entry["set_code"])})
 
     # The card-level id is published as "codex_id", after Codex, the game's
@@ -253,6 +275,8 @@ def build_export(con, images=None, errata=None, notes=None):
                         if chosen is not None else None)
         record["image_urls"] = face_urls(record["default_printing_id"], chosen_front)
         record["image_status"] = image_status(chosen_front)
+        record["origin"] = row["origin"]
+        record["manual"] = manual_of(row)
         record["notes"] = [dict(n) for n in card_notes.get(record["codex_id"], [])]
         cards.append(record)
 
@@ -268,6 +292,16 @@ def build_export(con, images=None, errata=None, notes=None):
                   "card_name": name_by_card[row["card_id"]]}
         for field in PRINTING_FIELDS:
             record[field] = decode_field(field, row[field])
+            if field == "released_at":
+                # The set release this printing belongs to: its own set's,
+                # or for a promo or a curio, the one recorded by hand.
+                if is_release_set(row["set_code"]):
+                    record["released_with"] = row["set_code"]
+                elif row["released_with"] is not None:
+                    record["released_with"] = row["released_with"]
+                else:
+                    promo = promo_releases.get(record["printing_id"])
+                    record["released_with"] = promo["set_code"] if promo else None
         record["back"] = _face(record["back"], PRINTING_FACE_FIELDS)
         record["printed_as_current"] = shows_current(row)
         record["retired_at"] = row["retired_at"]
@@ -281,6 +315,8 @@ def build_export(con, images=None, errata=None, notes=None):
         record["image_status"] = image_status(front)
         if record["back"] is not None:
             record["back"]["image_urls"] = face_urls(record["printing_id"], back, back=True)
+        record["origin"] = row["origin"]
+        record["manual"] = manual_of(row)
         record["notes"] = [dict(n) for n in printing_notes.get(record["printing_id"], [])]
         printings.append(record)
 

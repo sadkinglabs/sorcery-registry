@@ -18,6 +18,7 @@ the one being released, and publishes it next to index.json:
                   "printings_added": 4, "printings_changed": 1, "printings_removed": 0,
                   "sets_added": 0, "images_added": 3, "images_replaced": 1,
                   "history_rows_added": 2, "notes_added": 1, "notes_removed": 0,
+                  "manual_added": 4, "manual_confirmed": 0, "manual_withdrawn": 0,
                   "identifiers_removed": 0},
       "cards": {"added": [], "changed": [{"codex_id": "C000230", "name": "Polar Bears",
                                           "fields": ["rules_text", "errata"]}], "removed": []},
@@ -27,13 +28,20 @@ the one being released, and publishes it next to index.json:
       "images": {"added": ["P003089"], "replaced": ["P000937"]},
       "history": {"added": [{"codex_id": "C000230", "valid_from": "2026-09-15", "source": "card"}]},
       "notes": {"added": [{"id": "P001640", "text": ..., "source": ..., "recorded": "2026-09-22"}],
-                "removed": []}
+                "removed": []},
+      "manual": {"added": ["C001101", "P003089", "P003090", "P003091"],
+                 "confirmed": [], "withdrawn": []}
     }
 
 Notes have a section of their own: a note added to a printing is
-reported there, not as the printing changing. A field a release adds is
-not a change to records where it is empty, so a release that introduces
-a field reports only the records that carry something in it.
+reported there, not as the printing changing. `manual` names the records
+added by hand (also counted as added above), the manual records upstream
+now serves and a person confirmed, and those withdrawn as wrong.
+
+A release that adds a field changes the shape, which schema_version
+reports, not every record that carries it: a new field counts only on
+records where it says something beyond its default, such as a promo's
+released_with recorded by hand.
 
 `identifiers_removed` is the sum of removed cards and printings and is
 zero by the registry's first rule: ids are permanent. `--check` enforces
@@ -57,30 +65,43 @@ def _by(records, key):
     return {r[key]: r for r in records}
 
 
-# A field that means "nothing here" when a release adds it: a new field
-# absent before and empty after is not a change to the record.
-_EMPTY = (None, [], {}, "")
-
 # Fields reported in their own section rather than as a change to the
 # record, so a note added to a printing reads as a note, not as the
 # printing changing.
 _OWN_SECTION = ("notes",)
 
 
+def _says_nothing(record, key, value):
+    """Whether a field that is new in this release holds only what every
+    record gets by default, rather than something learned about this one.
+    Empty is always a default. A new field whose default is not empty is
+    listed here: origin is "api" for every record the API serves, and
+    released_with repeats the printing's own set unless it was recorded
+    by hand for a promo or curio."""
+    if value in (None, [], {}, ""):
+        return True
+    if key == "origin":
+        return value == "api"
+    if key == "released_with":
+        return value == record.get("set_code")
+    return False
+
+
 def _changed_fields(before, after):
     """Field names whose values differ, in the record's own key order.
-    A key only one side has counts as changed, unless its value on the
-    other side is empty: a release that adds a field changes no record
-    that has nothing in it."""
+    A field this release adds counts only where it says something about
+    this record (_says_nothing): adding a field changes the shape, which
+    schema_version reports, not every record that carries it - but a
+    value recorded for one record is news about that record. A field this
+    release drops is a change of shape alone."""
     fields = []
-    for key in list(after) + [k for k in before if k not in after]:
+    for key in after:
         if key in _OWN_SECTION:
             continue
-        if key not in before and after[key] in _EMPTY:
-            continue
-        if key not in after and before[key] in _EMPTY:
-            continue
-        if before.get(key) != after.get(key):
+        if key not in before:
+            if not _says_nothing(after, key, after[key]):
+                fields.append(key)
+        elif before[key] != after[key]:
             fields.append(key)
     return fields
 
@@ -100,6 +121,21 @@ def _notes(export):
 
 def _note_key(record_id, note):
     return (record_id, note["text"])
+
+
+def _flipped(prev, cur):
+    """Records in both exports that went from manual to api (confirmed
+    upstream), and manual records newly marked withdrawn."""
+    confirmed, withdrawn = [], []
+    for record_id in sorted(i for i in cur if i in prev):
+        before, after = prev[record_id], cur[record_id]
+        if before.get("origin") == "manual" and after.get("origin") == "api":
+            confirmed.append(record_id)
+        was = (before.get("manual") or {}).get("withdrawn")
+        now = (after.get("manual") or {}).get("withdrawn")
+        if now and not was:
+            withdrawn.append(record_id)
+    return confirmed, withdrawn
 
 
 def _front_key(printing):
@@ -172,6 +208,11 @@ def diff_exports(previous, current, from_tag, to_tag):
         for r in current["card_history"] if _history_key(r) not in prev_rows]
     history_added.sort(key=lambda r: (r["codex_id"], r["valid_from"] or ""))
 
+    cards_confirmed, cards_withdrawn = _flipped(prev_cards, cur_cards)
+    prints_confirmed, prints_withdrawn = _flipped(prev_prints, cur_prints)
+    manual_added = sorted(i for i in cards_added if cur_cards[i].get("origin") == "manual") + \
+        sorted(i for i in prints_added if cur_prints[i].get("origin") == "manual")
+
     # A note is the same note while its record and text are; rewording one
     # reads as one removed and one added, which is what a consumer showing
     # notes needs to know.
@@ -200,6 +241,9 @@ def diff_exports(previous, current, from_tag, to_tag):
             "history_rows_added": len(history_added),
             "notes_added": len(notes_added),
             "notes_removed": len(notes_removed),
+            "manual_added": len(manual_added),
+            "manual_confirmed": len(cards_confirmed) + len(prints_confirmed),
+            "manual_withdrawn": len(cards_withdrawn) + len(prints_withdrawn),
             "identifiers_removed": len(cards_removed) + len(prints_removed),
         },
         "cards": {"added": cards_added, "changed": cards_changed, "removed": cards_removed},
@@ -208,6 +252,9 @@ def diff_exports(previous, current, from_tag, to_tag):
         "images": {"added": images_added, "replaced": images_replaced},
         "history": {"added": history_added},
         "notes": {"added": notes_added, "removed": notes_removed},
+        "manual": {"added": manual_added,
+                   "confirmed": cards_confirmed + prints_confirmed,
+                   "withdrawn": cards_withdrawn + prints_withdrawn},
     }
 
 
@@ -225,7 +272,12 @@ def summary_line(changes):
                            ("images_replaced", "image replaced", "images replaced"),
                            ("history_rows_added", "history row added", "history rows added"),
                            ("notes_added", "note added", "notes added"),
-                           ("notes_removed", "note removed", "notes removed")):
+                           ("notes_removed", "note removed", "notes removed"),
+                           ("manual_added", "record added by hand", "records added by hand"),
+                           ("manual_confirmed", "manual record confirmed upstream",
+                            "manual records confirmed upstream"),
+                           ("manual_withdrawn", "manual record withdrawn",
+                            "manual records withdrawn")):
         if s.get(key):
             parts.append(f"{s[key]} {one if s[key] == 1 else many}")
     parts.append(f"{s['identifiers_removed']} identifiers removed")

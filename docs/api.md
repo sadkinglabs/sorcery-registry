@@ -71,7 +71,7 @@ The same file is committed as [`schema/registry.d.ts`](../schema/registry.d.ts);
 
 | Path | Answers | Shape |
 |---|---|---|
-| `cards/{codex_id}.json` | one card | the card record from the export (including `default_printing_id`), plus `printings` (a summary of each: `printing_id`, `slug`, `set_code`, `set_name`, `released_at`, `product`, `finish`, `printed_as_current`, `retired_at`), `name_history` and `card_history` (that card's rows) |
+| `cards/{codex_id}.json` | one card | the card record from the export (including `default_printing_id`), plus `printings` (a summary of each: `printing_id`, `slug`, `set_code`, `set_name`, `released_at`, `released_with`, `product`, `finish`, `printed_as_current`, `retired_at`, `origin`), `name_history` and `card_history` (that card's rows) |
 | `printings/{printing_id}.json` | one physical print | the printing record, plus `slug_history` (that printing's rows) |
 | `slugs/{slug}.json` | "what is this slug?" for **any slug that has ever existed** | `slug`, `printing_id`, `codex_id`, `card_name`, `current_slug`, `is_current`, `valid_from`, `valid_to`, `set_code`, `set_name`, `product`, `finish`, `retired_at`, `api_url`, `kairos_url` (the printing's) |
 | `sets.json` | the set catalogue | the export's `sets` section |
@@ -142,29 +142,32 @@ Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680
   "from": "v3.3.3", "to": "v3.4.0",
   "schema_version": {"from": 11, "to": 12},
   "summary": {"cards_added": 0, "cards_changed": 0, "cards_removed": 0,
-              "printings_added": 0, "printings_changed": 0, "printings_removed": 0,
+              "printings_added": 0, "printings_changed": 1, "printings_removed": 0,
               "sets_added": 0, "images_added": 0, "images_replaced": 0,
               "history_rows_added": 0, "notes_added": 1, "notes_removed": 0,
+              "manual_added": 0, "manual_confirmed": 0, "manual_withdrawn": 0,
               "identifiers_removed": 0},
   "cards": {"added": [], "changed": [], "removed": []},
-  "printings": {"added": [], "changed": [], "removed": []},
+  "printings": {"added": [], "changed": [{"printing_id": "P001640", "codex_id": "C000403",
+                                          "fields": ["released_with"]}], "removed": []},
   "sets": {"added": []},
   "images": {"added": [], "replaced": []},
   "history": {"added": []},
   "notes": {"added": [{"id": "P001640", "text": "Prize support in the Arthurian Legends store kit, ...",
                        "source": "Community report, Sorcery Discord. ...", "recorded": "2026-09-22"}],
-            "removed": []}
+            "removed": []},
+  "manual": {"added": [], "confirmed": [], "withdrawn": []}
 }
 ```
 
-`cards.changed` and `printings.changed` name the fields that differ, in the record's own key order. `images` counts printings whose front or back art was added or replaced (a replaced image is a new address; the old one keeps serving). `history.added` lists the `card_history` rows new in this release, by card and start date. `notes.added` and `notes.removed` list whole notes with the `id` of the card or printing they sit on; a note is never counted as a change to its record, and rewording one reads as one removed and one added. A field a release adds is not a change to records where it is empty: the release that introduced `notes` reports only the records that carry one. Documents from before schema 12 have no `notes_*` keys; read them as 0. `identifiers_removed` is the sum of removed cards and printings and is always `0` within a major: the release workflow refuses to publish otherwise, so the promise that ids are permanent is checked at release time rather than merely stated. A new major may remove ids, and its `changes.json` says exactly which. The first release to carry the file is the one after v3.3.1; earlier roots have none.
+`cards.changed` and `printings.changed` name the fields that differ, in the record's own key order. `images` counts printings whose front or back art was added or replaced (a replaced image is a new address; the old one keeps serving). `history.added` lists the `card_history` rows new in this release, by card and start date. `notes.added` and `notes.removed` list whole notes with the `id` of the card or printing they sit on; a note is never counted as a change to its record, and rewording one reads as one removed and one added. A release that adds a field changes the shape, which `schema_version` reports, not every record that carries the field. A new field counts as a change only on records where it says something beyond its default: a promo's `released_with` recorded by hand, a record whose `origin` is `manual`. `manual.added` lists the cards and printings recorded by hand in this release, which are also counted as added. `manual.confirmed` lists manual records that upstream now serves and a person confirmed, and `manual.withdrawn` lists manual records marked as wrong. Documents from before schema 12 have no `notes_*` or `manual_*` keys; read them as 0. `identifiers_removed` is the sum of removed cards and printings and is always `0` within a major: the release workflow refuses to publish otherwise, so the promise that ids are permanent is checked at release time rather than merely stated. A new major may remove ids, and its `changes.json` says exactly which. The first release to carry the file is the one after v3.3.1; earlier roots have none.
 
 ## Indexes, for client-side search
 
 The registry has ~1,100 cards; filtering them in the client is a millisecond. These are the compact lists to do it with:
 
-- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `attack`, `defense`, `power`, `life`, `errata`, `set_codes`, `default_printing_id`, `image_status` per card (~330 KB).
-- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `product`, `finish`, `printed_as_current`, `retired_at`, `image_hash`, `image_status` per printing (~690 KB).
+- `index/cards.json` - `codex_id`, `name`, `type`, `category`, `rarity`, `elements`, `keywords`, `subtypes`, `cost`, `attack`, `defense`, `power`, `life`, `errata`, `set_codes`, `default_printing_id`, `image_status`, `origin` per card (~330 KB).
+- `index/printings.json` - `printing_id`, `codex_id`, `slug`, `set_code`, `released_with`, `product`, `finish`, `printed_as_current`, `retired_at`, `image_hash`, `image_status`, `origin` per printing (~690 KB).
 - `index/slugs.json` - `{slug: printing_id}` for every slug ever (~100 KB, 3,088 entries).
 
 ## History, whole
@@ -178,6 +181,28 @@ The official API describes a card and its printings and nothing else. People who
 Every card and printing carries `notes`, a list that is empty for most records. Each note is `{text, source, recorded}`: the fact in plain words, where it came from, and the date the registry recorded it. That date is not when the fact became true. A note never contradicts a field. A fact that fits a field, such as an artist or a date, is a correction and changes the field instead, with its reason in the repo. Notes appear in the export, in `cards/{codex_id}.json` and `printings/{printing_id}.json`; the indexes leave them out.
 
 A source names a place, not a person: "Community report, Sorcery Discord", "Arthurian Legends store kit insert, photographed". Releases are immutable, so a name printed in one stays in it for good; a person is credited only if they ask to be. Notes are reports, not official records. Quote the source with the fact.
+
+## Manual records
+
+The official API does not serve everything that was printed. Store-kit prize cards, Kickstarter pledge cards and curios exist only on tables and in binders. The registry records them by hand, with the same fields as every other record and ids from the same counters, so they can be stored, searched and linked like anything else.
+
+Every card, printing and set says who stands behind it:
+
+- `origin` is `api` when the official API serves the record, and `manual` when the registry recorded it by hand.
+- `manual` is null for a record the registry only ever observed upstream. For a hand-recorded one it is `{source, recorded, confirmed_at, withdrawn}`: where the record came from, the day it was written down, the day upstream was confirmed to serve it, and whether it was withdrawn as wrong, with `{on, reason}`.
+- A set's `origin` is `manual` when every printing in it is, as for a set code of the registry's own.
+
+**Confirmation.** When the official API starts serving a manual record, a person confirms the match. The record keeps its id, takes upstream's name, slug and values where they differ, and becomes `api`, with `manual.confirmed_at` set. `changes.json` lists it under `manual.confirmed`. Nothing a consumer stored breaks: the id is the same.
+
+**Withdrawal.** Ids are permanent, so a manual record found to be wrong stays, with `manual.withdrawn` set. A withdrawn printing is never a card's `default_printing_id`.
+
+**Slugs of manual printings are predictions.** A manual printing carries a slug predicted in the publisher's own shape, such as `999-the_champion-op-f`. It has no row in `slug_history`. It resolves at `slugs/{slug}.json` while it is the printing's slug, with `valid_from` null. On confirmation it is replaced by upstream's slug, and if the two differ, the prediction stops resolving from the next release. As always, a slug is a lookup, never a key.
+
+**Set codes.** The publisher's set codes are three digits. A set the registry makes for printings upstream will never serve has three capital letters, such as `CUR` for the curios, so the two can never collide. It is served like any other set, at `sets/CUR.json`.
+
+**`released_with`.** Every printing carries the set release it belongs to. For a printing in a release set it is that set. For a promo, which upstream files under set 999, or a curio, it is the release recorded by hand, and null until recorded.
+
+Manual records are the registry's own reports, like notes. Say a record is manual when you cite it.
 
 ## Guarantees carried over
 

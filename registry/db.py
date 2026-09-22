@@ -54,6 +54,11 @@ PRINTING_FIELDS = [
 # A printing's back face: the physical facts that differ per face.
 PRINTING_FACE_FIELDS = ["artist", "artist_slug", "flavour_text", "typeline"]
 
+# Registry-owned columns that describe where a record came from rather
+# than what it is: never read from upstream, never compared against it.
+MANUAL_FIELDS = ["origin", "manual_source", "manual_recorded", "confirmed_at",
+                 "withdrawn_at", "withdrawn_reason"]
+
 # Lists and objects live as JSON text in SQLite and as Python values
 # everywhere else (snapshots, plans, the export).
 JSON_FIELDS = {"subtypes", "elements", "keywords", "umbrellas", "back"}
@@ -92,7 +97,20 @@ CREATE TABLE cards (
     errata     INTEGER NOT NULL DEFAULT 0,
     -- Registry-owned: a hand-picked representative printing, set only
     -- through overrides. Null means the export's fixed rule chooses.
-    default_printing_id INTEGER REFERENCES printings(printing_id)
+    default_printing_id INTEGER REFERENCES printings(printing_id),
+    -- Who stands behind the record: 'api' when the official API serves it,
+    -- 'manual' when the registry recorded it by hand (data/manual.json).
+    -- A manual record flips to 'api' once upstream serves it and a human
+    -- confirms the match; confirmed_at is that day. manual_source and
+    -- manual_recorded say where the hand record came from and when, and
+    -- stay after confirmation. A manual record recorded in error is never
+    -- deleted: withdrawn_at and withdrawn_reason mark it.
+    origin           TEXT NOT NULL DEFAULT 'api',
+    manual_source    TEXT,
+    manual_recorded  TEXT,
+    confirmed_at     TEXT,
+    withdrawn_at     TEXT,
+    withdrawn_reason TEXT
 );
 
 CREATE TABLE printings (
@@ -110,7 +128,24 @@ CREATE TABLE printings (
     typeline     TEXT,
     back         TEXT,
     image_hash   TEXT,
-    retired_at   TEXT
+    retired_at   TEXT,
+    -- Registry-owned: the set release a printing belongs to, when its
+    -- set_code does not say (promos in 999, curios in CUR). Recorded by
+    -- hand for manual printings; see registry/manual.py.
+    released_with TEXT,
+    -- Who stands behind the record: 'api' when the official API serves it,
+    -- 'manual' when the registry recorded it by hand (data/manual.json).
+    -- A manual record flips to 'api' once upstream serves it and a human
+    -- confirms the match; confirmed_at is that day. manual_source and
+    -- manual_recorded say where the hand record came from and when, and
+    -- stay after confirmation. A manual record recorded in error is never
+    -- deleted: withdrawn_at and withdrawn_reason mark it.
+    origin           TEXT NOT NULL DEFAULT 'api',
+    manual_source    TEXT,
+    manual_recorded  TEXT,
+    confirmed_at     TEXT,
+    withdrawn_at     TEXT,
+    withdrawn_reason TEXT
 );
 
 CREATE INDEX idx_printings_card_id ON printings(card_id);
@@ -152,7 +187,7 @@ CREATE TABLE card_history (
     valid_from TEXT NOT NULL,
     valid_to   TEXT,
     face       TEXT NOT NULL,
-    source     TEXT NOT NULL DEFAULT 'api',  -- 'api': observed upstream; 'card': read from the printed card
+    source     TEXT NOT NULL DEFAULT 'api',  -- 'api': observed upstream; 'card': read from the printed card; 'manual': a manual card's recorded face
     UNIQUE (card_id, valid_from, face)
 );
 
@@ -263,6 +298,8 @@ def load_registry_state(con):
         # Published form, so an override's value compares like for like.
         record["default_printing_id"] = (format_printing_id(row["default_printing_id"])
                                          if row["default_printing_id"] is not None else None)
+        record["origin"] = row["origin"]
+        record["withdrawn_at"] = row["withdrawn_at"]
         cards[row["name"]] = record
         card_names[row["card_id"]] = row["name"]
 
@@ -272,15 +309,19 @@ def load_registry_state(con):
         record["printing_id"] = row["printing_id"]
         record["card_name"] = card_names[row["card_id"]]
         record["retired_at"] = row["retired_at"]
+        record["origin"] = row["origin"]
+        record["withdrawn_at"] = row["withdrawn_at"]
         printings[row["slug"]] = record
 
     # Every slug that has ever referred to a printing, and the printing it
     # belongs to permanently. History first, current slugs overlaid: the two
-    # can never disagree while the ownership invariant holds.
+    # can never disagree while the ownership invariant holds. A manual
+    # printing's slug is a prediction and owns nothing until upstream
+    # confirms it.
     slug_owners = {}
     for row in con.execute("SELECT slug, printing_id FROM slug_history"):
         slug_owners[row["slug"]] = row["printing_id"]
-    for row in con.execute("SELECT slug, printing_id FROM printings"):
+    for row in con.execute("SELECT slug, printing_id FROM printings WHERE origin = 'api'"):
         slug_owners[row["slug"]] = row["printing_id"]
 
     return {"cards": cards, "printings": printings, "slug_owners": slug_owners}

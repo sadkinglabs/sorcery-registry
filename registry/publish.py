@@ -53,13 +53,14 @@ from .types import render_types
 DIST_PATH = Path("dist")
 
 PRINTING_SUMMARY = ("printing_id", "slug", "set_code", "set_name", "released_at",
-                    "product", "finish", "printed_as_current", "retired_at")
+                    "released_with", "product", "finish", "printed_as_current",
+                    "retired_at", "origin")
 CARD_INDEX = ("codex_id", "name", "type", "category", "rarity", "elements",
               "keywords", "subtypes", "cost", "attack", "defense", "power", "life",
-              "errata", "set_codes", "default_printing_id", "image_status")
-PRINTING_INDEX = ("printing_id", "codex_id", "slug", "set_code", "product",
+              "errata", "set_codes", "default_printing_id", "image_status", "origin")
+PRINTING_INDEX = ("printing_id", "codex_id", "slug", "set_code", "released_with", "product",
                   "finish", "printed_as_current", "retired_at", "image_hash",
-                  "image_status")
+                  "image_status", "origin")
 
 # Object keys become URL path segments; anything outside this set would
 # need escaping, and a key that needs escaping is not a stable address.

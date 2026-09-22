@@ -25,6 +25,10 @@ Checks, in order:
     This is the append-only guarantee, checked against history rather
     than promised.
  8. Every note in data/notes.json is on a card or printing that exists.
+ 9. data/manual.json and the database agree: every manual record has an
+    entry and holds what it says, manual printings own no slug, the
+    registry's own set codes are only on manual records, and
+    data/released-with.json names only official promos.
 
 Exit code 0 when every check passes, 1 with a list of violations otherwise.
 """
@@ -41,6 +45,7 @@ from .db import HISTORY_FIELDS, decode_field, face_of, get_meta, open_db
 from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, render
 from .images import load_images
 from .ids import id_number
+from .manual import check_manual, load_manual, load_released_with
 from .notes import check_notes, load_notes
 
 REQUIRED_TRIGGERS = {
@@ -71,14 +76,19 @@ def check_internal(con, errors):
             errors.append(f"{table}: max {id_column} {top} >= counter {counter} {next_id}; "
                           f"an id was assigned without the counter")
 
+    # A manual printing's slug is a prediction and has no history until
+    # upstream confirms it (check_manual); every other printing's has one
+    # open row.
     rows = con.execute("""
-        SELECT p.printing_id, p.slug,
+        SELECT p.printing_id, p.slug, p.origin,
                (SELECT count(*) FROM slug_history h
                  WHERE h.printing_id = p.printing_id AND h.valid_to IS NULL) AS open_rows,
                (SELECT h.slug FROM slug_history h
                  WHERE h.printing_id = p.printing_id AND h.valid_to IS NULL) AS open_slug
         FROM printings p""").fetchall()
     for row in rows:
+        if row["origin"] == "manual":
+            continue
         if row["open_rows"] != 1:
             errors.append(f"printing {row['printing_id']}: {row['open_rows']} open slug_history rows, expected 1")
         elif row["open_slug"] != row["slug"]:
@@ -299,7 +309,11 @@ def check_against_ref(con, ref, export_path, errors):
         if id_number(codex_id_of(current)) != id_number(codex_id_of(printing)):
             errors.append(f"printing_id {pid} moved from card {codex_id_of(printing)} "
                           f"to card {codex_id_of(current)}")
-        if current["slug"] != printing["slug"] and printing["slug"] not in history.get(pid, set()):
+        # A manual printing's predicted slug owned nothing: it may be
+        # replaced by upstream's on confirmation without leaving history.
+        was_manual = printing.get("origin") == "manual"
+        if current["slug"] != printing["slug"] and not was_manual \
+                and printing["slug"] not in history.get(pid, set()):
             errors.append(f"printing_id {pid} slug changed {printing['slug']!r} -> "
                           f"{current['slug']!r} without a slug_history record")
 
@@ -323,6 +337,7 @@ def main():
     check_internal(con, errors)
     check_errata(con, load_errata(), errors)
     check_notes(con, load_notes(), errors)
+    check_manual(con, load_manual(), load_released_with(), errors)
     check_export_matches(con, args.export, errors)
     if args.against:
         check_against_ref(con, args.against, args.export, errors)

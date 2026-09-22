@@ -156,13 +156,46 @@ To resolve a case, write `review/decisions.json`:
   "new_printings":    [ "091-some_genuinely_new-b-s" ],
   "retire_printings": [ 640 ],
   "card_renames":     [ { "card_id": 77, "new_name": "Witch" } ],
-  "new_cards":        [ "Some Genuinely New Card" ]
+  "new_cards":        [ "Some Genuinely New Card" ],
+  "confirm_cards":     [ { "card_id": 1101, "name": "The Champion" } ],
+  "confirm_printings": [ { "printing_id": 3089, "slug": "999-the_champion-op-f" } ]
 }
 ```
 
-Each entry answers one pending question: *this* vanished printing is now *that* slug (`printing_renames`), *this* new slug really is a new printing (`new_printings`), *this* printing really was removed (`retire_printings`), and likewise for cards. Re-run the sync; decisions are validated against the live diff (a stale decision is an error, never a silent guess), applied, and archived to `review/archive/` so every human judgement stays on record. Alternatively `python -m registry.sync --interactive` walks the same choices at the prompt.
+Each entry answers one pending question: *this* vanished printing is now *that* slug (`printing_renames`), *this* new slug really is a new printing (`new_printings`), *this* printing really was removed (`retire_printings`), and likewise for cards. `confirm_cards` and `confirm_printings` answer the cases the sync raises when upstream starts serving something that looks like a manual record (next section): *this* manual record is *that* upstream card or slug. Re-run the sync; decisions are validated against the live diff (a stale decision is an error, never a silent guess), applied, and archived to `review/archive/` so every human judgement stays on record. Alternatively `python -m registry.sync --interactive` walks the same choices at the prompt.
 
 Include the pending file, your decisions and your reasoning in the PR so reviewers can check the pairing.
+
+## Recording cards the API does not serve
+
+Store-kit prize cards, Kickstarter pledge cards and curios were printed but are not in the official API. [`data/manual.json`](data/manual.json) records them with the same fields as every other card and printing, and they get real ids from the same counters.
+
+- **A new card** goes under `cards`, with every card field and its printings nested inside it. Leave `codex_id` and each `printing_id` null.
+- **A new printing of a card the registry already holds**, such as a curio of an official card, goes under `printings` with that card's `codex_id`. Its gameplay text comes from the card, so it lists only physical facts.
+- **Null means unknown.** Never copy a value from another printing. An alternate art usually means a different artist, typeline or flavour text.
+- **Every entry needs a `source` and a `recorded` date.** Sources name a place, never a person, as for notes. The bar for minting an id is a photo of the card or a public source that shows it: ids are permanent, so a record minted in error can only be withdrawn, never taken back.
+- **Set codes.** A promo goes in the publisher's set `999` with the product it was distributed as (`OrganizedPlay`, `Kickstarter`). A printing upstream will never serve and that belongs to no set of theirs goes in a set of the registry's own, whose code is three capital letters (`CUR`, "Curios"), so it can never collide with a publisher's code.
+- **`released_with`** names the set release a promo or curio belongs to, such as `002` for a Beta store-kit card. Leave it null for a printing in a release set. For official promos, which the API serves under 999, record it in [`data/released-with.json`](data/released-with.json) instead, with a source.
+
+Then run:
+
+```bash
+python -m registry.manual apply     # mints ids and writes them into data/manual.json
+python -m registry.export
+python -m registry.validate --against origin/main
+```
+
+`apply` can be re-run safely. It mints ids only for entries without one, and updates the others in place: until upstream serves a record, it is our reading of the card, so a corrected reading replaces the old one. Commit `data/manual.json` with the ids it wrote, the database and the export together.
+
+**Slugs.** Each manual printing gets a slug predicted in the publisher's own shape (`999-the_champion-op-f`), so it reads like the rest and is the first hint when upstream starts serving it. The prediction owns nothing and has no slug history. Where two predictions would collide, the second takes its `released_with` as a suffix (`999-the_champion_004-op-f`); an entry may also give its own `slug`.
+
+**Never remove an entry.** `apply` refuses a manual record with no entry. To retract one found to be wrong, add `"withdrawn": {"on": "YYYY-MM-DD", "reason": "..."}` to it. A withdrawn printing is never a card's default, and the export shows why it was withdrawn.
+
+**When upstream starts serving one.** The sync never retires a manual record, since upstream not serving it is its normal state. When upstream serves a card with the same or a close name, or a printing of the same card with the same product and finish, or the predicted slug itself, the sync neither matches nor mints. It writes a case to `review/pending.json`, and you answer it in `review/decisions.json`:
+- `confirm_cards` or `confirm_printings` says it is the same record. The record keeps its id, takes upstream's name, slug and values where they differ, and becomes origin `api`, with `manual.confirmed_at` set to that day. Its entry stays in `data/manual.json` as the record of where it started.
+- `new_cards` or `new_printings` says it is something else.
+
+A curio in a set of the registry's own will never be confirmed, and stays manual for good.
 
 ## Notes
 

@@ -24,8 +24,8 @@
     },
     "setCode": {
       "type": "string",
-      "pattern": "^[0-9]{3}$",
-      "description": "The set's official code (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promo). A code, not a number: 003 is deliberately unused, so codes do not imply an order. There is no collector number: cards have no official serialisation within a set."
+      "pattern": "^([0-9]{3}|[A-Z]{3})$",
+      "description": "A set's code. Three digits are the publisher's official codes (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promo). A code, not a number: 003 is deliberately unused, so codes do not imply an order. Three capital letters are codes the registry makes for printings the official API will never serve (CUR, the curios), so they can never collide with the publisher's. There is no collector number: cards have no official serialisation within a set."
     },
     "face": {
       "type": "object",
@@ -285,6 +285,81 @@
       ],
       "additionalProperties": false,
       "description": "Something known about a record that the official API does not say, with where it came from. A note never contradicts a field: a fact that fits a field is a correction and changes the field instead."
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "api",
+        "manual"
+      ],
+      "description": "Who stands behind the record. 'api': the official API serves it. 'manual': the registry recorded it by hand (data/manual.json) because the API does not serve it. A manual record becomes 'api', keeping its id, once the API serves it and a person confirms the match."
+    },
+    "manual": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Where the hand record came from. Names a place, not a person, unless that person asked to be credited."
+            },
+            "recorded": {
+              "$ref": "#/$defs/date",
+              "description": "The day the record was written down."
+            },
+            "confirmed_at": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The day the official API was confirmed to serve it, after which origin is 'api'; null while it is still manual."
+            },
+            "withdrawn": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "on": {
+                      "$ref": "#/$defs/date",
+                      "description": "The day the record was withdrawn."
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Why the record was found to be wrong."
+                    }
+                  },
+                  "required": [
+                    "on",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Set when a manual record was found to be wrong. Ids are permanent, so it stays, marked; a withdrawn printing is never a card's default."
+            }
+          },
+          "required": [
+            "source",
+            "recorded",
+            "confirmed_at",
+            "withdrawn"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Null for a record the registry only ever observed in the official API. For a record the registry recorded by hand: where it came from and when, kept after the API starts serving it."
     }
   },
   "type": "object",
@@ -378,6 +453,10 @@
             "type": "integer",
             "description": "Printings in the set."
           },
+          "origin": {
+            "$ref": "#/$defs/origin",
+            "description": "'manual' when every printing in the set is a manual record, as for a set code of the registry's own; 'api' otherwise."
+          },
           "api_url": {
             "type": [
               "string",
@@ -401,6 +480,7 @@
           "released_at",
           "cards",
           "printings",
+          "origin",
           "api_url",
           "kairos_url"
         ],
@@ -597,6 +677,12 @@
             "$ref": "#/$defs/imageStatus",
             "description": "Derived: the default printing's image_status."
           },
+          "origin": {
+            "$ref": "#/$defs/origin"
+          },
+          "manual": {
+            "$ref": "#/$defs/manual"
+          },
           "notes": {
             "type": "array",
             "items": {
@@ -635,6 +721,8 @@
           "kairos_url",
           "image_urls",
           "image_status",
+          "origin",
+          "manual",
           "notes"
         ],
         "additionalProperties": false,
@@ -683,6 +771,17 @@
               }
             ],
             "description": "The date this printing reached the public."
+          },
+          "released_with": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/setCode"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The set release this printing belongs to. For a printing in a release set it is that set. For a promo (set 999) or a curio (CUR), which the publisher files outside any release, it is the release it came out with, recorded by hand; null until recorded."
           },
           "product": {
             "type": [
@@ -791,6 +890,12 @@
             "$ref": "#/$defs/imageStatus",
             "description": "How good the source of the front image was: missing, lowres or ok."
           },
+          "origin": {
+            "$ref": "#/$defs/origin"
+          },
+          "manual": {
+            "$ref": "#/$defs/manual"
+          },
           "notes": {
             "type": "array",
             "items": {
@@ -806,6 +911,7 @@
           "set_name",
           "set_code",
           "released_at",
+          "released_with",
           "product",
           "finish",
           "slug",
@@ -821,6 +927,8 @@
           "kairos_url",
           "image_urls",
           "image_status",
+          "origin",
+          "manual",
           "notes"
         ],
         "additionalProperties": false,
@@ -933,9 +1041,10 @@
             "type": "string",
             "enum": [
               "api",
-              "card"
+              "card",
+              "manual"
             ],
-            "description": "Where the face came from: 'api' when the registry observed it in the official API; 'card' when it was recorded by hand from what is printed on the card (data/errata.json), the case of a card whose printed text differs from the text the API serves."
+            "description": "Where the face came from: 'api' when the registry observed it in the official API; 'card' when it was recorded by hand from what is printed on the card (data/errata.json), the case of a card whose printed text differs from the text the API serves; 'manual' for the face of a card the registry recorded by hand because the API does not serve it (data/manual.json)."
           },
           "type": {
             "type": [
