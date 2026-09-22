@@ -13,7 +13,7 @@ from pathlib import Path
 from . import API_BASE, API_URL, IMAGE_BASE, SCHEMA_VERSION, SITE_BASE
 from .errata import load_errata, unknown_printings
 from .images import load_images
-from .notes import load_gaps, load_notes
+from .notes import load_notes
 from .db import (CARD_FIELDS, FACE_FIELDS, HISTORY_FIELDS, PRINTING_FACE_FIELDS,
                  PRINTING_FIELDS, decode_field, open_db)
 from .ids import format_card_id, format_printing_id
@@ -153,15 +153,13 @@ def printed_as_current(released_at, history, added_on=None):
     return released_at >= current["valid_from"]
 
 
-def build_export(con, images=None, errata=None, notes=None, gaps=None):
+def build_export(con, images=None, errata=None, notes=None):
     """The export, from the database plus data/images.json (what images the
-    registry holds), data/errata.json (printed faces recorded by hand),
-    data/notes.json (what the official API does not say about a record)
-    and data/gaps.json (what exists but is not recorded) - registry-owned
-    data kept in git, like overrides."""
+    registry holds), data/errata.json (printed faces recorded by hand) and
+    data/notes.json (what the official API does not say about a record) -
+    registry-owned data kept in git, like overrides."""
     held_images = (images if images is not None else load_images()).get("printings", {})
     notes = notes if notes is not None else load_notes()
-    gaps = gaps if gaps is not None else load_gaps()
     # Every record carries its notes as a list, empty for almost all of
     # them: a consumer never has to ask whether the field is there.
     card_notes, printing_notes = notes.get("cards", {}), notes.get("printings", {})
@@ -334,7 +332,6 @@ def build_export(con, images=None, errata=None, notes=None, gaps=None):
             "slug_history": len(slug_history),
             "name_history": len(name_history),
             "card_history": len(card_history),
-            "gaps": len(gaps),
         },
         "sets": sets,
         "cards": cards,
@@ -342,8 +339,6 @@ def build_export(con, images=None, errata=None, notes=None, gaps=None):
         "slug_history": slug_history,
         "name_history": name_history,
         "card_history": card_history,
-        # Known to exist, not recorded: the edge of the registry, stated.
-        "gaps": [dict(g) for g in gaps],
     }
 
 

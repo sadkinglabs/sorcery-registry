@@ -24,9 +24,7 @@ Checks, in order:
     decreased, and any slug that changed is explained by slug_history.
     This is the append-only guarantee, checked against history rather
     than promised.
- 8. Every note in data/notes.json is on a card or printing that exists,
-    and every gap in data/gaps.json agrees with the card it names, or
-    names no card the registry holds.
+ 8. Every note in data/notes.json is on a card or printing that exists.
 
 Exit code 0 when every check passes, 1 with a list of violations otherwise.
 """
@@ -43,7 +41,7 @@ from .db import HISTORY_FIELDS, decode_field, face_of, get_meta, open_db
 from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, render
 from .images import load_images
 from .ids import id_number
-from .notes import check_notes, load_gaps, load_notes
+from .notes import check_notes, load_notes
 
 REQUIRED_TRIGGERS = {
     "cards_no_delete", "cards_id_immutable",
@@ -324,7 +322,7 @@ def main():
     errors = []
     check_internal(con, errors)
     check_errata(con, load_errata(), errors)
-    check_notes(con, load_notes(), load_gaps(), errors)
+    check_notes(con, load_notes(), errors)
     check_export_matches(con, args.export, errors)
     if args.against:
         check_against_ref(con, args.against, args.export, errors)

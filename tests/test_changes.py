@@ -8,7 +8,7 @@ import unittest
 from registry.changes import check, diff_exports, summary_line
 
 
-def export(cards, printings, sets=("001",), history=(), schema_version=11, gaps=None):
+def export(cards, printings, sets=("001",), history=(), schema_version=11):
     doc = {
         "header": {"schema_version": schema_version},
         "sets": [{"set_code": code, "set_name": f"Set {code}"} for code in sets],
@@ -16,18 +16,12 @@ def export(cards, printings, sets=("001",), history=(), schema_version=11, gaps=
         "printings": printings,
         "card_history": list(history),
     }
-    if gaps is not None:
-        doc["gaps"] = gaps
     return doc
 
 
 def note(text, source="Community report, Sorcery Discord", recorded="2026-09-22"):
     return {"text": text, "source": source, "recorded": recorded}
 
-
-def gap(name, codex_id=None, text="Known to exist, not recorded."):
-    return {"name": name, "codex_id": codex_id, "text": text,
-            "source": "Community report, Sorcery Discord", "recorded": "2026-09-22"}
 
 
 def card(codex_id, **fields):
@@ -80,7 +74,7 @@ class DiffTest(unittest.TestCase):
             "printings_added": 1, "printings_changed": 2, "printings_removed": 0,
             "sets_added": 1, "images_added": 2, "images_replaced": 1,
             "history_rows_added": 1, "notes_added": 0, "notes_removed": 0,
-            "gaps_added": 0, "gaps_closed": 0, "identifiers_removed": 0})
+            "identifiers_removed": 0})
         self.assertEqual(changes["cards"]["changed"],
                          [{"codex_id": "C000001", "name": "Card C000001", "fields": ["rules_text", "errata"]}])
         self.assertEqual(changes["cards"]["added"], ["C000003"])
@@ -173,26 +167,9 @@ class DiffTest(unittest.TestCase):
         self.assertEqual(summary_line(changes), "1 note added · 0 identifiers removed")
         self.assertEqual(changes["printings"]["changed"], [])
 
-    def test_gaps_recorded_and_closed_by_what_they_name(self):
-        before = export(BEFORE["cards"], BEFORE["printings"],
-                        gaps=[gap("The Champion"), gap("Card One", "C000001")])
-        after = export(BEFORE["cards"], BEFORE["printings"],
-                       gaps=[gap("The Champion", text="Reworded, same gap."),
-                             gap("Card Two", "C000002")])
-        changes = diff_exports(before, after, "v3.4.0", "v3.4.1")
-        self.assertEqual(changes["gaps"], {
-            "added": [{"name": "Card Two", "codex_id": "C000002"}],
-            "closed": [{"name": "Card One", "codex_id": "C000001"}]})
-        self.assertEqual(summary_line(changes),
-                         "1 gap recorded · 1 gap closed · 0 identifiers removed")
-        # An export from before the register existed has no gaps.
-        first = diff_exports(BEFORE, after, "v3.3.3", "v3.4.0")
-        self.assertEqual(first["summary"]["gaps_added"], 2)
-        self.assertEqual(first["summary"]["gaps_closed"], 0)
-
     def test_summary_line_reads_documents_from_before_notes(self):
         changes = diff_exports(BEFORE, copy.deepcopy(BEFORE), "v3.3.2", "v3.3.3")
-        for key in ("notes_added", "notes_removed", "gaps_added", "gaps_closed"):
+        for key in ("notes_added", "notes_removed"):
             del changes["summary"][key]
         self.assertEqual(summary_line(changes), "0 identifiers removed")
 

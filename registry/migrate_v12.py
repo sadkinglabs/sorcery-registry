@@ -2,10 +2,10 @@
 
     python -m registry.migrate_v12 [--db registry.sqlite]
 
-v12 adds notes on cards and printings and the gaps section, both read at
-export time from data/notes.json and data/gaps.json. The database does
-not change; this only records the new version, because the validator
-insists the database and the code agree on it.
+v12 adds notes on cards and printings, read at export time from
+data/notes.json. The database does not change; this only records the new
+version, because the validator insists the database and the code agree
+on it.
 """
 
 import argparse

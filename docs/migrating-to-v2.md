@@ -7,9 +7,7 @@ Additive; **no identifier changed** and no existing value changed.
 | New | On | Value |
 |---|---|---|
 | `notes` | cards and printings, after `image_status` | a list of `{text, source, recorded}`: what the registry knows that the official API does not say, with where it came from and the day it was recorded. Empty for almost every record |
-| `gaps` | a new top-level section, after `card_history`, and `gaps.json` at every release root | cards and printings known to exist that the registry does not record: `{name, codex_id, text, source, recorded}`, with `codex_id` null for an unrecorded card |
-| `header.gaps` | the header, and `counts.gaps` in `index.json` | the number of gaps |
-| `notes_*`, `gaps_*` | `changes.json` summary, and `notes`/`gaps` sections | notes added and removed, gaps recorded and closed |
+| `notes_*` | `changes.json` summary, and its `notes` section | notes added and removed |
 
 A strict parser that rejects unknown keys needs the new schema; everything else reads v3.4 unchanged. `changes.json` also stops counting a field a release adds as a change to records where that field is empty.
 

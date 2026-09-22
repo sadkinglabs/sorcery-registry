@@ -37,8 +37,6 @@ Layout (every path relative to the version root the uploader chooses):
     index/printings.json        compact printing list
     index/slugs.json            slug -> printing_id, every slug ever
     history/slugs.json, history/names.json, history/cards.json
-    gaps.json                   the gap register: cards and printings known
-                                to exist that the registry does not record
 """
 
 import argparse
@@ -84,7 +82,6 @@ ENDPOINTS = {
     "slug_history": "history/slugs.json",
     "name_history": "history/names.json",
     "card_history": "history/cards.json",
-    "gaps": "gaps.json",
 }
 
 
@@ -204,7 +201,6 @@ def build_objects(export, dataset_version=None, base_url=None, latest_url=None,
     objects["history/slugs.json"] = export["slug_history"]
     objects["history/names.json"] = export["name_history"]
     objects["history/cards.json"] = export["card_history"]
-    objects["gaps.json"] = export["gaps"]
     objects["changes.json"] = diff_exports(previous, export,
                                            previous_tag if previous else None, dataset_version)
 
@@ -218,7 +214,7 @@ def build_objects(export, dataset_version=None, base_url=None, latest_url=None,
         "source": header["source"],
         "terms": TERMS_URL,
         "counts": {k: header[k] for k in ("sets", "cards", "printings", "slug_history",
-                                          "name_history", "card_history", "gaps")},
+                                          "name_history", "card_history")},
         "endpoints": dict(ENDPOINTS),
     }
 

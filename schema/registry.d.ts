@@ -160,8 +160,6 @@ export interface Header {
   name_history: number;
   /** How many rows the card_history section holds. */
   card_history: number;
-  /** How many entries the gaps section holds. */
-  gaps: number;
 }
 
 /** Derived catalogue of the sets themselves, with distinct-card and printing counts. */
@@ -360,24 +358,6 @@ export interface CardHistoryRow extends Face {
 }
 
 /**
- * Cards and printings known to exist that the registry does not record, usually because the
- * official API does not serve them. An entry is removed once what it describes has a record. A gap
- * has no id: it is a pointer to go and look, not a record.
- */
-export interface Gap {
-  /** The card's name as far as it is known. */
-  name: string;
-  /** The card a missing printing belongs to, or null when the card itself is not recorded. */
-  codex_id: CodexId | null;
-  /** What is missing, in plain words. */
-  text: string;
-  /** Where the report came from. Names a place, not a person. */
-  source: string;
-  /** The day the gap was written down. */
-  recorded: IsoDate;
-}
-
-/**
  * Stable identifiers for every card and printing in Sorcery: Contested Realm. codex_id (C000042)
  * identifies a card across all its reprints; printing_id (P000042) identifies one physical print.
  * Key on those two - every other field is data that can change. The shape mirrors the official
@@ -397,10 +377,4 @@ export interface Registry {
   slug_history: SlugHistoryRow[];
   name_history: NameHistoryRow[];
   card_history: CardHistoryRow[];
-  /**
-   * Cards and printings known to exist that the registry does not record, usually because the
-   * official API does not serve them. An entry is removed once what it describes has a record. A
-   * gap has no id: it is a pointer to go and look, not a record.
-   */
-  gaps: Gap[];
 }

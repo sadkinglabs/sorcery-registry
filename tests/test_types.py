@@ -118,7 +118,6 @@ class SampleTest(unittest.TestCase):
             "slug_history": [{"printing_id": "P000004", "slug": "x"}],
             "name_history": [{"codex_id": "C000004", "name": "n"}],
             "card_history": [{"codex_id": "C000003"}],
-            "gaps": [{"name": "g", "codex_id": None}],
         }
         text = render_sample(export, cards=1)
         self.assertTrue(text.startswith("// A slice"))
@@ -127,7 +126,6 @@ class SampleTest(unittest.TestCase):
         self.assertEqual([c["codex_id"] for c in sample["cards"]], ["C000001", "C000003", "C000004", "C000005"])
         self.assertEqual([p["printing_id"] for p in sample["printings"]],
                          ["P000001", "P000004", "P000005"])
-        self.assertEqual(sample["gaps"], [{"name": "g", "codex_id": None}])
         self.assertEqual(sample["card_history"], [{"codex_id": "C000003"}])
 
 

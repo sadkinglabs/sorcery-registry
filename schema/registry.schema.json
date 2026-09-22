@@ -324,10 +324,6 @@
         "card_history": {
           "type": "integer",
           "description": "How many rows the card_history section holds."
-        },
-        "gaps": {
-          "type": "integer",
-          "description": "How many entries the gaps section holds."
         }
       },
       "required": [
@@ -338,8 +334,7 @@
         "printings",
         "slug_history",
         "name_history",
-        "card_history",
-        "gaps"
+        "card_history"
       ],
       "additionalProperties": false,
       "description": "Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a byte-identical file."
@@ -1093,53 +1088,6 @@
         "additionalProperties": false,
         "description": "Every state a card's gameplay face has been in, as observed by syncs: the face's fields flattened into the row. valid_to null = the current face, which equals the card record. A closed row is how the card played until valid_to; a printing released within a row's dates was printed with that row's values. Seeded with every card's face on 2026-09-09."
       }
-    },
-    "gaps": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "description": "The card's name as far as it is known."
-          },
-          "codex_id": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/codexId"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The card a missing printing belongs to, or null when the card itself is not recorded."
-          },
-          "text": {
-            "type": "string",
-            "minLength": 1,
-            "description": "What is missing, in plain words."
-          },
-          "source": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Where the report came from. Names a place, not a person."
-          },
-          "recorded": {
-            "$ref": "#/$defs/date",
-            "description": "The day the gap was written down."
-          }
-        },
-        "required": [
-          "name",
-          "codex_id",
-          "text",
-          "source",
-          "recorded"
-        ],
-        "additionalProperties": false
-      },
-      "description": "Cards and printings known to exist that the registry does not record, usually because the official API does not serve them. An entry is removed once what it describes has a record. A gap has no id: it is a pointer to go and look, not a record."
     }
   },
   "required": [
@@ -1149,8 +1097,7 @@
     "printings",
     "slug_history",
     "name_history",
-    "card_history",
-    "gaps"
+    "card_history"
   ],
   "additionalProperties": false
 }

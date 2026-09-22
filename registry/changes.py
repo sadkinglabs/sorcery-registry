@@ -18,7 +18,7 @@ the one being released, and publishes it next to index.json:
                   "printings_added": 4, "printings_changed": 1, "printings_removed": 0,
                   "sets_added": 0, "images_added": 3, "images_replaced": 1,
                   "history_rows_added": 2, "notes_added": 1, "notes_removed": 0,
-                  "gaps_added": 0, "gaps_closed": 1, "identifiers_removed": 0},
+                  "identifiers_removed": 0},
       "cards": {"added": [], "changed": [{"codex_id": "C000230", "name": "Polar Bears",
                                           "fields": ["rules_text", "errata"]}], "removed": []},
       "printings": {"added": ["P003089"], "changed": [{"printing_id": ..., "codex_id": ...,
@@ -27,11 +27,10 @@ the one being released, and publishes it next to index.json:
       "images": {"added": ["P003089"], "replaced": ["P000937"]},
       "history": {"added": [{"codex_id": "C000230", "valid_from": "2026-09-15", "source": "card"}]},
       "notes": {"added": [{"id": "P001640", "text": ..., "source": ..., "recorded": "2026-09-22"}],
-                "removed": []},
-      "gaps": {"added": [], "closed": [{"name": "The Champion", "codex_id": null}]}
+                "removed": []}
     }
 
-Notes and gaps have sections of their own: a note added to a printing is
+Notes have a section of their own: a note added to a printing is
 reported there, not as the printing changing. A field a release adds is
 not a change to records where it is empty, so a release that introduces
 a field reports only the records that carry something in it.
@@ -51,7 +50,6 @@ import json
 import sys
 from pathlib import Path
 
-from .notes import gap_key
 from .versions import parse_tag
 
 
@@ -182,15 +180,6 @@ def diff_exports(previous, current, from_tag, to_tag):
     notes_added = [{"id": i, **n} for i, n in _notes(current) if _note_key(i, n) not in prev_notes]
     notes_removed = [{"id": i, **n} for i, n in _notes(previous) if _note_key(i, n) not in cur_notes]
 
-    prev_gaps = (previous or {}).get("gaps") or []
-    cur_gaps = current.get("gaps") or []
-    prev_gap_keys = {gap_key(g) for g in prev_gaps}
-    cur_gap_keys = {gap_key(g) for g in cur_gaps}
-    gaps_added = [{"name": g["name"], "codex_id": g["codex_id"]}
-                  for g in cur_gaps if gap_key(g) not in prev_gap_keys]
-    gaps_closed = [{"name": g["name"], "codex_id": g["codex_id"]}
-                   for g in prev_gaps if gap_key(g) not in cur_gap_keys]
-
     return {
         "from": from_tag,
         "to": to_tag,
@@ -211,8 +200,6 @@ def diff_exports(previous, current, from_tag, to_tag):
             "history_rows_added": len(history_added),
             "notes_added": len(notes_added),
             "notes_removed": len(notes_removed),
-            "gaps_added": len(gaps_added),
-            "gaps_closed": len(gaps_closed),
             "identifiers_removed": len(cards_removed) + len(prints_removed),
         },
         "cards": {"added": cards_added, "changed": cards_changed, "removed": cards_removed},
@@ -221,7 +208,6 @@ def diff_exports(previous, current, from_tag, to_tag):
         "images": {"added": images_added, "replaced": images_replaced},
         "history": {"added": history_added},
         "notes": {"added": notes_added, "removed": notes_removed},
-        "gaps": {"added": gaps_added, "closed": gaps_closed},
     }
 
 
@@ -239,9 +225,7 @@ def summary_line(changes):
                            ("images_replaced", "image replaced", "images replaced"),
                            ("history_rows_added", "history row added", "history rows added"),
                            ("notes_added", "note added", "notes added"),
-                           ("notes_removed", "note removed", "notes removed"),
-                           ("gaps_added", "gap recorded", "gaps recorded"),
-                           ("gaps_closed", "gap closed", "gaps closed")):
+                           ("notes_removed", "note removed", "notes removed")):
         if s.get(key):
             parts.append(f"{s[key]} {one if s[key] == 1 else many}")
     parts.append(f"{s['identifiers_removed']} identifiers removed")

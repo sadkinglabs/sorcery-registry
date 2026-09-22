@@ -164,21 +164,16 @@ Each entry answers one pending question: *this* vanished printing is now *that* 
 
 Include the pending file, your decisions and your reasoning in the PR so reviewers can check the pairing.
 
-## Notes and the gap register
+## Notes
 
-Some things the registry knows have no field and no place in the official API: that a promo was prize support in a particular store kit, or that a card was printed and never served. Two hand-kept files hold them, and both are read at export time, never stored in the database.
-
-- **[`data/notes.json`](data/notes.json)** attaches notes to cards (`cards`, keyed by `codex_id`) and printings (`printings`, keyed by `printing_id`). Each note is `{"text", "source", "recorded"}`: one fact in plain words, where it came from, and the day you wrote it down.
-- **[`data/gaps.json`](data/gaps.json)** lists what is known to exist but is not recorded. Each gap is `{"name", "codex_id", "text", "source", "recorded"}`, where `codex_id` is the card a missing printing belongs to, or `null` when the card itself is unrecorded. When the thing a gap describes gets a record, delete the gap in the same PR; the release diff reports it as closed.
-
-Rules for both:
+Some things the registry knows have no field and no place in the official API, such as that a promo was prize support in a particular store kit. [`data/notes.json`](data/notes.json) holds them, read at export time and never stored in the database. It attaches notes to cards (`cards`, keyed by `codex_id`) and printings (`printings`, keyed by `printing_id`). Each note is `{"text", "source", "recorded"}`: one fact in plain words, where it came from, and the day you wrote it down.
 
 - **Sources name a place, never a person.** Write "Community report, Sorcery Discord" or "Arthurian Legends store kit insert, photographed". Every release is immutable, so a name written into one stays in it for good. Credit a person by name only if they have asked to be credited.
-- **One fact per note.** Say how sure it is in the text: "reportedly", "community reports disagree". A listing or a single report is a reason to go and look, not a record.
+- **One fact per note.** Say how sure it is in the text, for example "reportedly". A single report is a reason to go and look, not a record.
 - **A note never contradicts a field.** A fact that fits a field, such as an artist, a date or a finish, is a correction. Make it in [`data/overrides.json`](data/overrides.json), where it changes the field and carries a reason.
-- **Adding a note is a data release.** Run `python -m registry.export` and commit the regenerated export with the note. `changes.json` reports notes and gaps in sections of their own, never as a change to the record.
+- **Adding a note is a data release.** Run `python -m registry.export` and commit the regenerated export with the note. `changes.json` reports notes in a section of their own, never as a change to the record.
 
-Both files are shape-checked on load, so a typo is an error rather than a silently dropped note. The validator checks that every note sits on a record that exists, that a gap with a `codex_id` names that card by its current name, and that a gap without one does not name a card the registry already holds.
+The file is shape-checked on load, so a typo is an error rather than a silently dropped note, and the validator checks that every note sits on a record that exists.
 
 ## What runs in CI
 
@@ -188,7 +183,7 @@ Every push and PR: the test suite, then `registry.validate`, which checks that
 - no ID exceeds its allocation counter (nothing bypassed ID assignment),
 - every printing's slug agrees with its open `slug_history` row, and every card's name and rules text agree with their open history rows,
 - the committed JSON is byte-identical to what the committed database generates, and every record's addresses name the record they sit on,
-- every note sits on a card or printing that exists, and every gap agrees with the card it names,
+- every note sits on a card or printing that exists,
 - and against the base branch: every ID that existed before still exists, printings still point at the same card, counters never decreased, and every slug change is explained by `slug_history`.
 
 If any of those fail, the PR does not merge. There is deliberately no way to "fix up" a violation in place; revert and redo the change through the pipeline.

@@ -7,8 +7,7 @@
     "printings": 3088,
     "slug_history": 3088,
     "name_history": 1100,
-    "card_history": 1129,
-    "gaps": 1
+    "card_history": 1129
   },
   "sets": [
     {
@@ -201143,15 +201142,6 @@
       "thr_water": 0,
       "rules_text": "Submerge",
       "back": null
-    }
-  ],
-  "gaps": [
-    {
-      "name": "The Champion",
-      "codex_id": null,
-      "text": "Printed for the Arthurian Legends store kit, the Organised Play prize support sent at the set's release, alongside the Frank Frazetta Sorcerer (P001640). Not served by the official API. Community reports disagree on the artist: Frank Frazetta or Vincent Pompetti.",
-      "source": "Community reports, Sorcery Discord",
-      "recorded": "2026-09-22"
     }
   ]
 }
