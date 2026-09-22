@@ -184,7 +184,7 @@ A source names a place, not a person: "Community report, Sorcery Discord", "Arth
 
 ## Manual records
 
-The official API does not serve everything that was printed. Store-kit prize cards, Kickstarter pledge cards and curios exist only on tables and in binders. The registry records them by hand, with the same fields as every other record and ids from the same counters, so they can be stored, searched and linked like anything else.
+The official API does not serve everything that was printed. Store-kit prize cards, Kickstarter pledge cards and curios exist only on tables and in binders. The registry records them by hand, with the same fields as every other record and ids from the same counters, so they can be stored, searched and linked like anything else. A curio is always a card of its own, never a printing of a card that is played: its printings are in set `CUR`, and its name ends in ` (Curio)` (`Bosk Troll (Curio)`), since card names are unique.
 
 Every card, printing and set says who stands behind it:
 

@@ -19,6 +19,14 @@ The export publishes the kind on every set, and everything that asks
 set the file does not classify, so a new set from upstream stops the
 release until a person says what it is.
 
+Curios (CUR) are collectibles, not game objects: nothing about one is
+ever played, so no curio is recorded as a printing of a card that is.
+Every curio is a card of its own, all of whose printings are curios, and
+its name is the printed name with " (Curio)" after it, because card
+names are unique and the sync identifies cards by name ("Bosk Troll
+(Curio)" beside the official "Bosk Troll"). A note on the official card
+can say a curio of it exists.
+
 The one rule about a code's shape is a collision rule, not a meaning:
 the registry's own codes are three capital letters, which the publisher's
 three-digit codes can never be, so a code of ours can never collide with
@@ -32,6 +40,8 @@ from pathlib import Path
 SETS_PATH = Path("data") / "sets.json"
 KINDS = ("release", "promo", "registry")
 REGISTRY_CODE = re.compile(r"^[A-Z]{3}$")
+CURIOS = "CUR"
+CURIO_SUFFIX = " (Curio)"
 
 
 def load_sets(path=SETS_PATH):
@@ -71,7 +81,8 @@ def is_release(set_code, kinds):
 
 def check_sets(con, kinds, errors):
     """The validator's view: every set the registry holds is classified,
-    and a set of the registry's own holds only records kept by hand."""
+    a set of the registry's own holds only records kept by hand, and
+    every curio is a card of its own, named as one."""
     for row in con.execute("SELECT set_code, count(*) AS n, "
                            "sum(origin != 'manual') AS official FROM printings GROUP BY set_code"):
         code = row["set_code"]
@@ -83,3 +94,20 @@ def check_sets(con, kinds, errors):
         elif kinds[code] == "registry" and row["official"]:
             errors.append(f"data/sets.json: set {code} is the registry's own, but "
                           f"{row['official']} of its printings are official records")
+    rows = con.execute(
+        "SELECT c.name, sum(p.set_code = ?) AS curios, count(p.printing_id) AS printings "
+        "FROM cards c LEFT JOIN printings p ON p.card_id = c.card_id "
+        "GROUP BY c.card_id HAVING curios > 0 OR c.name LIKE ?",
+        (CURIOS, "%" + CURIO_SUFFIX)).fetchall()
+    for row in rows:
+        name = row["name"]
+        if row["curios"] and row["curios"] != row["printings"]:
+            errors.append(f"card {name!r}: {row['curios']} of its {row['printings']} printings are "
+                          f"curios; a curio is a card of its own, never a printing of a card "
+                          f"that is played")
+        elif not row["curios"]:
+            errors.append(f"card {name!r}: named as a curio, but none of its printings is in "
+                          f"{CURIOS}")
+        elif not name.endswith(CURIO_SUFFIX):
+            errors.append(f"card {name!r}: its printings are curios, so its name ends with "
+                          f"{CURIO_SUFFIX.strip()!r}")
