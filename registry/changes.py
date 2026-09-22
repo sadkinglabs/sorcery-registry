@@ -13,19 +13,27 @@ the one being released, and publishes it next to index.json:
 
     {
       "from": "v3.3.0", "to": "v3.3.1",
-      "schema_version": {"from": 11, "to": 11},
+      "schema_version": {"from": 12, "to": 12},
       "summary": {"cards_added": 0, "cards_changed": 2, "cards_removed": 0,
                   "printings_added": 4, "printings_changed": 1, "printings_removed": 0,
                   "sets_added": 0, "images_added": 3, "images_replaced": 1,
-                  "history_rows_added": 2, "identifiers_removed": 0},
+                  "history_rows_added": 2, "notes_added": 1, "notes_removed": 0,
+                  "identifiers_removed": 0},
       "cards": {"added": [], "changed": [{"codex_id": "C000230", "name": "Polar Bears",
                                           "fields": ["rules_text", "errata"]}], "removed": []},
       "printings": {"added": ["P003089"], "changed": [{"printing_id": ..., "codex_id": ...,
                                                        "fields": ["slug"]}], "removed": []},
       "sets": {"added": []},
       "images": {"added": ["P003089"], "replaced": ["P000937"]},
-      "history": {"added": [{"codex_id": "C000230", "valid_from": "2026-09-15", "source": "card"}]}
+      "history": {"added": [{"codex_id": "C000230", "valid_from": "2026-09-15", "source": "card"}]},
+      "notes": {"added": [{"id": "P001640", "text": ..., "source": ..., "recorded": "2026-09-22"}],
+                "removed": []}
     }
+
+Notes have a section of their own: a note added to a printing is
+reported there, not as the printing changing. A field a release adds is
+not a change to records where it is empty, so a release that introduces
+a field reports only the records that carry something in it.
 
 `identifiers_removed` is the sum of removed cards and printings and is
 zero by the registry's first rule: ids are permanent. `--check` enforces
@@ -49,14 +57,49 @@ def _by(records, key):
     return {r[key]: r for r in records}
 
 
+# A field that means "nothing here" when a release adds it: a new field
+# absent before and empty after is not a change to the record.
+_EMPTY = (None, [], {}, "")
+
+# Fields reported in their own section rather than as a change to the
+# record, so a note added to a printing reads as a note, not as the
+# printing changing.
+_OWN_SECTION = ("notes",)
+
+
 def _changed_fields(before, after):
-    """Field names whose values differ, in the record's own key order,
-    with keys only one side has counted as changed too."""
+    """Field names whose values differ, in the record's own key order.
+    A key only one side has counts as changed, unless its value on the
+    other side is empty: a release that adds a field changes no record
+    that has nothing in it."""
     fields = []
     for key in list(after) + [k for k in before if k not in after]:
+        if key in _OWN_SECTION:
+            continue
+        if key not in before and after[key] in _EMPTY:
+            continue
+        if key not in after and before[key] in _EMPTY:
+            continue
         if before.get(key) != after.get(key):
             fields.append(key)
     return fields
+
+
+def _notes(export):
+    """Every note in an export as (record id, note), cards then printings.
+    An export from before notes existed has none."""
+    out = []
+    if not export:
+        return out
+    for section, key in (("cards", "codex_id"), ("printings", "printing_id")):
+        for record in export[section]:
+            for note in record.get("notes") or []:
+                out.append((record[key], note))
+    return out
+
+
+def _note_key(record_id, note):
+    return (record_id, note["text"])
 
 
 def _front_key(printing):
@@ -129,6 +172,14 @@ def diff_exports(previous, current, from_tag, to_tag):
         for r in current["card_history"] if _history_key(r) not in prev_rows]
     history_added.sort(key=lambda r: (r["codex_id"], r["valid_from"] or ""))
 
+    # A note is the same note while its record and text are; rewording one
+    # reads as one removed and one added, which is what a consumer showing
+    # notes needs to know.
+    prev_notes = {_note_key(i, n) for i, n in _notes(previous)}
+    cur_notes = {_note_key(i, n) for i, n in _notes(current)}
+    notes_added = [{"id": i, **n} for i, n in _notes(current) if _note_key(i, n) not in prev_notes]
+    notes_removed = [{"id": i, **n} for i, n in _notes(previous) if _note_key(i, n) not in cur_notes]
+
     return {
         "from": from_tag,
         "to": to_tag,
@@ -147,6 +198,8 @@ def diff_exports(previous, current, from_tag, to_tag):
             "images_added": len(images_added),
             "images_replaced": len(images_replaced),
             "history_rows_added": len(history_added),
+            "notes_added": len(notes_added),
+            "notes_removed": len(notes_removed),
             "identifiers_removed": len(cards_removed) + len(prints_removed),
         },
         "cards": {"added": cards_added, "changed": cards_changed, "removed": cards_removed},
@@ -154,6 +207,7 @@ def diff_exports(previous, current, from_tag, to_tag):
         "sets": {"added": sets_added},
         "images": {"added": images_added, "replaced": images_replaced},
         "history": {"added": history_added},
+        "notes": {"added": notes_added, "removed": notes_removed},
     }
 
 
@@ -169,8 +223,10 @@ def summary_line(changes):
                            ("sets_added", "set added", "sets added"),
                            ("images_added", "image added", "images added"),
                            ("images_replaced", "image replaced", "images replaced"),
-                           ("history_rows_added", "history row added", "history rows added")):
-        if s[key]:
+                           ("history_rows_added", "history row added", "history rows added"),
+                           ("notes_added", "note added", "notes added"),
+                           ("notes_removed", "note removed", "notes removed")):
+        if s.get(key):
             parts.append(f"{s[key]} {one if s[key] == 1 else many}")
     parts.append(f"{s['identifiers_removed']} identifiers removed")
     return " · ".join(parts)

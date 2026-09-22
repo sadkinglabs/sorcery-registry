@@ -221,12 +221,15 @@ def render_sample(export, cards=40):
     """A slice of the export as a TypeScript module, `export default {...}
     as const`, so tsc sees every value as a literal ("ok", not string)
     and can check the real data against the declarations structurally.
-    The first `cards` cards, plus a double-faced card and an errata card
-    so the nullable and nested shapes are exercised, with their printings
-    and history rows and every set."""
+    The first `cards` cards, plus a double-faced card, an errata card and
+    a card with notes on it or on a printing, so the nullable and nested
+    shapes are exercised, with their printings and history rows and
+    every set."""
     chosen = list(export["cards"][:cards])
     ids = {c["codex_id"] for c in chosen}
-    for pick in (lambda c: c.get("back"), lambda c: c.get("errata")):
+    noted = {p["codex_id"] for p in export["printings"] if p.get("notes")}
+    for pick in (lambda c: c.get("back"), lambda c: c.get("errata"),
+                 lambda c: c.get("notes") or c["codex_id"] in noted):
         extra = next((c for c in export["cards"] if pick(c) and c["codex_id"] not in ids), None)
         if extra:
             chosen.append(extra)

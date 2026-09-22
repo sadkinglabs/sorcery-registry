@@ -259,6 +259,32 @@
         "ok"
       ],
       "description": "missing: the registry holds no image for this face (image_urls null). lowres: held and served in every rendition, but the publisher's file was too small for the large rendition and was upscaled (the early sets ship at 380x531). ok: held at full size."
+    },
+    "note": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The fact, in plain words."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Where the fact came from: a document, a product, a community report. Names a place, not a person, unless that person asked to be credited."
+        },
+        "recorded": {
+          "$ref": "#/$defs/date",
+          "description": "The day the note was written down, not the day the fact became true."
+        }
+      },
+      "required": [
+        "text",
+        "source",
+        "recorded"
+      ],
+      "additionalProperties": false,
+      "description": "Something known about a record that the official API does not say, with where it came from. A note never contradicts a field: a fact that fits a field is a correction and changes the field instead."
     }
   },
   "type": "object",
@@ -570,6 +596,13 @@
           "image_status": {
             "$ref": "#/$defs/imageStatus",
             "description": "Derived: the default printing's image_status."
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/note"
+            },
+            "description": "What the registry knows about this card that the official API does not say, oldest first. Empty for most records."
           }
         },
         "required": [
@@ -601,7 +634,8 @@
           "api_url",
           "kairos_url",
           "image_urls",
-          "image_status"
+          "image_status",
+          "notes"
         ],
         "additionalProperties": false,
         "description": "One record per card as a game piece; reprints share one record."
@@ -756,6 +790,13 @@
           "image_status": {
             "$ref": "#/$defs/imageStatus",
             "description": "How good the source of the front image was: missing, lowres or ok."
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/note"
+            },
+            "description": "What the registry knows about this printing that the official API does not say, oldest first. Empty for most records."
           }
         },
         "required": [
@@ -779,7 +820,8 @@
           "api_url",
           "kairos_url",
           "image_urls",
-          "image_status"
+          "image_status",
+          "notes"
         ],
         "additionalProperties": false,
         "description": "One record per physical print: a specific set, product and finish. Gameplay data is on the card it points at."

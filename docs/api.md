@@ -63,7 +63,7 @@ const registry = await (await fetch("https://api.kairosarchive.net/v3/registry.j
 
 (type-check that one with `--lib es2022,dom` instead of `--types node`).
 
-What the file declares: `Registry` (the whole export) and one interface per record, `Card`, `Printing`, `RegistrySet` (not `Set`, which would shadow the built-in), `CardHistoryRow`, `NameHistoryRow`, `SlugHistoryRow` and `Header`; the shared shapes `Face` (the gameplay fields; `Card` and `CardHistoryRow` extend it, so a function that takes a `Face` accepts either), `PrintingFace` and `ImageUrls`; and the aliases `CodexId`, `PrintingId`, `SetCode`, `IsoDate`, `Threshold` and `ImageStatus` (`"missing" | "lowres" | "ok"`). Nothing is optional and no record has an index signature, because the schema lists every field and allows no others. The declarations are only a description: `JSON.parse` does not validate, so a file that is not a registry export is not caught here; validate against `schema.json` for that.
+What the file declares: `Registry` (the whole export) and one interface per record, `Card`, `Printing`, `RegistrySet` (not `Set`, which would shadow the built-in), `CardHistoryRow`, `NameHistoryRow`, `SlugHistoryRow` and `Header`; the shared shapes `Face` (the gameplay fields; `Card` and `CardHistoryRow` extend it, so a function that takes a `Face` accepts either), `PrintingFace`, `ImageUrls` and `Note`; and the aliases `CodexId`, `PrintingId`, `SetCode`, `IsoDate`, `Threshold` and `ImageStatus` (`"missing" | "lowres" | "ok"`). Nothing is optional and no record has an index signature, because the schema lists every field and allows no others. The declarations are only a description: `JSON.parse` does not validate, so a file that is not a registry export is not caught here; validate against `schema.json` for that.
 
 The same file is committed as [`schema/registry.d.ts`](../schema/registry.d.ts); CI fails if it drifts from the schema, and type-checks a slice of the real export against it under strict `tsc`, so the types are proven neither too loose nor too tight before a release.
 
@@ -139,21 +139,25 @@ Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680
 
 ```json
 {
-  "from": "v3.3.0", "to": "v3.3.1",
-  "schema_version": {"from": 11, "to": 11},
-  "summary": {"cards_added": 0, "cards_changed": 1, "cards_removed": 0,
+  "from": "v3.3.3", "to": "v3.4.0",
+  "schema_version": {"from": 11, "to": 12},
+  "summary": {"cards_added": 0, "cards_changed": 0, "cards_removed": 0,
               "printings_added": 0, "printings_changed": 0, "printings_removed": 0,
               "sets_added": 0, "images_added": 0, "images_replaced": 0,
-              "history_rows_added": 0, "identifiers_removed": 0},
-  "cards": {"added": [], "changed": [{"codex_id": "C000459", "name": "Druid", "fields": ["rules_text", "back"]}], "removed": []},
+              "history_rows_added": 0, "notes_added": 1, "notes_removed": 0,
+              "identifiers_removed": 0},
+  "cards": {"added": [], "changed": [], "removed": []},
   "printings": {"added": [], "changed": [], "removed": []},
   "sets": {"added": []},
   "images": {"added": [], "replaced": []},
-  "history": {"added": []}
+  "history": {"added": []},
+  "notes": {"added": [{"id": "P001640", "text": "Prize support in the Arthurian Legends store kit, ...",
+                       "source": "Community report, Sorcery Discord. ...", "recorded": "2026-09-22"}],
+            "removed": []}
 }
 ```
 
-`cards.changed` and `printings.changed` name the fields that differ, in the record's own key order. `images` counts printings whose front or back art was added or replaced (a replaced image is a new address; the old one keeps serving). `history.added` lists the `card_history` rows new in this release, by card and start date. `identifiers_removed` is the sum of removed cards and printings and is always `0` within a major: the release workflow refuses to publish otherwise, so the promise that ids are permanent is checked at release time rather than merely stated. A new major may remove ids, and its `changes.json` says exactly which. The first release to carry the file is the one after v3.3.1; earlier roots have none.
+`cards.changed` and `printings.changed` name the fields that differ, in the record's own key order. `images` counts printings whose front or back art was added or replaced (a replaced image is a new address; the old one keeps serving). `history.added` lists the `card_history` rows new in this release, by card and start date. `notes.added` and `notes.removed` list whole notes with the `id` of the card or printing they sit on; a note is never counted as a change to its record, and rewording one reads as one removed and one added. A field a release adds is not a change to records where it is empty: the release that introduced `notes` reports only the records that carry one. Documents from before schema 12 have no `notes_*` keys; read them as 0. `identifiers_removed` is the sum of removed cards and printings and is always `0` within a major: the release workflow refuses to publish otherwise, so the promise that ids are permanent is checked at release time rather than merely stated. A new major may remove ids, and its `changes.json` says exactly which. The first release to carry the file is the one after v3.3.1; earlier roots have none.
 
 ## Indexes, for client-side search
 
@@ -166,6 +170,14 @@ The registry has ~1,100 cards; filtering them in the client is a millisecond. Th
 ## History, whole
 
 `history/slugs.json`, `history/names.json`, `history/cards.json` - the export's three history sections, for consumers that want them all at once. `history/cards.json` is every state every card's gameplay face has been in; a printing released within a row's dates was printed with that row's values. Each row says where it came from: `source` is `api` when the registry observed the face in the official API, and `card` when the face was recorded by hand from what is printed on the card - the case of a card the publisher changed after printing, whose earlier face the API never served. Such a row runs from the day the first printing carrying it reached the public until the current face took over, so those printings show `printed_as_current: false` and a later reprint with the corrected text shows `true`; a printing that shows no face at all (a textless promo) reports `null`.
+
+## Notes
+
+The official API describes a card and its printings and nothing else. People who play the game know more, such as that a promo was prize support in a particular store kit. The registry keeps that knowledge as notes, and every note says where it came from and when it was written down.
+
+Every card and printing carries `notes`, a list that is empty for most records. Each note is `{text, source, recorded}`: the fact in plain words, where it came from, and the date the registry recorded it. That date is not when the fact became true. A note never contradicts a field. A fact that fits a field, such as an artist or a date, is a correction and changes the field instead, with its reason in the repo. Notes appear in the export, in `cards/{codex_id}.json` and `printings/{printing_id}.json`; the indexes leave them out.
+
+A source names a place, not a person: "Community report, Sorcery Discord", "Arthurian Legends store kit insert, photographed". Releases are immutable, so a name printed in one stays in it for good; a person is credited only if they ask to be. Notes are reports, not official records. Quote the source with the fact.
 
 ## Guarantees carried over
 

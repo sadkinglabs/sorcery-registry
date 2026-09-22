@@ -746,7 +746,7 @@ class BackFaceRoundTripTest(unittest.TestCase):
                                                      "set_codes", "printing_ids",
                                                      "default_printing_id", "api_url",
                                                      "kairos_url", "image_urls",
-                                                     "image_status")]
+                                                     "image_status", "notes")]
         self.assertEqual(list(wizard["back"]), front_keys)
         self.assertEqual(wizard["back"]["life"], 20)
         printing = next(p for p in export["printings"]
@@ -757,17 +757,14 @@ class BackFaceRoundTripTest(unittest.TestCase):
 
 
 class MigrationTest(unittest.TestCase):
-    def test_v11_adds_the_source_column_and_refuses_anything_but_v10(self):
-        from registry.db import get_meta, set_meta
-        from registry.migrate_v11 import migrate
+    def test_v12_records_the_version_and_refuses_anything_but_v11(self):
+        from registry.db import get_meta
+        from registry.migrate_v12 import migrate
         con = open_db(":memory:")
-        # A v10 database: today's DDL without the column.
-        con.executescript(DDL.replace("    source     TEXT NOT NULL DEFAULT 'api',  -- 'api': observed upstream; 'card': read from the printed card\n", ""))
-        con.execute("INSERT INTO meta VALUES ('schema_version', '10')")
-        self.assertNotIn("source", {r["name"] for r in con.execute("PRAGMA table_info(card_history)")})
+        con.executescript(DDL)
+        con.execute("INSERT INTO meta VALUES ('schema_version', '11')")
         migrate(con)
-        self.assertEqual(get_meta(con, "schema_version"), "11")
-        self.assertIn("source", {r["name"] for r in con.execute("PRAGMA table_info(card_history)")})
+        self.assertEqual(get_meta(con, "schema_version"), "12")
         with self.assertRaises(ValueError):
             migrate(con)
 

@@ -120,6 +120,23 @@ export interface ImageUrls {
 export type ImageStatus = "missing" | "lowres" | "ok";
 
 /**
+ * Something known about a record that the official API does not say, with where it came from. A
+ * note never contradicts a field: a fact that fits a field is a correction and changes the field
+ * instead.
+ */
+export interface Note {
+  /** The fact, in plain words. */
+  text: string;
+  /**
+   * Where the fact came from: a document, a product, a community report. Names a place, not a
+   * person, unless that person asked to be credited.
+   */
+  source: string;
+  /** The day the note was written down, not the day the fact became true. */
+  recorded: IsoDate;
+}
+
+/**
  * Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a
  * byte-identical file.
  */
@@ -213,6 +230,11 @@ export interface Card extends Face {
   image_urls: ImageUrls | null;
   /** Derived: the default printing's image_status. */
   image_status: ImageStatus;
+  /**
+   * What the registry knows about this card that the official API does not say, oldest first.
+   * Empty for most records.
+   */
+  notes: Note[];
 }
 
 /**
@@ -278,6 +300,11 @@ export interface Printing {
   image_urls: ImageUrls | null;
   /** How good the source of the front image was: missing, lowres or ok. */
   image_status: ImageStatus;
+  /**
+   * What the registry knows about this printing that the official API does not say, oldest first.
+   * Empty for most records.
+   */
+  notes: Note[];
 }
 
 /** Every slug that has ever existed, mapped to its printing. valid_to null = the current slug. */

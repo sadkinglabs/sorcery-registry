@@ -13,6 +13,7 @@ from pathlib import Path
 from . import API_BASE, API_URL, IMAGE_BASE, SCHEMA_VERSION, SITE_BASE
 from .errata import load_errata, unknown_printings
 from .images import load_images
+from .notes import load_notes
 from .db import (CARD_FIELDS, FACE_FIELDS, HISTORY_FIELDS, PRINTING_FACE_FIELDS,
                  PRINTING_FIELDS, decode_field, open_db)
 from .ids import format_card_id, format_printing_id
@@ -152,11 +153,16 @@ def printed_as_current(released_at, history, added_on=None):
     return released_at >= current["valid_from"]
 
 
-def build_export(con, images=None, errata=None):
+def build_export(con, images=None, errata=None, notes=None):
     """The export, from the database plus data/images.json (what images the
-    registry holds) and data/errata.json (printed faces recorded by hand) -
+    registry holds), data/errata.json (printed faces recorded by hand) and
+    data/notes.json (what the official API does not say about a record) -
     registry-owned data kept in git, like overrides."""
     held_images = (images if images is not None else load_images()).get("printings", {})
+    notes = notes if notes is not None else load_notes()
+    # Every record carries its notes as a list, empty for almost all of
+    # them: a consumer never has to ask whether the field is there.
+    card_notes, printing_notes = notes.get("cards", {}), notes.get("printings", {})
     # A textless promo shows no face, so no date can say whether it is
     # current: data/errata.json names such printings and they report null.
     faceless = unknown_printings(errata if errata is not None else load_errata())
@@ -247,6 +253,7 @@ def build_export(con, images=None, errata=None):
                         if chosen is not None else None)
         record["image_urls"] = face_urls(record["default_printing_id"], chosen_front)
         record["image_status"] = image_status(chosen_front)
+        record["notes"] = [dict(n) for n in card_notes.get(record["codex_id"], [])]
         cards.append(record)
 
     # card_name is derived from the cards table at export time, so a
@@ -274,6 +281,7 @@ def build_export(con, images=None, errata=None):
         record["image_status"] = image_status(front)
         if record["back"] is not None:
             record["back"]["image_urls"] = face_urls(record["printing_id"], back, back=True)
+        record["notes"] = [dict(n) for n in printing_notes.get(record["printing_id"], [])]
         printings.append(record)
 
     slug_history = []
