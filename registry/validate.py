@@ -26,9 +26,10 @@ Checks, in order:
     than promised.
  8. Every note in data/notes.json is on a card or printing that exists.
  9. data/manual.json and the database agree: every manual record has an
-    entry and holds what it says, manual printings own no slug, the
-    registry's own set codes are only on manual records, and
+    entry and holds what it says, manual printings own no slug, and
     data/released-with.json names only official promos.
+10. Every set is classified in data/sets.json (release, promo or
+    registry), and a set of the registry's own holds only manual records.
 
 Exit code 0 when every check passes, 1 with a list of violations otherwise.
 """
@@ -46,6 +47,7 @@ from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, rende
 from .images import load_images
 from .ids import id_number
 from .manual import check_manual, load_manual, load_released_with
+from .sets import check_sets, load_sets
 from .notes import check_notes, load_notes
 
 REQUIRED_TRIGGERS = {
@@ -337,7 +339,9 @@ def main():
     check_internal(con, errors)
     check_errata(con, load_errata(), errors)
     check_notes(con, load_notes(), errors)
-    check_manual(con, load_manual(), load_released_with(), errors)
+    kinds = load_sets()
+    check_sets(con, kinds, errors)
+    check_manual(con, load_manual(kinds=kinds), load_released_with(kinds=kinds), errors, kinds=kinds)
     check_export_matches(con, args.export, errors)
     if args.against:
         check_against_ref(con, args.against, args.export, errors)

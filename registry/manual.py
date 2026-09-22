@@ -55,9 +55,10 @@ repeat a slug already in use, the name part takes the release it belongs
 to as a suffix (999-the_champion_002-op-f); an entry may also give its
 own "slug".
 
-Set codes. The publisher's set codes are three digits. A code the
-registry makes for printings the API will never serve is three capital
-letters (CUR, the curios), so it can never collide with one of theirs.
+Set codes are labels, never numbers: what a set is - a release, the
+publisher's promo bucket, or a set of the registry's own such as CUR, the
+curios - is recorded in data/sets.json (registry/sets.py), and a printing
+may only name a set recorded there.
 """
 
 import argparse
@@ -71,16 +72,14 @@ from pathlib import Path
 from .db import (CARD_FIELDS, FACE_FIELDS, PRINTING_FACE_FIELDS, allocate_id, decode_field,
                  encode_field, face_of, open_db)
 from .ids import format_card_id, format_printing_id, id_number
+from .sets import is_release, load_sets
 
 MANUAL_PATH = Path("data") / "manual.json"
 RELEASED_WITH_PATH = Path("data") / "released-with.json"
 
 CARD_ID = re.compile(r"^C\d{6}$")
 PRINTING_ID = re.compile(r"^P\d{6}$")
-PUBLISHER_SET = re.compile(r"^[0-9]{3}$")
-REGISTRY_SET = re.compile(r"^[A-Z]{3}$")
 SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9_]+)+$")
-PROMO_SET = "999"
 
 LIST_FIELDS = ("subtypes", "elements", "keywords", "umbrellas")
 INT_FIELDS = ("cost", "attack", "defense", "life")
@@ -96,16 +95,6 @@ PROVENANCE_KEYS = ("source", "recorded")
 # for every product upstream serves; Rainbow is the one finish that is not
 # its initial.
 FINISH_CODES = {"Standard": "s", "Foil": "f", "Rainbow": "rf"}
-
-
-def is_release_set(set_code):
-    """A set that is itself a release (001 Alpha, 002 Beta, ...), as
-    opposed to 999, where upstream files every promo, or a code of ours."""
-    return bool(set_code) and PUBLISHER_SET.match(set_code) is not None and set_code != PROMO_SET
-
-
-def is_set_code(value):
-    return isinstance(value, str) and (PUBLISHER_SET.match(value) or REGISTRY_SET.match(value))
 
 
 # ---- predicted slugs ---------------------------------------------------
@@ -230,7 +219,7 @@ def _check_card(where, card):
         raise ValueError(f"{where}: a card needs at least one printing")
 
 
-def _check_printing(where, printing, top_level):
+def _check_printing(where, printing, top_level, kinds):
     required = ("printing_id",) + (("codex_id",) if top_level else ()) \
         + PRINTING_KEYS + PROVENANCE_KEYS
     _check_keys(where, printing, required, ("slug", "back", "withdrawn"))
@@ -240,15 +229,15 @@ def _check_printing(where, printing, top_level):
     if top_level and not (isinstance(printing["codex_id"], str)
                           and CARD_ID.match(printing["codex_id"])):
         raise ValueError(f"{where}: codex_id must name the card this is a printing of")
-    if not is_set_code(printing["set_code"]):
-        raise ValueError(f"{where}: set_code must be three digits (the publisher's) "
-                         f"or three capital letters (the registry's)")
+    if printing["set_code"] not in kinds:
+        raise ValueError(f"{where}: set {printing['set_code']!r} is not in data/sets.json; "
+                         f"record what the set is there first")
     _check_text(where, printing, "set_name")
     _check_date(where, printing, "released_at", nullable=True)
     released_with = printing["released_with"]
-    if released_with is not None and not is_release_set(released_with):
+    if released_with is not None and not is_release(released_with, kinds):
         raise ValueError(f"{where}: released_with must name a set release such as 002, or be null")
-    if is_release_set(printing["set_code"]) and released_with is not None:
+    if is_release(printing["set_code"], kinds) and released_with is not None:
         raise ValueError(f"{where}: a printing in set {printing['set_code']} is released "
                          f"with that set; leave released_with null")
     for key in ("product", "finish"):
@@ -263,9 +252,11 @@ def _check_printing(where, printing, top_level):
     _check_provenance(where, printing)
 
 
-def load_manual(path=MANUAL_PATH):
+def load_manual(path=MANUAL_PATH, kinds=None):
     """The file, shape-checked: a mistake is an error here, never a record
-    silently left out. A missing file means no manual entries."""
+    silently left out. A missing file means no manual entries. `kinds`
+    is what each set is (data/sets.json)."""
+    kinds = load_sets() if kinds is None else kinds
     path = Path(path)
     if not path.exists():
         return {"cards": [], "printings": []}
@@ -286,9 +277,9 @@ def load_manual(path=MANUAL_PATH):
             raise ValueError(f"{where}: {card['name']} appears twice")
         names.add(card["name"].casefold())
         for j, printing in enumerate(card["printings"]):
-            _check_printing(f"{where}, printing {j + 1}", printing, top_level=False)
+            _check_printing(f"{where}, printing {j + 1}", printing, top_level=False, kinds=kinds)
     for i, printing in enumerate(printings):
-        _check_printing(_where(path, "printing", i, printing), printing, top_level=True)
+        _check_printing(_where(path, "printing", i, printing), printing, top_level=True, kinds=kinds)
     for entry in cards + printings + [p for c in cards for p in c["printings"]]:
         record_id = entry.get("codex_id") if "printings" in entry else entry.get("printing_id")
         if record_id is not None:
@@ -308,9 +299,10 @@ def write_manual(manual, path=MANUAL_PATH):
                           encoding="utf-8", newline="\n")
 
 
-def load_released_with(path=RELEASED_WITH_PATH):
+def load_released_with(path=RELEASED_WITH_PATH, kinds=None):
     """{printing_id: {"set_code", "source", "recorded"}}: the release an
     official promo belongs to, which upstream's set 999 does not say."""
+    kinds = load_sets() if kinds is None else kinds
     path = Path(path)
     if not path.exists():
         return {}
@@ -326,7 +318,7 @@ def load_released_with(path=RELEASED_WITH_PATH):
         if not PRINTING_ID.match(pid):
             raise ValueError(f"{where}: not a printing id")
         _check_keys(where, entry, ("set_code", "source", "recorded"))
-        if not is_release_set(entry["set_code"]):
+        if not is_release(entry["set_code"], kinds):
             raise ValueError(f"{where}: set_code must name a set release such as 004")
         _check_text(where, entry, "source")
         _check_date(where, entry, "recorded")
@@ -380,7 +372,8 @@ class _Slugs:
     current and historical slugs, and the predictions already made in this
     run, so two new entries never predict the same slug."""
 
-    def __init__(self, con):
+    def __init__(self, con, kinds):
+        self.kinds = kinds
         self.owner = {}
         for row in con.execute("SELECT slug, printing_id FROM slug_history "
                                "UNION SELECT slug, printing_id FROM printings"):
@@ -404,7 +397,7 @@ class _Slugs:
         if self.free(plain, printing_id):
             return plain
         suffix = printing["released_with"] or (printing["set_code"]
-                                               if is_release_set(printing["set_code"]) else None)
+                                               if is_release(printing["set_code"], self.kinds) else None)
         if suffix:
             suffixed = predict_slug(printing["set_code"], card_name, printing["product"],
                                     printing["finish"], suffix)
@@ -453,14 +446,14 @@ def _write_printing(con, printing_id, card_id, printing, slug, new):
                     [encode_field(c, values[c]) for c in columns] + [printing_id])
 
 
-def apply_manual(con, manual, log=print):
+def apply_manual(con, manual, log=print, kinds=None):
     """Bring the database in line with the file: mint ids for new entries
     (writing them into `manual`, which the caller saves), update manual
     records in place, and leave confirmed ones alone. One transaction: any
     error leaves the database as it was."""
     counts = {"minted": 0, "updated": 0, "confirmed": 0}
     try:
-        _apply(con, manual, counts, log)
+        _apply(con, manual, counts, log, load_sets() if kinds is None else kinds)
     except Exception:
         con.rollback()
         raise
@@ -468,8 +461,8 @@ def apply_manual(con, manual, log=print):
     return counts
 
 
-def _apply(con, manual, counts, log):
-    slugs = _Slugs(con)
+def _apply(con, manual, counts, log, kinds):
+    slugs = _Slugs(con, kinds)
     seen_cards, seen_printings = set(), set()
 
     def printing_entry(printing, card_id, card_name, where):
@@ -549,10 +542,12 @@ def _apply(con, manual, counts, log):
 
 # ---- the validator's view ------------------------------------------------
 
-def check_manual(con, manual, released_with, errors):
+def check_manual(con, manual, released_with, errors, kinds=None):
     """The file and the database agree, manual records stay out of slug
     ownership, and the registry's own set codes are only on its own
     records."""
+    kinds = load_sets() if kinds is None else kinds
+
     def err(message):
         errors.append(f"manual: {message}")
 
@@ -653,9 +648,6 @@ def check_manual(con, manual, released_with, errors):
             # it; every other official printing takes it from the file.
             err(f"{label}: released_with for an official printing belongs in "
                 f"data/released-with.json")
-        if row["set_code"] and REGISTRY_SET.match(row["set_code"]) and row["origin"] != "manual":
-            err(f"{label}: set code {row['set_code']} is the registry's own; only manual "
-                f"records carry one")
 
     names = {}
     for row in con.execute("SELECT DISTINCT set_code, set_name FROM printings"):
@@ -671,7 +663,7 @@ def check_manual(con, manual, released_with, errors):
         elif row["manual_source"] is not None:
             err(f"data/released-with.json names {pid}, a manual record; give its "
                 f"released_with in data/manual.json")
-        elif is_release_set(row["set_code"]):
+        elif is_release(row["set_code"], kinds):
             err(f"data/released-with.json names {pid}, which is in set {row['set_code']} "
                 f"and so released with it")
         elif entry["set_code"] not in names:

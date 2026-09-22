@@ -308,14 +308,12 @@ class Registry:
 
     @staticmethod
     def _in_set(printing, wanted):
-        """Match a printing against a set given as its code ('006', '6', 6,
-        or one of the registry's own such as 'CUR') or its name ('Gothic'),
-        case-insensitively."""
-        text = str(wanted).strip()
-        if text.isdigit():
-            return printing["set_code"] == text.zfill(3)
-        return (printing["set_code"] or "").lower() == text.lower() \
-            or (printing["set_name"] or "").lower() == text.lower()
+        """Match a printing against a set given as its code ('006', 'CUR')
+        or its name ('Gothic'), case-insensitively. A code is a label, not
+        a number: '6' is not '006'."""
+        text = str(wanted).strip().lower()
+        return (printing["set_code"] or "").lower() == text \
+            or (printing["set_name"] or "").lower() == text
 
     def search_cards(self, name=None, type=None, element=None, rarity=None,
                      card_set=None, keyword=None, category=None, errata=None,
@@ -468,8 +466,10 @@ def build_server():
             "because the API does not (store-kit prizes, curios); a manual "
             "record's manual field gives its source, and says so when it was "
             "later confirmed upstream or withdrawn. Say a record is manual "
-            "when you cite it. Set codes are three digits (the publisher's) "
-            "or three capital letters (the registry's own, such as CUR). "
+            "when you cite it. Set codes are labels, never numbers ('6' is not "
+            "'006'): three digits for the publisher's, three capital letters "
+            "for the registry's own (CUR). What a set is comes from its kind: "
+            "release, promo (999) or registry. "
             "released_with names the set release a printing belongs to, "
             "which for a promo in set 999 is recorded by hand or null."
         ),

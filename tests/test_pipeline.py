@@ -3,6 +3,7 @@ round trip through apply_plan proving ids survive a slug rename."""
 
 import copy
 import unittest
+from unittest import mock
 
 import registry.db
 from registry.canon import canon_text, parse_slug
@@ -62,6 +63,23 @@ RAW_API = [
         ],
     },
 ]
+
+
+# What each fixture set is. The fixtures invent sets upstream has never
+# issued (007 Revised, 010 Gothic), so the export reads this instead of
+# data/sets.json, which classifies only real sets.
+FIXTURE_SET_KINDS = {"001": "release", "002": "release", "004": "release", "005": "release",
+                     "006": "release", "007": "release", "010": "release", "999": "promo",
+                     "CUR": "registry"}
+_set_kinds = mock.patch("registry.export.load_sets", return_value=FIXTURE_SET_KINDS)
+
+
+def setUpModule():
+    _set_kinds.start()
+
+
+def tearDownModule():
+    _set_kinds.stop()
 
 
 class CanonTest(unittest.TestCase):
@@ -273,11 +291,11 @@ class EndToEndTest(unittest.TestCase):
         self.assertEqual(export_one["header"]["sets"], 2)
         self.assertEqual(export_one["sets"], [
             {"set_code": "001", "set_name": "Alpha",
-             "released_at": "2023-06-22", "cards": 1, "printings": 2, "origin": "api",
+             "released_at": "2023-06-22", "cards": 1, "printings": 2, "kind": "release", "origin": "api",
              "api_url": "https://api.kairosarchive.net/v3/sets/001.json",
              "kairos_url": "https://kairosarchive.net/sets/001"},
             {"set_code": "010", "set_name": "Gothic",
-             "released_at": "2026-05-01", "cards": 1, "printings": 1, "origin": "api",
+             "released_at": "2026-05-01", "cards": 1, "printings": 1, "kind": "release", "origin": "api",
              "api_url": "https://api.kairosarchive.net/v3/sets/010.json",
              "kairos_url": "https://kairosarchive.net/sets/010"},
         ])
