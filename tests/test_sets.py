@@ -87,5 +87,49 @@ class MeaningTest(unittest.TestCase):
         self.assertEqual(errors, [])
 
 
+class CurioTest(unittest.TestCase):
+    """Every curio is a card of its own, named as one."""
+
+    def setUp(self):
+        self.con = populated()
+        self.kinds = {"001": "release", "010": "release", "CUR": "registry"}
+        self.card_id, self.name = self.con.execute(
+            "SELECT card_id, name FROM cards ORDER BY card_id LIMIT 1").fetchone()
+
+    def errors(self):
+        errors = []
+        check_sets(self.con, self.kinds, errors)
+        return errors
+
+    def make_curio(self, name):
+        self.con.execute("UPDATE cards SET name = ? WHERE card_id = ?", (name, self.card_id))
+        self.con.execute("UPDATE printings SET set_code = 'CUR', origin = 'manual' "
+                         "WHERE card_id = ?", (self.card_id,))
+
+    def test_a_curio_card_named_as_one_passes(self):
+        self.make_curio(self.name + " (Curio)")
+        self.assertEqual(self.errors(), [])
+
+    def test_a_curio_needs_the_suffix(self):
+        self.make_curio(self.name)
+        self.assertIn("its name ends with '(Curio)'", self.errors()[0])
+
+    def test_a_curio_is_never_a_printing_of_a_played_card(self):
+        # Another card's printing moved into CUR: that card has official
+        # printings too.
+        other = self.con.execute("SELECT card_id FROM printings GROUP BY card_id "
+                                 "HAVING count(*) > 1 LIMIT 1").fetchone()[0]
+        pid = self.con.execute("SELECT printing_id FROM printings WHERE card_id = ? LIMIT 1",
+                               (other,)).fetchone()[0]
+        self.con.execute("UPDATE printings SET set_code = 'CUR', origin = 'manual' "
+                         "WHERE printing_id = ?", (pid,))
+        self.assertIn("never a printing of a card that is played", self.errors()[0])
+
+    def test_the_suffix_is_only_for_curios(self):
+        self.con.execute("UPDATE cards SET name = 'Troll (Curio)' WHERE card_id = ?",
+                         (self.card_id,))
+        self.assertIn("named as a curio, but none of its printings is in CUR", self.errors()[0])
+
+
 if __name__ == "__main__":
     unittest.main()

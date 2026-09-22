@@ -19,6 +19,7 @@ from registry.export import build_export
 from registry.fetch import build_snapshot
 from registry.manual import (apply_manual, check_manual, load_manual, load_released_with,
                              predict_slug, slug_name, write_manual)
+from registry.sets import check_sets
 from registry.sync import apply_plan
 from registry.validate import check_internal
 
@@ -246,34 +247,41 @@ class ApplyTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.apply(manual([card(name="apprentice wizard")]))
 
-    def test_a_curio_of_an_official_card_in_a_set_of_our_own(self):
-        curio = printing(codex_id="C000001", set_code="CUR", set_name="Curios",
-                         released_at=None, released_with="004", product="Curio",
-                         finish="Standard", artist=None, flavour_text=None,
-                         source="Curio card, photographed")
-        entries = manual(printings=[curio])
+    def test_a_curio_is_a_card_of_its_own_in_a_set_of_our_own(self):
+        curio = card(name="Apprentice Wizard (Curio)", type=None, category=None, rarity=None,
+                     slot=None, subtypes=[], elements=[], cost=None, attack=None, defense=None,
+                     thr_fire=0, rules_text="", source="Curio card, photographed",
+                     printings=[printing(set_code="CUR", set_name="Curios", released_at=None,
+                                         released_with="004", product="Curio",
+                                         finish="Standard", artist=None, flavour_text=None,
+                                         source="Curio card, photographed")])
+        entries = manual(cards=[curio])
         self.apply(entries)
         self.assertEqual(self.check(entries), [])
+        errors = []
+        check_sets(self.con, {"001": "release", "010": "release", "CUR": "registry"}, errors)
+        self.assertEqual(errors, [])
         export = build_export(self.con, released_with={})
         self.assertEqual(validate_schema(export), [])
-        made = next(p for p in export["printings"] if p["printing_id"] == "P000004")
-        self.assertEqual(made["slug"], "cur-apprentice_wizard-c-s")
-        self.assertEqual((made["codex_id"], made["origin"], made["released_with"]),
-                         ("C000001", "manual", "004"))
+        made_card = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard (Curio)")
+        made = next(p for p in export["printings"] if p["codex_id"] == made_card["codex_id"])
+        self.assertEqual(made["slug"], "cur-apprentice_wizard_curio-c-s")
+        self.assertEqual((made_card["origin"], made["origin"], made["released_with"]),
+                         ("manual", "manual", "004"))
+        self.assertEqual(made_card["set_codes"], ["CUR"])
         self.assertIsNone(made["artist"])                          # unknown, not copied
         cur = next(s for s in export["sets"] if s["set_code"] == "CUR")
         self.assertEqual((cur["origin"], cur["set_name"], cur["cards"]), ("manual", "Curios", 1))
         self.assertEqual(next(s for s in export["sets"] if s["set_code"] == "001")["origin"], "api")
-        wizard = next(c for c in export["cards"] if c["codex_id"] == "C000001")
-        self.assertEqual(wizard["origin"], "api")
-        self.assertIn("CUR", wizard["set_codes"])
-        self.assertNotEqual(wizard["default_printing_id"], "P000004")   # a Booster outranks it
+        wizard = next(c for c in export["cards"] if c["name"] == "Apprentice Wizard")
+        self.assertNotIn("CUR", wizard["set_codes"])              # the played card is untouched
 
         from registry.publish import build_objects
         objects = build_objects(export, dataset_version="v9.9.9")
-        self.assertEqual(objects["sets/CUR.json"]["cards"][0]["printing_ids"], ["P000004"])
-        predicted = objects["slugs/cur-apprentice_wizard-c-s.json"]
-        self.assertEqual((predicted["printing_id"], predicted["valid_from"]), ("P000004", None))
+        self.assertEqual(objects["sets/CUR.json"]["cards"][0]["printing_ids"], [made["printing_id"]])
+        predicted = objects["slugs/cur-apprentice_wizard_curio-c-s.json"]
+        self.assertEqual((predicted["printing_id"], predicted["valid_from"]),
+                         (made["printing_id"], None))
         self.assertEqual(objects["index/printings.json"][-1]["origin"], "manual")
 
     def test_released_with_for_official_promos_is_checked(self):
