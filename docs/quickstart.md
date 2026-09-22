@@ -101,7 +101,8 @@ double-faced printing's reverse face carries its own `image_urls` under
 
 `image_urls`, when not null, has four renditions, all WebP except
 `original`: `small` 146×204, `normal` 488×680, `large` 672×936, and
-`original` (the publisher's file, untouched, own format).
+`original` (the source file, untouched, own format: the publisher's, or a
+photograph for a printing recorded by hand).
 
 Image addresses are permanent - a name encodes the printing id and an
 art-version key (`P000290.93dbd8484e16.normal.webp`), so cache them

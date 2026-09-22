@@ -30,6 +30,9 @@ Checks, in order:
     data/released-with.json names only official promos.
 10. Every set is classified in data/sets.json (release, promo or
     registry), and a set of the registry's own holds only manual records.
+11. Every file in art/ is named for a printing recorded by hand, is the
+    image its name says, and carries no metadata; data/images.json holds
+    art only for such printings (registry/art.py).
 
 Exit code 0 when every check passes, 1 with a list of violations otherwise.
 """
@@ -41,6 +44,7 @@ import sys
 from pathlib import Path
 
 from . import SCHEMA_VERSION
+from .art import ART_DIR, check_art, check_held_art
 from .errata import check_errata, load_errata
 from .db import HISTORY_FIELDS, decode_field, face_of, get_meta, open_db
 from .export import EXPORT_PATH, SCHEMA_PATH, build_export, checksum_path, render
@@ -207,7 +211,10 @@ def check_export_matches(con, export_path, errors):
         if card["printing_ids"] != sorted(card["printing_ids"]):
             errors.append(f"card {card['codex_id']}: printing_ids is not sorted")
     check_addresses(export, errors)
-    check_images(export, load_images(), errors)
+    images = load_images()
+    check_images(export, images, errors)
+    check_art(export, ART_DIR, errors)
+    check_held_art(export, images, errors)
 
 
 def check_addresses(export, errors):

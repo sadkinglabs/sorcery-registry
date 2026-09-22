@@ -93,10 +93,11 @@ A failed run leaves at most a partial root without `RELEASED` - never listed, ne
 
 ## Images
 
-The publisher's guidance is "host images yourself; download released card images from the public image folder" (a Google Drive folder, 3,090 PNGs named by API slug, a `-r` suffix for the reverse of a double-faced card). The `images` workflow (Actions tab) has two modes:
+The publisher's guidance is "host images yourself; download released card images from the public image folder" (a Google Drive folder, 3,090 PNGs named by API slug, a `-r` suffix for the reverse of a double-faced card). The `images` workflow (Actions tab) has three modes:
 
 - **list** - lists the folder through the Drive API as a service account (secret `GDRIVE_SERVICE_ACCOUNT`, the JSON key of a robot identity in the owner's Google Cloud project; it can only read what is already public, but its requests count against the project's quota instead of the abuse filter Google applies to anonymous traffic from cloud addresses) or, failing that, with a plain API key (secret `GDRIVE_API_KEY`), maps every file to a printing and face through `slug_history` plus [`data/image-decisions.json`](data/image-decisions.json), and commits `review/image-listing.json` to the branch `review/image-listing` with a summary: folders, formats, dimensions, unmapped files, faces claimed twice, printings and back faces without a file. Read-only.
 - **sync** - lists, then downloads what changed (a new file, a new MD5, a new recipe), renders the renditions, uploads them to the bucket's `images/` prefix, verifies every held object through the CDN, regenerates the export and opens a pull request. Nothing reaches `main` except through that PR (which the workflow also asks CI to check, by dispatching `validate` on the branch: a pull request opened by a workflow's token does not trigger CI by itself). With a service account a run takes everything that changed, within a four-hour fetch budget (a GitHub job dies at six hours with everything on its disk, so the fetch stops in time to upload, verify and open the PR, and the next run continues from `data/images.json`); anonymously, `limit` caps it at 1,500 images: Google refuses an address after roughly 1,600 anonymous downloads in a day (an HTML "Sorry" page, not an API error), and the fetch stops on its own after a few refusals in a row, publishing what it got; the next run - weekly on Tuesdays, or dispatched - resumes where `data/images.json` says, so the folder is covered in two or three runs.
+- **art** - the same upload, verification and pull request for the owner's art of hand-recorded printings (`art/`, next to the manual entries below). It runs by itself when a change to `art/` reaches `main`; nothing is fetched from Drive.
 
 **Two sources, two watches.** The registry follows the publisher on two channels and treats each as a diff against what it already holds: the official API for the data (the `drift` workflow, Mondays: one request, a dry-run sync, an issue when anything changed) and the public image folder for the pictures (the `images` workflow, Tuesdays: one listing, then only the files whose MD5 or name is new). Each weekly listing is also a drift check on the folder itself: files the naming rule cannot place, one face claimed by two files, or files named by slugs the API no longer uses are raised as warnings on the run page, and the mapping summary lands in the run's step summary. A file that vanishes from the folder changes nothing here - the objects already served stay served, because image addresses are permanent - it only shows up as one more "printing without a file" in the summary. If Erik's Curiosa ever changes how they distribute images (another host, another naming scheme, a different structure), the only code that knows about the folder is the intake in `registry/images.py` (`list_folder`, `map_listing`, `DriveAuth`); keys, object names, `data/images.json` and every published address are independent of where a file came from, so the adaptation is a new intake and a run, never a change to what is already published.
 
@@ -196,6 +197,17 @@ python -m registry.validate --against origin/main
 - `new_cards` or `new_printings` says it is something else.
 
 A curio in a set of the registry's own will never be confirmed, and stays manual for good.
+
+**Art.** The publisher's folder has no file for a printing recorded by hand, so its image comes from the owner and lives in [`art/`](art/), named by printing id: `art/P001700.jpg` for the front, `art/P001700-r.jpg` for the back face of a printing that has one. PNG, JPEG or WebP (convert a phone's HEIC first). Art is only for printings recorded by hand - the validator refuses a file for an official printing, whose only image is the publisher's - and when the publisher's folder later serves a file for a confirmed record, the image sync replaces the art and `render` leaves it alone.
+
+The repository and the bucket are public, and a phone photo carries EXIF, often including where it was taken. The validator refuses an art file with EXIF, XMP or text chunks. Strip a file before committing it, because a pushed blob stays in the branch's history even if a later commit cleans it:
+
+```bash
+python -m registry.art strip art/P001700.jpg   # orientation applied to the pixels, metadata removed, colour profile kept
+python -m registry.art check                   # the validator's checks on art/
+```
+
+Commit the art in the same pull request as its manual entry, or after it. When it reaches `main`, the `images` workflow (mode `art`) renders the same renditions as a publisher image under the same content-addressed names, uploads them, verifies them through the CDN and opens a pull request with `data/images.json`, which records the art file as the source. Replacing a file publishes new art under a new key; deleting one drops the image from the records (the objects stay in the bucket, as every published object does). As with the publisher's images, nothing reaches the domain until the next release.
 
 ## What each set is
 

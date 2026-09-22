@@ -943,6 +943,11 @@ def verify_objects(objects, status=None, workers=VERIFY_WORKERS, per_second=VERI
 def cmd_verify(args):
     state = load_images(args.images)
     objects = image_objects(state)
+    if args.work:
+        # Only what this run rendered: the rest was verified when it was
+        # uploaded, and the release checks every address new since the last.
+        rendered = {path.name for path in Path(args.work).glob("*")} if Path(args.work).exists() else set()
+        objects = [(name, size) for name, size in objects if name in rendered]
     problems = verify_objects(objects)
     checked = len(objects)
     if problems:
@@ -996,6 +1001,8 @@ def main(argv=None):
 
     p = sub.add_parser("verify", help="every object in data/images.json is served")
     p.add_argument("--images", default=str(IMAGES_PATH))
+    p.add_argument("--work", default=None,
+                   help="verify only the objects rendered into this directory by this run")
     p.set_defaults(run=cmd_verify)
 
     args = parser.parse_args(argv)
