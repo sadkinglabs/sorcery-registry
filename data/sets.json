@@ -1,0 +1,12 @@
+{
+  "_comment": "What each set is. A set code is a label, not a number, so nothing about a set is read from its code: it is recorded here. release: a set release, whose printings came out with it. promo: the publisher's bucket for promos (999), which came out with many releases; each one's release is recorded in data/released-with.json or data/manual.json. registry: a set of the registry's own for printings the official API will never serve; its code is three capital letters so it can never collide with a publisher's. A set that appears upstream stops the release until it is classified here. See registry/sets.py.",
+  "sets": {
+    "001": {"kind": "release"},
+    "002": {"kind": "release"},
+    "004": {"kind": "release"},
+    "005": {"kind": "release"},
+    "006": {"kind": "release"},
+    "999": {"kind": "promo"},
+    "CUR": {"kind": "registry"}
+  }
+}

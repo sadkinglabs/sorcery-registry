@@ -18,12 +18,11 @@ export type IsoDate = string;
 export type Threshold = number;
 
 /**
- * A set's code. Three digits are the publisher's official codes (001 Alpha, 002 Beta, 004
- * Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promo). A code, not a number: 003 is
- * deliberately unused, so codes do not imply an order. Three capital letters are codes the
- * registry makes for printings the official API will never serve (CUR, the curios), so they can
- * never collide with the publisher's. There is no collector number: cards have no official
- * serialisation within a set.
+ * A set's code: a label, never a number, so nothing about a set is read from it (what a set is, is
+ * its kind). The publisher's codes are three digits (001 Alpha, 002 Beta, 004 Arthurian Legends,
+ * 005 Dragonlord, 006 Gothic, 999 Promo; 003 is deliberately unused). The registry's own are three
+ * capital letters, such as CUR for the curios, so they can never collide with the publisher's.
+ * There is no collector number: cards have no official serialisation within a set.
  */
 export type SetCode = string;
 
@@ -214,6 +213,14 @@ export interface RegistrySet {
   /** Printings in the set. */
   printings: number;
   /**
+   * What the set is, as the registry records it (data/sets.json); never read from the code.
+   * release: a set release, whose printings came out with it. promo: the publisher's bucket for
+   * promos (999), which came out with many releases; each printing's released_with says which.
+   * registry: a set of the registry's own for printings the official API will never serve, such as
+   * CUR.
+   */
+  kind: "release" | "promo" | "registry";
+  /**
    * 'manual' when every printing in the set is a manual record, as for a set code of the
    * registry's own; 'api' otherwise.
    */
@@ -301,9 +308,10 @@ export interface Printing {
   /** The date this printing reached the public. */
   released_at: IsoDate | null;
   /**
-   * The set release this printing belongs to. For a printing in a release set it is that set. For
-   * a promo (set 999) or a curio (CUR), which the publisher files outside any release, it is the
-   * release it came out with, recorded by hand; null until recorded.
+   * The set release this printing belongs to: a set whose kind is release. For a printing in a
+   * release set it is that set. For a promo (a set of kind promo, 999) or a curio (kind registry,
+   * CUR), filed outside any release, it is the release it came out with, recorded by hand; null
+   * until recorded.
    */
   released_with: SetCode | null;
   /**

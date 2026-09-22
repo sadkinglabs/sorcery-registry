@@ -263,9 +263,13 @@ class SearchPrintingsTest(unittest.TestCase):
         result = self.reg.search_printings(card_set="Alpha", finish="Standard")
         self.assertEqual([p["printing_id"] for p in result["printings"]],
                          ["P000001", "P000003"])
-        result = self.reg.search_printings(name="wizard", card_set="2")
+        result = self.reg.search_printings(name="wizard", card_set="002")
         self.assertEqual([p["printing_id"] for p in result["printings"]], ["P000002"])
         self.assertEqual(result["printings"][0]["card_name"], "Apprentice Wizard")
+
+    def test_a_set_code_is_a_label_not_a_number(self):
+        self.assertEqual(self.reg.search_printings(card_set="2")["total_matches"], 0)
+        self.assertEqual(self.reg.search_printings(card_set="002")["total_matches"], 1)
 
     def test_a_set_code_of_the_registrys_own_matches_by_code(self):
         data = copy.deepcopy(DATA)
@@ -287,7 +291,7 @@ class SetContentsTest(unittest.TestCase):
     def test_distinct_cards_and_counts(self):
         # A set is addressable by name or by its official code.
         reg = Registry(copy.deepcopy(DATA))
-        self.assertEqual(reg.set_contents("1"), reg.set_contents("Alpha"))
+        self.assertEqual(reg.set_contents("001"), reg.set_contents("Alpha"))
         result = reg.set_contents("Alpha")
         self.assertEqual(result["set_name"], "Alpha")
         self.assertEqual(result["distinct_cards"], 2)

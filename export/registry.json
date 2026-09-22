@@ -16,6 +16,7 @@
       "released_at": "2023-06-22",
       "cards": 407,
       "printings": 817,
+      "kind": "release",
       "origin": "api",
       "api_url": "https://api.kairosarchive.net/v3/sets/001.json",
       "kairos_url": "https://kairosarchive.net/sets/001"
@@ -26,6 +27,7 @@
       "released_at": "2023-10-06",
       "cards": 405,
       "printings": 812,
+      "kind": "release",
       "origin": "api",
       "api_url": "https://api.kairosarchive.net/v3/sets/002.json",
       "kairos_url": "https://kairosarchive.net/sets/002"
@@ -36,6 +38,7 @@
       "released_at": "2024-10-04",
       "cards": 227,
       "printings": 448,
+      "kind": "release",
       "origin": "api",
       "api_url": "https://api.kairosarchive.net/v3/sets/004.json",
       "kairos_url": "https://kairosarchive.net/sets/004"
@@ -46,6 +49,7 @@
       "released_at": "2025-07-31",
       "cards": 13,
       "printings": 26,
+      "kind": "release",
       "origin": "api",
       "api_url": "https://api.kairosarchive.net/v3/sets/005.json",
       "kairos_url": "https://kairosarchive.net/sets/005"
@@ -56,6 +60,7 @@
       "released_at": "2025-12-05",
       "cards": 447,
       "printings": 891,
+      "kind": "release",
       "origin": "api",
       "api_url": "https://api.kairosarchive.net/v3/sets/006.json",
       "kairos_url": "https://kairosarchive.net/sets/006"
@@ -66,6 +71,7 @@
       "released_at": "2022-03-15",
       "cards": 67,
       "printings": 94,
+      "kind": "promo",
       "origin": "api",
       "api_url": "https://api.kairosarchive.net/v3/sets/999.json",
       "kairos_url": "https://kairosarchive.net/sets/999"

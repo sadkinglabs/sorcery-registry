@@ -198,9 +198,9 @@ Every card, printing and set says who stands behind it:
 
 **Slugs of manual printings are predictions.** A manual printing carries a slug predicted in the publisher's own shape, such as `999-the_champion-op-f`. It has no row in `slug_history`. It resolves at `slugs/{slug}.json` while it is the printing's slug, with `valid_from` null. On confirmation it is replaced by upstream's slug, and if the two differ, the prediction stops resolving from the next release. As always, a slug is a lookup, never a key.
 
-**Set codes.** The publisher's set codes are three digits. A set the registry makes for printings upstream will never serve has three capital letters, such as `CUR` for the curios, so the two can never collide. It is served like any other set, at `sets/CUR.json`.
+**Set codes and kinds.** A set code is a label, never a number: `6` is not `006`, and nothing about a set is read from its code. What a set is, is its `kind`, recorded by the registry: `release` for a set release, `promo` for the publisher's bucket for promos (999), and `registry` for a set of the registry's own. The publisher's codes are three digits. The registry's own codes are three capital letters, such as `CUR` for the curios, so the two can never collide. A registry set is served like any other, at `sets/CUR.json`. A set that appears upstream stops the next release until it is classified.
 
-**`released_with`.** Every printing carries the set release it belongs to. For a printing in a release set it is that set. For a promo, which upstream files under set 999, or a curio, it is the release recorded by hand, and null until recorded.
+**`released_with`.** Every printing carries the set release it belongs to. For a printing in a set of kind `release` it is that set. For a promo, which upstream files under set 999 (kind `promo`), or a curio (kind `registry`), it is the release recorded by hand, and null until recorded.
 
 Manual records are the registry's own reports, like notes. Say a record is manual when you cite it.
 

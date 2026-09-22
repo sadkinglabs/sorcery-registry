@@ -174,8 +174,8 @@ Store-kit prize cards, Kickstarter pledge cards and curios were printed but are 
 - **A new printing of a card the registry already holds**, such as a curio of an official card, goes under `printings` with that card's `codex_id`. Its gameplay text comes from the card, so it lists only physical facts.
 - **Null means unknown.** Never copy a value from another printing. An alternate art usually means a different artist, typeline or flavour text.
 - **Every entry needs a `source` and a `recorded` date.** Sources name a place, never a person, as for notes. The bar for minting an id is a photo of the card or a public source that shows it: ids are permanent, so a record minted in error can only be withdrawn, never taken back.
-- **Set codes.** A promo goes in the publisher's set `999` with the product it was distributed as (`OrganizedPlay`, `Kickstarter`). A printing upstream will never serve and that belongs to no set of theirs goes in a set of the registry's own, whose code is three capital letters (`CUR`, "Curios"), so it can never collide with a publisher's code.
-- **`released_with`** names the set release a promo or curio belongs to, such as `002` for a Beta store-kit card. Leave it null for a printing in a release set. For official promos, which the API serves under 999, record it in [`data/released-with.json`](data/released-with.json) instead, with a source.
+- **Set codes.** A promo goes in the publisher's set `999` with the product it was distributed as (`OrganizedPlay`, `Kickstarter`). A printing upstream will never serve and that belongs to no set of theirs goes in a set of the registry's own, whose code is three capital letters (`CUR`, "Curios"), so it can never collide with a publisher's code. A set code must be classified in [`data/sets.json`](data/sets.json) before any entry uses it: a new set of ours gets `"kind": "registry"` there.
+- **`released_with`** names the set release a promo or curio belongs to, such as `002` for a Beta store-kit card. Leave it null for a printing in a set of kind `release`. For official promos, which the API serves under 999, record it in [`data/released-with.json`](data/released-with.json) instead, with a source.
 
 Then run:
 
@@ -196,6 +196,15 @@ python -m registry.validate --against origin/main
 - `new_cards` or `new_printings` says it is something else.
 
 A curio in a set of the registry's own will never be confirmed, and stays manual for good.
+
+## What each set is
+
+A set code is a label, never a number, so nothing is read from it. [`data/sets.json`](data/sets.json) records what each set is:
+- `release` is a set release, whose printings came out with it.
+- `promo` is the publisher's bucket for promos, `999`. Its printings came out with many releases, and each one's release is recorded per printing.
+- `registry` is a set of the registry's own, for printings the official API will never serve. Its code is three capital letters, so it can never collide with a publisher's.
+
+When a sync brings a set the file does not list, the validator fails until you add it with its kind. That is deliberate: a new code could be a new release or a new promo bucket, and only a person can say which.
 
 ## Notes
 

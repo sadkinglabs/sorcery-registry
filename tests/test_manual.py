@@ -22,7 +22,18 @@ from registry.manual import (apply_manual, check_manual, load_manual, load_relea
 from registry.sync import apply_plan
 from registry.validate import check_internal
 
-from test_pipeline import RAW_API, engine, upstream_printing
+from test_pipeline import FIXTURE_SET_KINDS, RAW_API, engine, upstream_printing
+from unittest import mock
+
+_set_kinds = mock.patch("registry.export.load_sets", return_value=FIXTURE_SET_KINDS)
+
+
+def setUpModule():
+    _set_kinds.start()
+
+
+def tearDownModule():
+    _set_kinds.stop()
 
 SCHEMA = json.loads((Path(__file__).resolve().parent.parent / "schema" /
                      "registry.schema.json").read_text(encoding="utf-8"))

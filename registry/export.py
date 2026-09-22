@@ -13,7 +13,8 @@ from pathlib import Path
 from . import API_BASE, API_URL, IMAGE_BASE, SCHEMA_VERSION, SITE_BASE
 from .errata import load_errata, unknown_printings
 from .images import load_images
-from .manual import is_release_set, load_released_with
+from .manual import load_released_with
+from .sets import is_release, load_sets
 from .notes import load_notes
 from .db import (CARD_FIELDS, FACE_FIELDS, HISTORY_FIELDS, PRINTING_FACE_FIELDS,
                  PRINTING_FIELDS, decode_field, open_db)
@@ -169,18 +170,20 @@ def manual_of(row):
             "confirmed_at": row["confirmed_at"], "withdrawn": withdrawn}
 
 
-def build_export(con, images=None, errata=None, notes=None, released_with=None):
+def build_export(con, images=None, errata=None, notes=None, released_with=None, set_kinds=None):
     """The export, from the database plus data/images.json (what images the
     registry holds), data/errata.json (printed faces recorded by hand),
     data/notes.json (what the official API does not say about a record)
-    and data/released-with.json (the release an official promo belongs to)
-    - registry-owned data kept in git, like overrides."""
+    data/released-with.json (the release an official promo belongs to) and
+    data/sets.json (what each set is) - registry-owned data kept in git,
+    like overrides."""
+    kinds = set_kinds if set_kinds is not None else load_sets()
     held_images = (images if images is not None else load_images()).get("printings", {})
     notes = notes if notes is not None else load_notes()
     # Every record carries its notes as a list, empty for almost all of
     # them: a consumer never has to ask whether the field is there.
     card_notes, printing_notes = notes.get("cards", {}), notes.get("printings", {})
-    promo_releases = released_with if released_with is not None else load_released_with()
+    promo_releases = released_with if released_with is not None else load_released_with(kinds=kinds)
     # A textless promo shows no face, so no date can say whether it is
     # current: data/errata.json names such printings and they report null.
     faceless = unknown_printings(errata if errata is not None else load_errata())
@@ -241,6 +244,10 @@ def build_export(con, images=None, errata=None, notes=None, released_with=None):
                      "released_at": entry["released_at"],
                      "cards": len(entry["card_ids"]),
                      "printings": entry["printings"],
+                     # What the set is, as recorded (data/sets.json); null
+                     # for a set nobody has classified, which the
+                     # validator refuses.
+                     "kind": kinds.get(entry["set_code"]),
                      # A set only the registry's own records are in - a
                      # code of ours, such as CUR - is itself manual.
                      "origin": "manual" if entry["origins"] == {"manual"} else "api",
@@ -295,7 +302,7 @@ def build_export(con, images=None, errata=None, notes=None, released_with=None):
             if field == "released_at":
                 # The set release this printing belongs to: its own set's,
                 # or for a promo or a curio, the one recorded by hand.
-                if is_release_set(row["set_code"]):
+                if is_release(row["set_code"], kinds):
                     record["released_with"] = row["set_code"]
                 elif row["released_with"] is not None:
                     record["released_with"] = row["released_with"]

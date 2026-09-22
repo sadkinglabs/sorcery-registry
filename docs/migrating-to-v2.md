@@ -12,11 +12,12 @@ Additive; **no identifier changed** and no existing value changed.
 | `manual` | cards and printings, after `origin` | null for every record until now. For a hand-recorded record: `{source, recorded, confirmed_at, withdrawn}` |
 | `released_with` | printings, after `released_at` | the set release the printing belongs to: its own set for a release set, the release recorded by hand for a promo or curio, else null |
 | `source: "manual"` | `card_history` rows | the face of a card recorded by hand |
+| `kind` | sets, after `printings` | what the set is, as recorded: `release`, `promo` (999) or `registry` (a set of the registry's own). Read this, never the code's characters |
 | letter set codes | `set_code`, `released_with` | a set of the registry's own, such as `CUR`, for printings upstream will never serve. The publisher's codes stay three digits |
 | `manual_*` | `changes.json` summary, and its `manual` section | records added by hand, confirmed upstream or withdrawn |
 | `origin`, `released_with` | `index/cards.json`, `index/printings.json` and the printing summaries in `cards/{codex_id}.json` | as above |
 
-A strict parser that rejects unknown keys needs the new schema. So does code that assumes a set code is three digits, or that every printing has a `slug_history` row: manual printings have none until upstream confirms them. Everything else reads v3.4 unchanged. `changes.json` also stops counting a field that a release adds or drops as a change to every record that carries it. A new field counts only on records where it says something beyond its default, such as a promo's `released_with` recorded by hand.
+A strict parser that rejects unknown keys needs the new schema. So does code that assumes a set code is three digits, or reads a set's meaning from its code (use `kind`), or that every printing has a `slug_history` row: manual printings have none until upstream confirms them. Everything else reads v3.4 unchanged. `changes.json` also stops counting a field that a release adds or drops as a change to every record that carries it. A new field counts only on records where it says something beyond its default, such as a promo's `released_with` recorded by hand.
 
 
 ## v3.2 to v3.3 (schema 11)
