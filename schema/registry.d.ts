@@ -18,9 +18,12 @@ export type IsoDate = string;
 export type Threshold = number;
 
 /**
- * The set's official code (001 Alpha, 002 Beta, 004 Arthurian Legends, 005 Dragonlord, 006 Gothic,
- * 999 Promo). A code, not a number: 003 is deliberately unused, so codes do not imply an order.
- * There is no collector number: cards have no official serialisation within a set.
+ * A set's code. Three digits are the publisher's official codes (001 Alpha, 002 Beta, 004
+ * Arthurian Legends, 005 Dragonlord, 006 Gothic, 999 Promo). A code, not a number: 003 is
+ * deliberately unused, so codes do not imply an order. Three capital letters are codes the
+ * registry makes for printings the official API will never serve (CUR, the curios), so they can
+ * never collide with the publisher's. There is no collector number: cards have no official
+ * serialisation within a set.
  */
 export type SetCode = string;
 
@@ -137,6 +140,42 @@ export interface Note {
 }
 
 /**
+ * Who stands behind the record. 'api': the official API serves it. 'manual': the registry recorded
+ * it by hand (data/manual.json) because the API does not serve it. A manual record becomes 'api',
+ * keeping its id, once the API serves it and a person confirms the match.
+ */
+export type Origin = "api" | "manual";
+
+/**
+ * Null for a record the registry only ever observed in the official API. For a record the registry
+ * recorded by hand: where it came from and when, kept after the API starts serving it.
+ */
+export type Manual = null | {
+  /**
+   * Where the hand record came from. Names a place, not a person, unless that person asked to be
+   * credited.
+   */
+  source: string;
+  /** The day the record was written down. */
+  recorded: IsoDate;
+  /**
+   * The day the official API was confirmed to serve it, after which origin is 'api'; null while it
+   * is still manual.
+   */
+  confirmed_at: IsoDate | null;
+  /**
+   * Set when a manual record was found to be wrong. Ids are permanent, so it stays, marked; a
+   * withdrawn printing is never a card's default.
+   */
+  withdrawn: null | {
+    /** The day the record was withdrawn. */
+    on: IsoDate;
+    /** Why the record was found to be wrong. */
+    reason: string;
+  };
+};
+
+/**
  * Counts match the section lengths. Deliberately no timestamp: an unchanged registry produces a
  * byte-identical file.
  */
@@ -174,6 +213,11 @@ export interface RegistrySet {
   cards: number;
   /** Printings in the set. */
   printings: number;
+  /**
+   * 'manual' when every printing in the set is a manual record, as for a set code of the
+   * registry's own; 'api' otherwise.
+   */
+  origin: Origin;
   /** Derived: this set's JSON object on api.kairosarchive.net; null only for a set without a code. */
   api_url: string | null;
   /** Derived: this set's page on kairosarchive.net. */
@@ -230,6 +274,8 @@ export interface Card extends Face {
   image_urls: ImageUrls | null;
   /** Derived: the default printing's image_status. */
   image_status: ImageStatus;
+  origin: Origin;
+  manual: Manual;
   /**
    * What the registry knows about this card that the official API does not say, oldest first.
    * Empty for most records.
@@ -254,6 +300,12 @@ export interface Printing {
   set_code: SetCode | null;
   /** The date this printing reached the public. */
   released_at: IsoDate | null;
+  /**
+   * The set release this printing belongs to. For a printing in a release set it is that set. For
+   * a promo (set 999) or a curio (CUR), which the publisher files outside any release, it is the
+   * release it came out with, recorded by hand; null until recorded.
+   */
+  released_with: SetCode | null;
   /**
    * Official product line, spelled as upstream spells it. Observed values: Booster, BoxTopper,
    * Dust, OrganizedPlay, PreconstructedDeck, DraftKit, AlphaInvestments, WelcomeKit, Kickstarter,
@@ -300,6 +352,8 @@ export interface Printing {
   image_urls: ImageUrls | null;
   /** How good the source of the front image was: missing, lowres or ok. */
   image_status: ImageStatus;
+  origin: Origin;
+  manual: Manual;
   /**
    * What the registry knows about this printing that the official API does not say, oldest first.
    * Empty for most records.
@@ -350,9 +404,10 @@ export interface CardHistoryRow extends Face {
   /**
    * Where the face came from: 'api' when the registry observed it in the official API; 'card' when
    * it was recorded by hand from what is printed on the card (data/errata.json), the case of a
-   * card whose printed text differs from the text the API serves.
+   * card whose printed text differs from the text the API serves; 'manual' for the face of a card
+   * the registry recorded by hand because the API does not serve it (data/manual.json).
    */
-  source: "api" | "card";
+  source: "api" | "card" | "manual";
   /** The back face at that time; null unless the card is double-faced. */
   back: Face | null;
 }

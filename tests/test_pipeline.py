@@ -273,11 +273,11 @@ class EndToEndTest(unittest.TestCase):
         self.assertEqual(export_one["header"]["sets"], 2)
         self.assertEqual(export_one["sets"], [
             {"set_code": "001", "set_name": "Alpha",
-             "released_at": "2023-06-22", "cards": 1, "printings": 2,
+             "released_at": "2023-06-22", "cards": 1, "printings": 2, "origin": "api",
              "api_url": "https://api.kairosarchive.net/v3/sets/001.json",
              "kairos_url": "https://kairosarchive.net/sets/001"},
             {"set_code": "010", "set_name": "Gothic",
-             "released_at": "2026-05-01", "cards": 1, "printings": 1,
+             "released_at": "2026-05-01", "cards": 1, "printings": 1, "origin": "api",
              "api_url": "https://api.kairosarchive.net/v3/sets/010.json",
              "kairos_url": "https://kairosarchive.net/sets/010"},
         ])
@@ -746,7 +746,8 @@ class BackFaceRoundTripTest(unittest.TestCase):
                                                      "set_codes", "printing_ids",
                                                      "default_printing_id", "api_url",
                                                      "kairos_url", "image_urls",
-                                                     "image_status", "notes")]
+                                                     "image_status", "origin", "manual",
+                                                     "notes")]
         self.assertEqual(list(wizard["back"]), front_keys)
         self.assertEqual(wizard["back"]["life"], 20)
         printing = next(p for p in export["printings"]

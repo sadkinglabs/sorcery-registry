@@ -267,6 +267,15 @@ class SearchPrintingsTest(unittest.TestCase):
         self.assertEqual([p["printing_id"] for p in result["printings"]], ["P000002"])
         self.assertEqual(result["printings"][0]["card_name"], "Apprentice Wizard")
 
+    def test_a_set_code_of_the_registrys_own_matches_by_code(self):
+        data = copy.deepcopy(DATA)
+        curio = next(p for p in data["printings"] if p["printing_id"] == "P000003")
+        curio.update(set_code="CUR", set_name="Curios")
+        reg = Registry(data)
+        for spelling in ("CUR", "cur", "Curios"):
+            result = reg.search_printings(card_set=spelling)
+            self.assertEqual([p["printing_id"] for p in result["printings"]], ["P000003"])
+
     def test_counts_and_limit(self):
         result = self.reg.search_printings(limit=1)
         self.assertEqual(result["total_matches"], 3)

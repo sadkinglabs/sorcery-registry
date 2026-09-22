@@ -23,9 +23,24 @@ gameplay attributes changed at once, in which case the fingerprint cannot
 pair them - so issuing the newcomer a fresh id would fork the identity.
 Both sides go to quarantine instead. Disappearances alone still retire
 their printings, and newcomers alone are still genuinely new.
+
+Manual records (origin "manual", see registry/manual.py) are the
+registry's own: upstream not serving them is their normal state, so they
+never count as vanished and are never retired, and their predicted slugs
+own nothing. When upstream starts serving something that looks like one -
+a card with the same or a close name, a printing of the same card with
+the same product and finish, or the predicted slug itself - it is never
+matched automatically and never minted a second id. It goes to review,
+and a human either confirms the match (confirm_cards, confirm_printings:
+the record keeps its id, takes upstream's name, slug and values, and
+becomes origin "api") or says it is something else (new_cards,
+new_printings).
 """
 
+import difflib
 import json
+import re
+import unicodedata
 
 from .db import CARD_FIELDS, CARD_OWNED_FIELDS, PRINTING_FIELDS
 
@@ -54,7 +69,36 @@ EMPTY_DECISIONS = {
     "printing_renames": [],  # {"printing_id": int, "new_slug": str}
     "new_printings": [],     # [slug, ...] force "genuinely new"
     "retire_printings": [],  # [printing_id, ...] force "really gone"
+    "confirm_cards": [],     # {"card_id": int, "name": str} manual card = upstream card
+    "confirm_printings": [], # {"printing_id": int, "slug": str} manual printing = upstream printing
 }
+
+
+def _name_key(name):
+    """A card name reduced to what two spellings of one card share: case,
+    accents, punctuation and a leading "The" do not tell cards apart."""
+    plain = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
+    plain = re.sub(r"[^a-z0-9]+", " ", plain.lower()).strip()
+    return re.sub(r"^the ", "", plain)
+
+
+def close_names(a, b):
+    """Whether two card names could be the same card spelled twice: equal
+    once reduced, one contained in the other, or nearly the same letters.
+    Deliberately generous - a false alarm costs a look, a miss costs a
+    duplicate card."""
+    ka, kb = _name_key(a), _name_key(b)
+    if not ka or not kb:
+        return False
+    if ka == kb:
+        return True
+    # Short names differ by a letter and are still different cards (Frog,
+    # Fog); only longer ones are compared by likeness.
+    if min(len(ka), len(kb)) < 6:
+        return False
+    if ka in kb or kb in ka:
+        return True
+    return difflib.SequenceMatcher(None, ka, kb).ratio() >= 0.85
 
 
 def _hashable(value):
@@ -110,7 +154,7 @@ def _case_names(plan):
     Entries are either bare names or _card_summary dicts."""
     names = set()
     for case in plan["ambiguous"]:
-        if case["kind"] != "card":
+        if case["kind"] not in ("card", "manual-card"):
             continue
         for entry in case["missing"] + case["candidates"]:
             names.add(entry if isinstance(entry, str) else entry["name"])
@@ -137,11 +181,17 @@ def diff(registry, api, decisions=None):
         "printing_updates": [],
         "retire_printings": [],
         "unretire_printings": [],
+        "confirm_cards": [],
+        "confirm_printings": [],
         "ambiguous": [],
         "notes": [],
     }
 
-    reg_cards = registry["cards"]
+    # Manual records take no part in the matching below: they are not
+    # upstream's, so they cannot vanish from it. They meet upstream only
+    # through review (_manual_cards, _manual_printings).
+    manual_cards = {n: c for n, c in registry["cards"].items() if c.get("origin") == "manual"}
+    reg_cards = {n: c for n, c in registry["cards"].items() if c.get("origin", "api") == "api"}
     api_cards = api["cards"]
 
     # ---- Card layer -----------------------------------------------------
@@ -152,6 +202,7 @@ def diff(registry, api, decisions=None):
 
     missing_names = [n for n in reg_cards if n not in api_cards]
     added_names = [n for n in api_cards if n not in reg_cards]
+    _manual_cards(plan, manual_cards, api_cards, added_names, rename_map, decisions)
 
     # Human decisions consume candidates before any automatic pairing.
     for decision in decisions["card_renames"]:
@@ -233,7 +284,9 @@ def diff(registry, api, decisions=None):
                 {"card_id": card["card_id"], "name": api_name, "changes": changes})
 
     # ---- Printing layer -------------------------------------------------
-    reg_printings = registry["printings"]
+    manual_printings = [p for p in registry["printings"].values() if p.get("origin") == "manual"]
+    reg_printings = {s: p for s, p in registry["printings"].items()
+                     if p.get("origin", "api") == "api"}
     api_printings = api["printings"]
     printing_by_id = {p["printing_id"]: p for p in reg_printings.values()}
 
@@ -268,6 +321,7 @@ def diff(registry, api, decisions=None):
     added = [p for p in api_printings.values()
              if p["slug"] not in reg_printings
              and p["card_name"] not in ambiguous_card_names]
+    _manual_printings(plan, manual_printings, added, effective_card, decisions)
 
     # Human decisions first, exactly as at the card layer.
     for decision in decisions["printing_renames"]:
@@ -350,6 +404,102 @@ def diff(registry, api, decisions=None):
     return plan
 
 
+def _manual_cards(plan, manual_cards, api_cards, added_names, rename_map, decisions):
+    """Upstream cards that may be manual cards the registry already holds.
+    A confirmed pair keeps the manual card's id and takes upstream's name
+    and values; anything else that resembles a manual card waits for a
+    human. Consumes what it handles from added_names."""
+    by_id = {c["card_id"]: c for c in manual_cards.values()}
+    for decision in decisions["confirm_cards"]:
+        card = by_id.get(decision["card_id"])
+        name = decision["name"]
+        if card is None or name not in added_names:
+            raise ValueError(f"confirm_cards decision does not match the current diff: {decision!r}")
+        added_names.remove(name)
+        del by_id[decision["card_id"]]
+        plan["confirm_cards"].append({"card_id": card["card_id"], "old_name": card["name"],
+                                      "new_name": name})
+        if card["name"] != name:
+            rename_map[card["name"]] = name
+            plan["card_renames"].append({"card_id": card["card_id"], "old_name": card["name"],
+                                         "new_name": name, "decided_by": "human"})
+        changes = field_changes(card, api_cards[name], CARD_COMPARE)
+        if changes:
+            plan["card_updates"].append({"card_id": card["card_id"], "name": name,
+                                         "changes": changes})
+    forced_new = set(decisions["new_cards"])
+    for name in list(added_names):
+        alike = sorted(c["name"] for c in by_id.values() if close_names(c["name"], name))
+        if not alike:
+            continue
+        if name in forced_new:
+            if any(a.casefold() == name.casefold() for a in alike):
+                raise ValueError(f"new_cards decision: {name!r} is the name of manual card "
+                                 f"{alike}; confirm it, or rename the manual entry first")
+            continue
+        added_names.remove(name)
+        plan["ambiguous"].append({
+            "kind": "manual-card",
+            "problem": "the official API now serves a card like one the registry recorded by "
+                       "hand; confirm it (confirm_cards) or say it is a different card (new_cards)",
+            "missing": alike,
+            "candidates": [name],
+        })
+
+
+def _manual_printings(plan, manual_printings, added, effective_card, decisions):
+    """Upstream printings that may be manual printings the registry
+    already holds: same card with the same product and finish, or the
+    predicted slug itself. Confirmed pairs keep the manual id; the rest
+    wait for a human. Consumes what it handles from `added`."""
+    by_id = {p["printing_id"]: p for p in manual_printings}
+    by_slug = {p["slug"]: p for p in added}
+    for decision in decisions["confirm_printings"]:
+        old = by_id.get(decision["printing_id"])
+        new = by_slug.get(decision["slug"])
+        if old is None or new is None or new not in added \
+                or effective_card(old) != new["card_name"]:
+            raise ValueError(f"confirm_printings decision does not match the current diff: "
+                             f"{decision!r}")
+        added.remove(new)
+        del by_id[decision["printing_id"]]
+        plan["confirm_printings"].append({"printing_id": old["printing_id"],
+                                          "old_slug": old["slug"], "new_slug": new["slug"]})
+        changes = field_changes(old, new, PRINTING_COMPARE)
+        if changes:
+            plan["printing_updates"].append({"printing_id": old["printing_id"],
+                                             "slug": new["slug"], "changes": changes})
+    forced_new = set(decisions["new_printings"])
+    for new in list(added):
+        alike = [p for p in by_id.values()
+                 if p["slug"] == new["slug"]
+                 or (effective_card(p) == new["card_name"]
+                     and (p["product"], p["finish"]) == (new["product"], new["finish"]))]
+        if not alike:
+            continue
+        if new["slug"] in forced_new:
+            if any(p["slug"] == new["slug"] for p in alike):
+                raise ValueError(f"new_printings decision: {new['slug']!r} is the predicted slug "
+                                 f"of a manual printing; confirm it, or give that entry another "
+                                 f"slug in data/manual.json first")
+            continue
+        added.remove(new)
+        plan["ambiguous"].append({
+            "kind": "manual-printing",
+            "problem": "the official API now serves a printing like one the registry recorded "
+                       "by hand; confirm it (confirm_printings) or say it is a different "
+                       "printing (new_printings)",
+            "card": new["card_name"],
+            "missing": [{"printing_id": p["printing_id"], "slug": p["slug"],
+                         "set_name": p["set_name"], "product": p["product"],
+                         "finish": p["finish"], "released_at": p["released_at"]}
+                        for p in sorted(alike, key=lambda p: p["printing_id"])],
+            "candidates": [{"slug": new["slug"], "set_name": new["set_name"],
+                            "product": new["product"], "finish": new["finish"],
+                            "released_at": new["released_at"]}],
+        })
+
+
 def _enforce_slug_ownership(plan, slug_owners, decisions):
     """A slug belongs permanently to the first printing that carried it.
     Sweep the classified plan and quarantine anything that would hand a
@@ -417,7 +567,7 @@ def is_noop(plan):
     return not any(plan[key] for key in (
         "new_cards", "card_renames", "card_updates", "new_printings",
         "printing_renames", "printing_updates", "retire_printings",
-        "unretire_printings", "ambiguous"))
+        "unretire_printings", "confirm_cards", "confirm_printings", "ambiguous"))
 
 
 def summarise(plan):
@@ -431,6 +581,8 @@ def summarise(plan):
         ("printing attribute updates", len(plan["printing_updates"])),
         ("printings retired", len(plan["retire_printings"])),
         ("printings unretired", len(plan["unretire_printings"])),
+        ("manual cards confirmed upstream", len(plan["confirm_cards"])),
+        ("manual printings confirmed upstream", len(plan["confirm_printings"])),
         ("AMBIGUOUS, needs human review", len(plan["ambiguous"])),
     ]
     for label, count in counts:

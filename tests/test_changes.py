@@ -74,6 +74,7 @@ class DiffTest(unittest.TestCase):
             "printings_added": 1, "printings_changed": 2, "printings_removed": 0,
             "sets_added": 1, "images_added": 2, "images_replaced": 1,
             "history_rows_added": 1, "notes_added": 0, "notes_removed": 0,
+            "manual_added": 0, "manual_confirmed": 0, "manual_withdrawn": 0,
             "identifiers_removed": 0})
         self.assertEqual(changes["cards"]["changed"],
                          [{"codex_id": "C000001", "name": "Card C000001", "fields": ["rules_text", "errata"]}])
@@ -123,20 +124,26 @@ class DiffTest(unittest.TestCase):
         self.assertEqual(changes["summary"]["identifiers_removed"], 0)
         self.assertEqual(check(changes), [])
 
-    def test_a_field_a_release_adds_changes_only_the_records_that_carry_something(self):
-        # schema 12 adds notes to every record: [] on most, one note on one.
+    def test_a_field_a_release_adds_or_drops_changes_no_record(self):
+        # schema 12 adds notes, origin and released_with to every record,
+        # most of them with a value: the shape changed, no record did.
         after = copy.deepcopy(BEFORE)
+        after["header"]["schema_version"] = 12
         for record in after["cards"] + after["printings"]:
             record["notes"] = []
-            record["new_field"] = None
-        after["cards"][1]["other_field"] = "set"
+            record["origin"] = "api"
+        after["cards"][1]["rules_text"] = "Changed."
         changes = diff_exports(BEFORE, after, "v3.3.3", "v3.4.0")
+        self.assertEqual(changes["schema_version"], {"from": 11, "to": 12})
         self.assertEqual(changes["cards"]["changed"],
-                         [{"codex_id": "C000002", "name": "Card C000002", "fields": ["other_field"]}])
+                         [{"codex_id": "C000002", "name": "Card C000002", "fields": ["rules_text"]}])
         self.assertEqual(changes["printings"]["changed"], [])
-        # And the other way: a field dropped while empty is no change either.
-        self.assertEqual(diff_exports(after, BEFORE, "v3.4.0", "v4.0.0")["cards"]["changed"],
-                         [{"codex_id": "C000002", "name": "Card C000002", "fields": ["other_field"]}])
+        self.assertEqual(diff_exports(after, BEFORE, "v3.4.0", "v4.0.0")["printings"]["changed"], [])
+        # Once both releases have the field, a new value is a change.
+        later = copy.deepcopy(after)
+        later["printings"][0]["origin"] = "manual"
+        self.assertEqual(diff_exports(after, later, "v3.4.0", "v3.4.1")["printings"]["changed"][0]["fields"],
+                         ["origin"])
 
     def test_notes_have_their_own_section_and_never_change_a_record(self):
         before = copy.deepcopy(BEFORE)
@@ -169,7 +176,8 @@ class DiffTest(unittest.TestCase):
 
     def test_summary_line_reads_documents_from_before_notes(self):
         changes = diff_exports(BEFORE, copy.deepcopy(BEFORE), "v3.3.2", "v3.3.3")
-        for key in ("notes_added", "notes_removed"):
+        for key in ("notes_added", "notes_removed", "manual_added", "manual_confirmed",
+                    "manual_withdrawn"):
             del changes["summary"][key]
         self.assertEqual(summary_line(changes), "0 identifiers removed")
 

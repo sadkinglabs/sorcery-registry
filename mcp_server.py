@@ -308,12 +308,14 @@ class Registry:
 
     @staticmethod
     def _in_set(printing, wanted):
-        """Match a printing against a set given as its official code
-        ('006', '6', 6) or its name ('Gothic'), case-insensitively."""
+        """Match a printing against a set given as its code ('006', '6', 6,
+        or one of the registry's own such as 'CUR') or its name ('Gothic'),
+        case-insensitively."""
         text = str(wanted).strip()
         if text.isdigit():
             return printing["set_code"] == text.zfill(3)
-        return (printing["set_name"] or "").lower() == text.lower()
+        return (printing["set_code"] or "").lower() == text.lower() \
+            or (printing["set_name"] or "").lower() == text.lower()
 
     def search_cards(self, name=None, type=None, element=None, rarity=None,
                      card_set=None, keyword=None, category=None, errata=None,
@@ -460,7 +462,16 @@ def build_server():
             "(missing/lowres/ok) and image_urls (small/normal/large/original). "
             "Cards and printings carry notes: facts the official API does not "
             "say, each with its source and the date it was recorded. Quote the "
-            "source with the fact; a note is a report, not an official record."
+            "source with the fact; a note is a report, not an official record. "
+            "origin says who stands behind a record: 'api' when the official "
+            "API serves it, 'manual' when the registry recorded it by hand "
+            "because the API does not (store-kit prizes, curios); a manual "
+            "record's manual field gives its source, and says so when it was "
+            "later confirmed upstream or withdrawn. Say a record is manual "
+            "when you cite it. Set codes are three digits (the publisher's) "
+            "or three capital letters (the registry's own, such as CUR). "
+            "released_with names the set release a printing belongs to, "
+            "which for a promo in set 999 is recorded by hand or null."
         ),
     )
     registry = Registry(load_registry())

@@ -101,6 +101,17 @@ def _apply_plan(con, plan, as_of, retroactive=None):
     card_ids = {row["name"]: row["card_id"]
                 for row in con.execute("SELECT name, card_id FROM cards")}
 
+    # A manual card upstream now serves keeps its id and becomes upstream's
+    # to speak for. Its face row, read from the card, stays as the record
+    # of what was read; a difference upstream closes it below like any
+    # other change.
+    for confirm in plan.get("confirm_cards", []):
+        cur.execute("UPDATE cards SET origin = 'api', confirmed_at = ?, withdrawn_at = NULL, "
+                    "withdrawn_reason = NULL WHERE card_id = ? AND origin = 'manual'",
+                    (as_of, confirm["card_id"]))
+        if cur.rowcount != 1:
+            raise ValueError(f"confirm: card {confirm['card_id']} is not a manual card")
+
     for update in plan["card_updates"]:
         for field, change in update["changes"].items():
             value = change["new"]
@@ -164,6 +175,21 @@ def _apply_plan(con, plan, as_of, retroactive=None):
             "VALUES (?, ?, ?, NULL)",
             (printing["slug"], printing_id, as_of))
 
+    # A manual printing upstream now serves takes upstream's slug, which
+    # from today is owned like any other; its predicted slug owned nothing
+    # and leaves no history.
+    for confirm in plan.get("confirm_printings", []):
+        cur.execute("UPDATE printings SET slug = ?, origin = 'api', confirmed_at = ?, "
+                    "withdrawn_at = NULL, withdrawn_reason = NULL "
+                    "WHERE printing_id = ? AND origin = 'manual'",
+                    (confirm["new_slug"], as_of, confirm["printing_id"]))
+        if cur.rowcount != 1:
+            raise ValueError(f"confirm: printing {confirm['printing_id']} is not a manual printing")
+        cur.execute(
+            "INSERT INTO slug_history (slug, printing_id, valid_from, valid_to) "
+            "VALUES (?, ?, ?, NULL)",
+            (confirm["new_slug"], confirm["printing_id"], as_of))
+
     for rename in plan["printing_renames"]:
         cur.execute("UPDATE printings SET slug = ? WHERE printing_id = ?",
                     (rename["new_slug"], rename["printing_id"]))
@@ -204,7 +230,8 @@ def save_snapshot(raw, path=SNAPSHOT_PATH):
 def resolve_interactively(plan):
     """Walk each quarantined case at the prompt and build a decisions dict."""
     decisions = {"card_renames": [], "new_cards": [], "printing_renames": [],
-                 "new_printings": [], "retire_printings": []}
+                 "new_printings": [], "retire_printings": [], "confirm_cards": [],
+                 "confirm_printings": []}
     for case in plan["ambiguous"]:
         print(f"\nAmbiguous ({case['kind']}): {case['problem']}")
         print(json.dumps({k: v for k, v in case.items() if k not in ("kind", "problem")},

@@ -1,0 +1,5 @@
+{
+  "_comment": "Cards and printings the registry records by hand because the official API does not serve them. Same fields as every other record; null means unknown. Leave codex_id and printing_id null for a new entry: python -m registry.manual apply mints them and writes them back. Sources name a place, never a person. Never remove an entry: mark it withdrawn. See registry/manual.py and CONTRIBUTING.md.",
+  "cards": [],
+  "printings": []
+}
