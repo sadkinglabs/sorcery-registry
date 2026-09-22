@@ -27,7 +27,7 @@ def note(text, source="Community report, Sorcery Discord", recorded="2026-09-22"
 
 def gap(name, codex_id=None, text="Known to exist, not recorded."):
     return {"name": name, "codex_id": codex_id, "text": text,
-            "source": "TCGplayer product catalogue", "recorded": "2026-09-22"}
+            "source": "Community report, Sorcery Discord", "recorded": "2026-09-22"}
 
 
 def card(codex_id, **fields):
@@ -175,14 +175,14 @@ class DiffTest(unittest.TestCase):
 
     def test_gaps_recorded_and_closed_by_what_they_name(self):
         before = export(BEFORE["cards"], BEFORE["printings"],
-                        gaps=[gap("The Champion"), gap("Blink", "C000045")])
+                        gaps=[gap("The Champion"), gap("Card One", "C000001")])
         after = export(BEFORE["cards"], BEFORE["printings"],
                        gaps=[gap("The Champion", text="Reworded, same gap."),
-                             gap("Silver Bullet", "C001016")])
+                             gap("Card Two", "C000002")])
         changes = diff_exports(before, after, "v3.4.0", "v3.4.1")
         self.assertEqual(changes["gaps"], {
-            "added": [{"name": "Silver Bullet", "codex_id": "C001016"}],
-            "closed": [{"name": "Blink", "codex_id": "C000045"}]})
+            "added": [{"name": "Card Two", "codex_id": "C000002"}],
+            "closed": [{"name": "Card One", "codex_id": "C000001"}]})
         self.assertEqual(summary_line(changes),
                          "1 gap recorded · 1 gap closed · 0 identifiers removed")
         # An export from before the register existed has no gaps.

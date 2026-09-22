@@ -8,7 +8,7 @@
     "slug_history": 3088,
     "name_history": 1100,
     "card_history": 1129,
-    "gaps": 7
+    "gaps": 1
   },
   "sets": [
     {
@@ -201151,48 +201151,6 @@
       "codex_id": null,
       "text": "Printed for the Arthurian Legends store kit, the Organised Play prize support sent at the set's release, alongside the Frank Frazetta Sorcerer (P001640). Not served by the official API. Community reports disagree on the artist: Frank Frazetta or Vincent Pompetti.",
       "source": "Community reports, Sorcery Discord",
-      "recorded": "2026-09-22"
-    },
-    {
-      "name": "Death's Door",
-      "codex_id": null,
-      "text": "TCGplayer lists an Alpha foil pledge pack product by this name. No card of this name is recorded, and the printed spelling is unconfirmed.",
-      "source": "TCGplayer product catalogue, from its published sitemap",
-      "recorded": "2026-09-22"
-    },
-    {
-      "name": "The Artists",
-      "codex_id": null,
-      "text": "TCGplayer lists an Alpha box topper by this name. No card of this name is recorded.",
-      "source": "TCGplayer product catalogue, from its published sitemap",
-      "recorded": "2026-09-22"
-    },
-    {
-      "name": "Burned / Engulfed",
-      "codex_id": null,
-      "text": "TCGplayer lists a Beta product and an Alpha box topper as Burned Engulfed. Neither name is recorded as a card, and the listing does not say whether it is one card or two.",
-      "source": "TCGplayer product catalogue, from its published sitemap",
-      "recorded": "2026-09-22"
-    },
-    {
-      "name": "Blink",
-      "codex_id": "C000045",
-      "text": "TCGplayer lists a misprinted Beta foil and a corrected Beta foil as separate products. The registry records one Beta foil printing and does not tell them apart.",
-      "source": "TCGplayer product catalogue, from its published sitemap",
-      "recorded": "2026-09-22"
-    },
-    {
-      "name": "Blizzard",
-      "codex_id": "C000269",
-      "text": "TCGplayer lists a misprinted Beta foil as a separate product. The registry records one Beta foil printing and does not tell them apart.",
-      "source": "TCGplayer product catalogue, from its published sitemap",
-      "recorded": "2026-09-22"
-    },
-    {
-      "name": "Silver Bullet",
-      "codex_id": "C001016",
-      "text": "TCGplayer lists a 2026 Grand Contest promo printing. The registry records Silver Bullet only as a Gothic booster card.",
-      "source": "TCGplayer product catalogue, from its published sitemap",
       "recorded": "2026-09-22"
     }
   ]

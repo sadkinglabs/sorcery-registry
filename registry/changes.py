@@ -28,7 +28,7 @@ the one being released, and publishes it next to index.json:
       "history": {"added": [{"codex_id": "C000230", "valid_from": "2026-09-15", "source": "card"}]},
       "notes": {"added": [{"id": "P001640", "text": ..., "source": ..., "recorded": "2026-09-22"}],
                 "removed": []},
-      "gaps": {"added": [], "closed": [{"name": "Silver Bullet", "codex_id": "C001016"}]}
+      "gaps": {"added": [], "closed": [{"name": "The Champion", "codex_id": null}]}
     }
 
 Notes and gaps have sections of their own: a note added to a printing is

@@ -173,7 +173,7 @@ Some things the registry knows have no field and no place in the official API: t
 
 Rules for both:
 
-- **Sources name a place, never a person.** Write "Community report, Sorcery Discord", "TCGplayer product catalogue, from its published sitemap" or "Arthurian Legends store kit insert, photographed". Every release is immutable, so a name written into one stays in it for good. Credit a person by name only if they have asked to be credited.
+- **Sources name a place, never a person.** Write "Community report, Sorcery Discord" or "Arthurian Legends store kit insert, photographed". Every release is immutable, so a name written into one stays in it for good. Credit a person by name only if they have asked to be credited.
 - **One fact per note.** Say how sure it is in the text: "reportedly", "community reports disagree". A listing or a single report is a reason to go and look, not a record.
 - **A note never contradicts a field.** A fact that fits a field, such as an artist, a date or a finish, is a correction. Make it in [`data/overrides.json`](data/overrides.json), where it changes the field and carries a reason.
 - **Adding a note is a data release.** Run `python -m registry.export` and commit the regenerated export with the note. `changes.json` reports notes and gaps in sections of their own, never as a change to the record.

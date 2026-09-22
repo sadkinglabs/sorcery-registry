@@ -73,8 +73,8 @@ class LoadTest(unittest.TestCase):
                 load_notes(self.write(data))
 
     def test_gaps_load_and_mistakes_are_errors(self):
-        gaps = load_gaps(self.write({"gaps": [GAP, dict(GAP, name="Blink", codex_id="C000045")]}))
-        self.assertEqual([g["name"] for g in gaps], ["The Champion", "Blink"])
+        gaps = load_gaps(self.write({"gaps": [GAP, dict(GAP, name="Card One", codex_id="C000001")]}))
+        self.assertEqual([g["name"] for g in gaps], ["The Champion", "Card One"])
         bad = [
             {"gaps": [dict(GAP, codex_id="P000001")]},
             {"gaps": [dict(GAP, codex_id="")]},

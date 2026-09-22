@@ -146,7 +146,7 @@ Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680
               "printings_added": 0, "printings_changed": 0, "printings_removed": 0,
               "sets_added": 0, "images_added": 0, "images_replaced": 0,
               "history_rows_added": 0, "notes_added": 1, "notes_removed": 0,
-              "gaps_added": 7, "gaps_closed": 0, "identifiers_removed": 0},
+              "gaps_added": 1, "gaps_closed": 0, "identifiers_removed": 0},
   "cards": {"added": [], "changed": [], "removed": []},
   "printings": {"added": [], "changed": [], "removed": []},
   "sets": {"added": []},
@@ -155,9 +155,7 @@ Renditions, Scryfall's vocabulary and sizes: `small` 146×204, `normal` 488×680
   "notes": {"added": [{"id": "P001640", "text": "Prize support in the Arthurian Legends store kit, ...",
                        "source": "Community report, Sorcery Discord. ...", "recorded": "2026-09-22"}],
             "removed": []},
-  "gaps": {"added": [{"name": "The Champion", "codex_id": null}, ...,
-                     {"name": "Silver Bullet", "codex_id": "C001016"}],
-           "closed": []}
+  "gaps": {"added": [{"name": "The Champion", "codex_id": null}], "closed": []}
 }
 ```
 
@@ -183,7 +181,7 @@ The official API describes a card and its printings and nothing else. People who
 
 **Gaps.** `gaps.json`, and the export's `gaps` section, list cards and printings known to exist that the registry does not record, usually because the official API does not serve them. Each gap is `{name, codex_id, text, source, recorded}`. `codex_id` is the card a missing printing belongs to, or `null` when the card itself is unrecorded. A gap has no id of its own. It is a pointer to go and look, not a record, and it is removed once what it describes has a record; `changes.json` reports that as a gap closed. `header.gaps` and `index.json`'s `counts.gaps` give the count.
 
-A source names a place, not a person: "Community report, Sorcery Discord", "TCGplayer product catalogue". Releases are immutable, so a name printed in one stays in it for good; a person is credited only if they ask to be. Notes and gaps are reports, not official records. Quote the source with the fact.
+A source names a place, not a person: "Community report, Sorcery Discord", "Arthurian Legends store kit insert, photographed". Releases are immutable, so a name printed in one stays in it for good; a person is credited only if they ask to be. Notes and gaps are reports, not official records. Quote the source with the fact.
 
 ## Guarantees carried over
 
