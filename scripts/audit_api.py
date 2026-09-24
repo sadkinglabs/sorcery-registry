@@ -142,8 +142,10 @@ def main():
     card = registry["cards"][0]
     printing = registry["printings"][0]
     status, _, obj, _, elapsed = jget(f"{root}/cards/{card['codex_id']}.json")
-    summary_keys = {"printing_id", "slug", "set_code", "set_name", "released_at", "product",
-                    "finish", "printed_as_current", "retired_at"}
+    # The summary's fields come from the publisher, like the index fields in
+    # E below, so a schema change that adds one cannot leave a stale copy here.
+    from registry.publish import PRINTING_SUMMARY
+    summary_keys = set(PRINTING_SUMMARY)
     got = set(obj["printings"][0]) if status == 200 and obj.get("printings") else set()
     check("D1", "cards/{codex_id}.json adds printings summary, name_history, card_history",
           status == 200 and {"printings", "name_history", "card_history"} <= set(obj) and summary_keys == got,
