@@ -6,6 +6,7 @@
     "004": {"kind": "release"},
     "005": {"kind": "release"},
     "006": {"kind": "release"},
+    "008": {"kind": "release"},
     "999": {"kind": "promo"},
     "CUR": {"kind": "registry"}
   }

@@ -161,5 +161,54 @@
       "back.rules_text": "Tap → Play or draw a site.\nNearby allied sites have \"Whenever an enemy enters here, it takes 1 damage.\""
     },
     "reason": "API data error: the served faces do not match the card. The front carries the back's text (\"Nearby allied sites have ...\") while the back still reads the wording it replaced (\"Whenever an enemy enters a nearby site ...\"), and the front's Tawny clause is not the card's current wording either. Both faces supplied by the registry owner, 2026-09-15; arrows and line breaks follow the corpus (→, one newline between abilities). The text every printing to date actually shows is recorded separately in data/errata.json."
+  },
+  {
+    "match": {
+      "card_name": "Rubble"
+    },
+    "set_fields": {
+      "category": "Token",
+      "rarity": null,
+      "slot": null
+    },
+    "reason": "API data error: from the Frost Mage vs Lavamancer sync (2026-11-13) upstream serves Rubble as an Ordinary Site, where every earlier sync served a Token. Rubble is a Token. Confirmed by the registry owner, 2026-11-14."
+  },
+  {
+    "match": {
+      "card_name": "Winter River"
+    },
+    "set_fields": {
+      "subtypes": ["River"]
+    },
+    "reason": "API data error: from the Frost Mage vs Lavamancer sync (2026-11-13) upstream serves Winter River with no subtypes, dropping the River it served before. Winter River is a River. Confirmed by the registry owner, 2026-11-14."
+  },
+  {
+    "match": {
+      "card_name": "Polar Bears"
+    },
+    "set_fields": {
+      "defense": 3
+    },
+    "reason": "API data error: from the Frost Mage vs Lavamancer sync (2026-11-13) upstream serves Polar Bears with cost 3, attack 3 and defense null. The card changed to 3/3 (attack and defense equal, so power 3); the null defense is upstream's omission. Confirmed by the registry owner, 2026-11-14."
+  },
+  {
+    "match": {
+      "card_name": "Foot Soldier",
+      "set_name": "Alpha"
+    },
+    "set_fields": {
+      "product": "Kickstarter"
+    },
+    "reason": "API data error: upstream files the Alpha Foot Soldier tokens under BoxTopper. They were not in the box topper: they came with the Alpha pledge pack, the $1.75 million Kickstarter stretch goal. Confirmed by the registry owner, 2026-11-14."
+  },
+  {
+    "match": {
+      "card_name": "Frog",
+      "set_name": "Alpha"
+    },
+    "set_fields": {
+      "product": "Kickstarter"
+    },
+    "reason": "API data error: upstream files the Alpha Frog tokens under BoxTopper. They were not in the box topper: they came with the Alpha pledge pack, the $1.75 million Kickstarter stretch goal. Confirmed by the registry owner, 2026-11-14."
   }
 ]

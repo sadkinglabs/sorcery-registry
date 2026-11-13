@@ -101,7 +101,7 @@
       "rules_text": "Shoot a piercing projectile. Deal 2 damage to one unit at each location along its path."
     },
     "current_since": "2026-09-15",
-    "current_printings": [],
+    "current_printings": ["P003136"],
     "source": {
       "printing_id": "P000762"
     },
