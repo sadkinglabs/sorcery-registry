@@ -331,13 +331,18 @@ def file_key(name):
 def load_decisions(path=DECISIONS_PATH):
     path = Path(path)
     if not path.exists():
-        return {"assign": {}, "ignore": {}}
+        return {"assign": {}, "ignore": {}, "share": {}}
     doc = json.loads(path.read_text(encoding="utf-8"))
     for name, entry in doc.get("assign", {}).items():
         if entry.get("face") not in ("front", "back") or not entry.get("printing_id") \
                 or not entry.get("reason"):
             raise ValueError(f"image decision for {name!r} needs printing_id, face and reason")
-    return {"assign": doc.get("assign", {}), "ignore": doc.get("ignore", {})}
+    for printing_id, entry in doc.get("share", {}).items():
+        if entry.get("face") not in ("front", "back") or not entry.get("file") \
+                or not entry.get("reason"):
+            raise ValueError(f"image share for {printing_id!r} needs file, face and reason")
+    return {"assign": doc.get("assign", {}), "ignore": doc.get("ignore", {}),
+            "share": doc.get("share", {})}
 
 
 def map_listing(files, export, decisions=None):
@@ -345,8 +350,15 @@ def map_listing(files, export, decisions=None):
     a stem that is a slug the registry has ever issued is that printing's
     front; the same stem with "-r" is its back, when the printing has one;
     data/image-decisions.json assigns or ignores the rest by hand. What is
-    left is reported, never guessed at."""
-    decisions = decisions or {"assign": {}, "ignore": {}}
+    left is reported, never guessed at.
+
+    A share (data/image-decisions.json, keyed by the printing that
+    receives) gives a printing the publisher has no file for the file of
+    another printing with the same art: the file keeps its own printing
+    and is mapped a second time. A share yields the moment the publisher
+    serves a file of the printing's own, and one that cannot be applied
+    (no such printing, no such file) is reported, never dropped quietly."""
+    decisions = {"assign": {}, "ignore": {}, "share": {}, **(decisions or {})}
     owners, current = slug_owners(export)
     has_back = {p["printing_id"]: p.get("back") is not None for p in export["printings"]}
     mapped, unmapped, ignored = [], [], []
@@ -381,6 +393,26 @@ def map_listing(files, export, decisions=None):
         record["slug_is_current"] = current.get(printing_id) == slug
         mapped.append(record)
         claims.setdefault((printing_id, face), []).append(name)
+    by_name = {entry["name"]: entry for entry in files}
+    shares_superseded, shares_unapplied = [], []
+    for printing_id, share in sorted(decisions["share"].items()):
+        name, face = share["file"], share["face"]
+        if printing_id not in current:
+            shares_unapplied.append({"printing_id": printing_id, "file": name,
+                                     "why": "no such printing"})
+        elif (printing_id, face) in claims:
+            shares_superseded.append({"printing_id": printing_id, "file": name,
+                                      "own_file": claims[(printing_id, face)][0]})
+        elif name not in by_name or name in decisions["ignore"]:
+            shares_unapplied.append({"printing_id": printing_id, "file": name,
+                                     "why": "the file is not in the folder, or is ignored"})
+        else:
+            record = dict(by_name[name])
+            record.update({"printing_id": printing_id, "face": face,
+                           "slug": current[printing_id], "slug_is_current": True,
+                           "decided": share["reason"], "shared": True})
+            mapped.append(record)
+            claims[(printing_id, face)] = [name]
     duplicates = {f"{pid}/{face}": names for (pid, face), names in sorted(claims.items())
                   if len(names) > 1}
     covered = {pid for pid, face in claims if face == "front"}
@@ -389,7 +421,8 @@ def map_listing(files, export, decisions=None):
                            if back and (pid, "back") not in claims)
     return {"mapped": mapped, "unmapped": unmapped, "ignored": ignored,
             "duplicates": duplicates, "printings_without_file": missing,
-            "backs_without_file": backs_missing}
+            "backs_without_file": backs_missing,
+            "shares_superseded": shares_superseded, "shares_unapplied": shares_unapplied}
 
 
 def summarize(files, mapping):
@@ -414,6 +447,11 @@ def summarize(files, mapping):
         "printings_without_file": len(mapping["printings_without_file"]),
         "backs_without_file": len(mapping.get("backs_without_file", [])),
         "ignored": len(mapping.get("ignored", [])),
+        "shared": sum(1 for m in mapping["mapped"] if m.get("shared")),
+        "shares_superseded": [f"{s['printing_id']} (the folder now has {s['own_file']})"
+                              for s in mapping.get("shares_superseded", [])],
+        "shares_unapplied": [f"{s['printing_id']} <- {s['file']}: {s['why']}"
+                             for s in mapping.get("shares_unapplied", [])],
         "unmapped_examples": [f["path"] + f["name"] for f in mapping["unmapped"][:25]],
     }
 
@@ -431,6 +469,13 @@ def listing_warnings(summary):
     if summary["faces_claimed_twice"]:
         warnings.append(f"{summary['faces_claimed_twice']} face(s) are claimed by two files; "
                         f"decide which one in data/image-decisions.json")
+    if summary.get("shares_superseded"):
+        warnings.append("the folder now has a file of its own for a printing that shares another's "
+                        "image; remove the share from data/image-decisions.json: "
+                        + ", ".join(summary["shares_superseded"]))
+    if summary.get("shares_unapplied"):
+        warnings.append("an image share in data/image-decisions.json cannot be applied: "
+                        + "; ".join(summary["shares_unapplied"]))
     if summary["mapped_to_superseded_slug"]:
         warnings.append(f"{summary['mapped_to_superseded_slug']} file(s) are named by a slug the "
                         f"API no longer uses; the folder lags the API (harmless, resolved through slug_history)")
