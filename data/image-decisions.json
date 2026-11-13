@@ -1,5 +1,5 @@
 {
-  "_comment": "Human decisions about files in the publisher's image folder that the naming rule cannot place. assign: file -> printing and face, with the reason. ignore: files that must not be used, with the reason. Every entry is an audit trail, like data/overrides.json.",
+  "_comment": "Human decisions about files in the publisher's image folder that the naming rule cannot place. assign: file -> printing and face, with the reason. ignore: files that must not be used, with the reason. share: printing -> a file that belongs to another printing with the same art, for a printing the folder has no file for; the file keeps its own printing too, and the share yields when the folder serves a file of the printing's own. Every entry is an audit trail, like data/overrides.json.",
   "assign": {
     "004-foot_soldiers-bt-s.png": {
       "printing_id": "P003076",
@@ -16,5 +16,27 @@
     "004-foot_soldiers_english-bt-s.png": "Same bytes as 004-foot_soldiers-bt-s.png, which is used for P003076's front.",
     "004-foot_soldiers_saracen-bt-s.png": "Same bytes as 004-foot_soldiers-bt-s-r.png, which is used for P003076's back.",
     "999-waypoint_portal-d-s.png": "No such printing upstream: the API lists Waypoint Portal's Dust promo only as foil (999-waypoint_portal-d-f). Kept out until upstream lists a standard-finish printing; the registry does not invent printings from image files."
+  },
+  "share": {
+    "P002557": {
+      "file": "006-harbinger-pd-s.png",
+      "face": "front",
+      "reason": "The publisher's folder has no file for this Dust promo, which was sold in the store only with a foil treatment. Its art is the Gothic preconstructed deck printing's (P002559), so that printing's file is shown: the picture is the standard-finish card, not a scan of the foil. Registry owner's decision, 2026-11-14."
+    },
+    "P002737": {
+      "file": "006-necromancer-pd-s.png",
+      "face": "front",
+      "reason": "The publisher's folder has no file for this Dust promo, which was sold in the store only with a foil treatment. Its art is the Gothic preconstructed deck printing's (P002739), so that printing's file is shown: the picture is the standard-finish card, not a scan of the foil. Registry owner's decision, 2026-11-14."
+    },
+    "P002795": {
+      "file": "006-persecutor-pd-s.png",
+      "face": "front",
+      "reason": "The publisher's folder has no file for this Dust promo, which was sold in the store only with a foil treatment. Its art is the Gothic preconstructed deck printing's (P002797), so that printing's file is shown: the picture is the standard-finish card, not a scan of the foil. Registry owner's decision, 2026-11-14."
+    },
+    "P002863": {
+      "file": "006-savior-pd-s.png",
+      "face": "front",
+      "reason": "The publisher's folder has no file for this Dust promo, which was sold in the store only with a foil treatment. Its art is the Gothic preconstructed deck printing's (P002865), so that printing's file is shown: the picture is the standard-finish card, not a scan of the foil. Registry owner's decision, 2026-11-14."
+    }
   }
 }
