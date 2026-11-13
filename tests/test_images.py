@@ -181,6 +181,92 @@ class DecisionsAndFacesTest(unittest.TestCase):
         self.assertEqual(mapping["unmapped"], [])
         self.assertEqual(mapping["backs_without_file"], ["P000009"])
 
+    SHARE = {"share": {"P000001": {"file": "004-druid-bt-s.png", "face": "front", "reason": "same art"}}}
+
+    def test_a_share_maps_the_file_a_second_time_and_keeps_its_own_printing(self):
+        files = [{"name": "004-druid-bt-s.png", "path": "", "id": "d1", "md5": "m1"}]
+        mapping = map_listing(files, self.EXPORT, self.SHARE)
+        faces = {(m["printing_id"], m["face"]): m for m in mapping["mapped"]}
+        self.assertEqual(faces[("P000009", "front")]["name"], "004-druid-bt-s.png")
+        self.assertNotIn("shared", faces[("P000009", "front")])
+        shared = faces[("P000001", "front")]
+        self.assertEqual((shared["name"], shared["id"], shared["md5"]), ("004-druid-bt-s.png", "d1", "m1"))
+        self.assertEqual(shared["slug"], "001-apprentice-wizard-b-s")
+        self.assertEqual(shared["decided"], "same art")
+        self.assertTrue(shared["shared"])
+        self.assertEqual(mapping["duplicates"], {})
+        self.assertEqual(mapping["printings_without_file"], ["P000010"])
+        self.assertEqual(mapping["shares_superseded"], [])
+        self.assertEqual(mapping["shares_unapplied"], [])
+
+    def test_a_share_yields_when_the_folder_serves_the_printings_own_file(self):
+        files = [{"name": "004-druid-bt-s.png", "path": ""},
+                 {"name": "001-apprentice-wizard-b-s.png", "path": ""}]
+        mapping = map_listing(files, self.EXPORT, self.SHARE)
+        own = [m for m in mapping["mapped"] if m["printing_id"] == "P000001"]
+        self.assertEqual([m["name"] for m in own], ["001-apprentice-wizard-b-s.png"])
+        self.assertEqual(mapping["duplicates"], {})
+        self.assertEqual(mapping["shares_superseded"],
+                         [{"printing_id": "P000001", "file": "004-druid-bt-s.png",
+                           "own_file": "001-apprentice-wizard-b-s.png"}])
+
+    def test_a_share_that_cannot_be_applied_is_reported_not_guessed(self):
+        decisions = {"ignore": {"004-druid-bt-s.png": "not to be used"},
+                     "share": {"P000001": {"file": "004-druid-bt-s.png", "face": "front", "reason": "r"},
+                               "P000010": {"file": "nowhere.png", "face": "front", "reason": "r"},
+                               "P999999": {"file": "004-druid-bt-s.png", "face": "front", "reason": "r"}}}
+        mapping = map_listing([{"name": "004-druid-bt-s.png", "path": ""}], self.EXPORT, decisions)
+        self.assertEqual(mapping["mapped"], [])
+        self.assertEqual(sorted((s["printing_id"], s["why"]) for s in mapping["shares_unapplied"]),
+                         [("P000001", "the file is not in the folder, or is ignored"),
+                          ("P000010", "the file is not in the folder, or is ignored"),
+                          ("P999999", "no such printing")])
+
+    def test_a_shared_file_is_fetched_under_the_receiving_printing(self):
+        from registry.images import plan_fetch
+        files = [{"name": "004-druid-bt-s.png", "path": "", "id": "d1", "md5": "m1"}]
+        mapping = map_listing(files, self.EXPORT, self.SHARE)
+        held = {"md5": "m1", "recipe": 1}
+        todo = plan_fetch(mapping, {"recipe": 1, "printings": {"P000009": {"front": held}}})
+        self.assertEqual([(e["printing_id"], e["name"]) for e in todo], [("P000001", "004-druid-bt-s.png")])
+        self.assertEqual(plan_fetch(mapping, {"recipe": 1, "printings": {"P000009": {"front": held},
+                                                                         "P000001": {"front": held}}}), [])
+
+    def test_share_warnings_name_what_to_do(self):
+        from registry.images import listing_warnings
+        out = listing_warnings({"unmapped": 0, "faces_claimed_twice": 0, "mapped_to_superseded_slug": 0,
+                                "shares_superseded": ["P000001 (the folder now has x.png)"],
+                                "shares_unapplied": ["P000010 <- nowhere.png: the file is not in the folder, or is ignored"]})
+        self.assertEqual(len(out), 2)
+        self.assertIn("remove the share", out[0]); self.assertIn("P000001", out[0])
+        self.assertIn("cannot be applied", out[1]); self.assertIn("nowhere.png", out[1])
+
+    def test_the_committed_shares_name_real_printings_and_reasons(self):
+        import json
+        from pathlib import Path
+        from registry.images import load_decisions
+        export = json.loads(Path("export/registry.json").read_text(encoding="utf-8"))
+        by_id = {p["printing_id"]: p for p in export["printings"]}
+        by_slug = {p["slug"]: p for p in export["printings"]}
+        shares = load_decisions()["share"]
+        self.assertEqual(sorted(shares), ["P002557", "P002737", "P002795", "P002863"])
+        for printing_id, share in shares.items():
+            self.assertTrue(share["reason"])
+            receiver = by_id[printing_id]
+            giver = by_slug[share["file"].rsplit(".", 1)[0]]
+            self.assertEqual(receiver["codex_id"], giver["codex_id"], "a share stays within one card")
+            self.assertEqual((receiver["product"], giver["product"]), ("Dust", "PreconstructedDeck"))
+
+    def test_a_share_without_a_reason_is_refused(self):
+        import json, tempfile
+        from pathlib import Path
+        from registry.images import load_decisions
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "d.json"
+            path.write_text(json.dumps({"share": {"P1": {"file": "x.png", "face": "front"}}}))
+            with self.assertRaises(ValueError):
+                load_decisions(path)
+
     def test_the_committed_decisions_file_is_well_formed(self):
         from registry.images import load_decisions
         decisions = load_decisions()
