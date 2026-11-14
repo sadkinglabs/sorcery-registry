@@ -51157,6 +51157,26 @@
         "fetched": "2026-09-14"
       }
     },
+    "P002557": {
+      "front": {
+        "key": "9083320c097b",
+        "recipe": 1,
+        "source": "006-harbinger-pd-s.png",
+        "drive_id": "1lN6QzthH2MKsS19cmkXCkV1GrOcHFTXl",
+        "md5": "67432da29c3f6d0f1e5542eba612ed3d",
+        "width": 744,
+        "height": 1039,
+        "lowres": false,
+        "original_ext": "png",
+        "objects": {
+          "original": 1580409,
+          "small": 10278,
+          "normal": 89888,
+          "large": 155126
+        },
+        "fetched": "2026-11-14"
+      }
+    },
     "P002558": {
       "front": {
         "key": "e467c0b3f9a2",
@@ -54737,6 +54757,26 @@
         "fetched": "2026-09-14"
       }
     },
+    "P002737": {
+      "front": {
+        "key": "f97642aae0db",
+        "recipe": 1,
+        "source": "006-necromancer-pd-s.png",
+        "drive_id": "1tgao4i_39sfh5KcK8Mm8ZQBXoInHJqfR",
+        "md5": "83975fda82b263a476e9e28262df0f20",
+        "width": 744,
+        "height": 1039,
+        "lowres": false,
+        "original_ext": "png",
+        "objects": {
+          "original": 1559109,
+          "small": 8872,
+          "normal": 76874,
+          "large": 128530
+        },
+        "fetched": "2026-11-14"
+      }
+    },
     "P002738": {
       "front": {
         "key": "a4f6dbb7f475",
@@ -55875,6 +55915,26 @@
           "original": 1604718
         },
         "fetched": "2026-09-14"
+      }
+    },
+    "P002795": {
+      "front": {
+        "key": "43e97ce1a91e",
+        "recipe": 1,
+        "source": "006-persecutor-pd-s.png",
+        "drive_id": "1WB42ldxshqhomk_s2HOJZjM8i7vyUQbn",
+        "md5": "09d8e5720b5cc69db1425bde34ac01e9",
+        "width": 744,
+        "height": 1039,
+        "lowres": false,
+        "original_ext": "png",
+        "objects": {
+          "original": 1545909,
+          "small": 8910,
+          "normal": 71048,
+          "large": 115938
+        },
+        "fetched": "2026-11-14"
       }
     },
     "P002796": {
@@ -57215,6 +57275,26 @@
           "original": 1814840
         },
         "fetched": "2026-09-14"
+      }
+    },
+    "P002863": {
+      "front": {
+        "key": "70cb08b0a4e2",
+        "recipe": 1,
+        "source": "006-savior-pd-s.png",
+        "drive_id": "1--ZhlLQGJJ1ROGhtG89E0FHOKvMEzOrJ",
+        "md5": "563fc5b526367579f945da2efd8fde2a",
+        "width": 744,
+        "height": 1039,
+        "lowres": false,
+        "original_ext": "png",
+        "objects": {
+          "original": 1501893,
+          "small": 7952,
+          "normal": 67830,
+          "large": 113534
+        },
+        "fetched": "2026-11-14"
       }
     },
     "P002864": {
