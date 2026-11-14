@@ -345,9 +345,10 @@ export interface Printing {
    * Derived: whether the values physically printed on this printing equal the card's current
    * gameplay face - true when the printing was released on or after the current face took effect,
    * or entered the registry on or after it (a reprint that arrives in the same sync as the change
-   * it carries), or when the card's face has never changed. null when the printing has no release
-   * date and predates the current face, or when it shows no face at all (a textless promo listed
-   * under unknown_printings in data/errata.json).
+   * it carries), or when the card's face has never changed - except a reprint that kept the old
+   * face, listed under outdated_printings in data/errata.json, which is false whatever its date.
+   * null when the printing has no release date and predates the current face, or when it shows no
+   * face at all (a textless promo listed under unknown_printings in data/errata.json).
    */
   printed_as_current: boolean | null;
   /** Set when the printing vanished upstream. Retired printings keep their rows and ids forever. */

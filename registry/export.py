@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 from . import API_BASE, API_URL, IMAGE_BASE, SCHEMA_VERSION, SITE_BASE
-from .errata import load_errata, unknown_printings
+from .errata import load_errata, outdated_printings, unknown_printings
 from .images import load_images
 from .manual import load_released_with
 from .sets import is_release, load_sets
@@ -186,7 +186,11 @@ def build_export(con, images=None, errata=None, notes=None, released_with=None, 
     promo_releases = released_with if released_with is not None else load_released_with(kinds=kinds)
     # A textless promo shows no face, so no date can say whether it is
     # current: data/errata.json names such printings and they report null.
-    faceless = unknown_printings(errata if errata is not None else load_errata())
+    errata = errata if errata is not None else load_errata()
+    faceless = unknown_printings(errata)
+    # A reprint that kept the old text shows the printed face whatever its
+    # release date says: data/errata.json names such printings.
+    stale = outdated_printings(errata)
     # Derived at export time from the printings table, never stored: the
     # reverse card -> printings link cannot drift from the forward one.
     printing_ids_by_card = {}
@@ -212,6 +216,8 @@ def build_export(con, images=None, errata=None, notes=None, released_with=None, 
     def shows_current(row):
         if format_printing_id(row["printing_id"]) in faceless:
             return None
+        if format_printing_id(row["printing_id"]) in stale:
+            return False
         return printed_as_current(row["released_at"], history_by_card.get(row["card_id"], []),
                                   added_on.get(row["printing_id"]))
 
