@@ -13,6 +13,9 @@ data/errata.json records the printed face by hand, one entry per card:
      "current_since": "2026-09-15",             # the current face applies from this date
      "current_printings": [],                   # printings that already carry the current face
      "unknown_printings": [],                   # printings that show no face at all (a textless promo)
+     "outdated_printings": [],                  # printings released on or after current_since that
+                                                #  still carry the printed face (a reprint that kept
+                                                #  the old text)
      "source": {"printing_id": "P000007"},      # which printing the face was read from
      "reason": "..."}                           # why, and who checked it
 
@@ -21,7 +24,8 @@ card_history row holding the printed face (source "card") from the day
 the first printing carrying it reached the public until current_since,
 and the observed face from current_since on. Every printing released before current_since then
 shows older values; one released on or after it - a reprint with the
-corrected text - shows current values. The validator checks that the
+corrected text - shows current values, unless outdated_printings names
+it: a reprint that kept the old text. The validator checks that the
 file and the history agree, that current_since really separates the
 printings listed as current from the rest, and that no "card" row exists
 without an entry. Like data/overrides.json, every entry carries a reason.
@@ -71,9 +75,14 @@ def load_errata(path=ERRATA_PATH):
             raise ValueError(f"{path}: {codex}: every entry needs a reason")
         if not isinstance(entry.get("source", {}), dict) or not entry.get("source", {}).get("printing_id"):
             raise ValueError(f"{path}: {codex}: source.printing_id names the printing the face was read from")
-        for key in ("current_printings", "unknown_printings"):
+        listed = set()
+        for key in ("current_printings", "unknown_printings", "outdated_printings"):
             if not isinstance(entry.get(key, []), list):
                 raise ValueError(f"{path}: {codex}: {key} must be a list of printing ids")
+            twice = listed & set(entry.get(key, []))
+            if twice:
+                raise ValueError(f"{path}: {codex}: {sorted(twice)} listed in more than one list")
+            listed |= set(entry.get(key, []))
     return entries
 
 
@@ -187,6 +196,13 @@ def unknown_printings(entries):
     return {pid for entry in entries for pid in entry.get("unknown_printings", [])}
 
 
+def outdated_printings(entries):
+    """Printings released on or after their card's current_since that
+    still carry the printed face - a reprint that kept the old text - so
+    their release date cannot say what they show."""
+    return {pid for entry in entries for pid in entry.get("outdated_printings", [])}
+
+
 def check_errata(con, entries, errors):
     """The validator's view: the file and the history agree, the date
     separates the printings as claimed, and no hand-recorded row lacks
@@ -214,12 +230,19 @@ def check_errata(con, entries, errors):
                           f"({recorded[0]['valid_to']} / {current_row['valid_from']})")
         current_ids = set(entry.get("current_printings", []))
         unknown_ids = set(entry.get("unknown_printings", []))
+        outdated_ids = set(entry.get("outdated_printings", []))
         for row in con.execute("SELECT printing_id, released_at FROM printings WHERE card_id = ?",
                                (card_id,)):
             pid = format_printing_id(row["printing_id"])
             released = row["released_at"]
             if pid in unknown_ids:
                 continue  # shows no face; the export reports null for it
+            if pid in outdated_ids:
+                if released is None or released < since:
+                    errors.append(f"errata {codex}: {pid} is listed as keeping the printed face "
+                                  f"after {since} but was released {released}; a printing "
+                                  f"released before it already counts as printed, so remove it")
+                continue
             if pid in current_ids:
                 if released is None or released < since:
                     errors.append(f"errata {codex}: {pid} is listed as carrying the current face "
@@ -228,7 +251,7 @@ def check_errata(con, entries, errors):
                 errors.append(f"errata {codex}: {pid} was released {released}, on or after "
                               f"{since}, so it counts as current; list it in current_printings "
                               f"or move current_since")
-        for pid in current_ids | unknown_ids:
+        for pid in current_ids | unknown_ids | outdated_ids:
             owner = con.execute("SELECT card_id FROM printings WHERE printing_id = ?",
                                 (id_number(pid),)).fetchone()
             if owner is None or owner["card_id"] != card_id:

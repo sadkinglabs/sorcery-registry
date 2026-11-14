@@ -9856,16 +9856,16 @@
         "P000765",
         "P003136"
       ],
-      "default_printing_id": "P003136",
+      "default_printing_id": "P000764",
       "api_url": "https://api.kairosarchive.net/v3/cards/C000187.json",
       "kairos_url": "https://kairosarchive.net/cards/C000187",
       "image_urls": {
-        "small": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.small.webp",
-        "normal": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.normal.webp",
-        "large": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.large.webp",
-        "original": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.original.png"
+        "small": "https://api.kairosarchive.net/images/P000764.4cc6809bb956.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P000764.4cc6809bb956.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P000764.4cc6809bb956.large.webp",
+        "original": "https://api.kairosarchive.net/images/P000764.4cc6809bb956.original.png"
       },
-      "image_status": "ok",
+      "image_status": "lowres",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158861,7 +158861,7 @@
       "typeline": "Ordinary Magic of focused fire",
       "back": null,
       "image_hash": "76b5db6a04a0",
-      "printed_as_current": true,
+      "printed_as_current": false,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003136.json",
       "kairos_url": "https://kairosarchive.net/printings/P003136",

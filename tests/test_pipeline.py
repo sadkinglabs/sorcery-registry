@@ -897,6 +897,46 @@ class ErrataTest(unittest.TestCase):
             apply_errata(con, [self.entry(card["codex_id"], current_since="2026-09-20")],
                          log=lambda *a: None)
 
+    def test_a_reprint_that_kept_the_old_text_is_listed_and_shows_older_values(self):
+        from registry.errata import apply_errata, check_errata, load_errata, outdated_printings
+        from pathlib import Path
+        import tempfile, json as _json
+        # The fixture plus a reprint released after the change, printed with the old text.
+        raw = copy.deepcopy(RAW_API)
+        raw[0]["printings"].append(upstream_printing("008-apprentice_wizard-pd-s", "Precon", "008", "2026-11-12"))
+        con = open_db(":memory:")
+        init_db(con)
+        apply_plan(con, diff(load_registry_state(con), build_snapshot(raw)), "2026-08-19")
+        card, _, prints = self.wizard(build_export(con))
+        reprint = max(prints, key=lambda p: p["released_at"])
+        entry = self.entry(card["codex_id"], outdated_printings=[reprint["printing_id"]])
+        self.assertEqual(outdated_printings([entry]), {reprint["printing_id"]})
+        apply_errata(con, [entry], log=lambda *a: None)
+        card, rows, prints = self.wizard(build_export(con, errata=[entry]))
+        # The printed face still dates from the first printing that shows it.
+        self.assertEqual(rows[0]["valid_from"], min(p["released_at"] for p in prints))
+        self.assertTrue(all(p["printed_as_current"] is False for p in prints))
+        errors = []
+        check_errata(con, [entry], errors)
+        self.assertEqual(errors, [])
+        # Without the listing the date calls it current, and the validator says so.
+        self.assertTrue(self.wizard(build_export(con, errata=[]))[2][-1]["printed_as_current"])
+        errors = []
+        check_errata(con, [self.entry(card["codex_id"])], errors)
+        self.assertTrue(any(reprint["printing_id"] in e and "counts as current" in e for e in errors))
+        # A printing released before the change already shows the printed face: listing it is an error.
+        older = min(prints, key=lambda p: p["released_at"])
+        errors = []
+        check_errata(con, [self.entry(card["codex_id"], outdated_printings=[reprint["printing_id"], older["printing_id"]])], errors)
+        self.assertTrue(any(older["printing_id"] in e and "remove it" in e for e in errors))
+        # One printing in two lists is a mistake in the file.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "errata.json"
+            path.write_text(_json.dumps([self.entry(card["codex_id"], current_printings=[reprint["printing_id"]],
+                                                    outdated_printings=[reprint["printing_id"]])]), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_errata(path)
+
     def test_a_textless_printing_reports_null_and_is_not_judged(self):
         from registry.errata import apply_errata, check_errata, unknown_printings
         raw = copy.deepcopy(RAW_API)

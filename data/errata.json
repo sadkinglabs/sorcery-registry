@@ -101,11 +101,12 @@
       "rules_text": "Shoot a piercing projectile. Deal 2 damage to one unit at each location along its path."
     },
     "current_since": "2026-09-15",
-    "current_printings": ["P003136"],
+    "current_printings": [],
+    "outdated_printings": ["P003136"],
     "source": {
       "printing_id": "P000762"
     },
-    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000762 on 2026-09-15. Every printing to date carries the printed text."
+    "reason": "The official API served this card's rules text prefixed UPDATED until its 2026 re-import, which dropped the marker but kept the revised text; no printing shows that text. Printed text transcribed from the served image of P000762 on 2026-09-15. Every printing to date carries the printed text, including the Frost Mage Vs. Lavamancer reprint P003136 (released 2026-11-12), which kept the old wording: confirmed against the printed card by the registry owner, 2026-11-14, and matching the publisher's image."
   },
   {
     "codex_id": "C000190",
