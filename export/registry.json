@@ -9708,8 +9708,13 @@
       "default_printing_id": "P003120",
       "api_url": "https://api.kairosarchive.net/v3/cards/C000184.json",
       "kairos_url": "https://kairosarchive.net/cards/C000184",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003120.388058db2c56.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003120.388058db2c56.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003120.388058db2c56.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003120.388058db2c56.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -9854,8 +9859,13 @@
       "default_printing_id": "P003136",
       "api_url": "https://api.kairosarchive.net/v3/cards/C000187.json",
       "kairos_url": "https://kairosarchive.net/cards/C000187",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -12063,8 +12073,13 @@
       "default_printing_id": "P003167",
       "api_url": "https://api.kairosarchive.net/v3/cards/C000230.json",
       "kairos_url": "https://kairosarchive.net/cards/C000230",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -21004,8 +21019,13 @@
       "default_printing_id": "P003207",
       "api_url": "https://api.kairosarchive.net/v3/cards/C000405.json",
       "kairos_url": "https://kairosarchive.net/cards/C000405",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -33050,8 +33070,13 @@
       "default_printing_id": "P003174",
       "api_url": "https://api.kairosarchive.net/v3/cards/C000650.json",
       "kairos_url": "https://kairosarchive.net/cards/C000650",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003174.c1260628abcc.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003174.c1260628abcc.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003174.c1260628abcc.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003174.c1260628abcc.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55172,8 +55197,13 @@
       "default_printing_id": "P003091",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001101.json",
       "kairos_url": "https://kairosarchive.net/cards/C001101",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55217,8 +55247,13 @@
       "default_printing_id": "P003093",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001102.json",
       "kairos_url": "https://kairosarchive.net/cards/C001102",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55262,8 +55297,13 @@
       "default_printing_id": "P003094",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001103.json",
       "kairos_url": "https://kairosarchive.net/cards/C001103",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55302,8 +55342,13 @@
       "default_printing_id": "P003095",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001104.json",
       "kairos_url": "https://kairosarchive.net/cards/C001104",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003095.2f939114d99c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003095.2f939114d99c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003095.2f939114d99c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003095.2f939114d99c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55344,8 +55389,13 @@
       "default_printing_id": "P003096",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001105.json",
       "kairos_url": "https://kairosarchive.net/cards/C001105",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55388,8 +55438,13 @@
       "default_printing_id": "P003097",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001106.json",
       "kairos_url": "https://kairosarchive.net/cards/C001106",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003097.fedf3917289c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003097.fedf3917289c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003097.fedf3917289c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003097.fedf3917289c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55431,8 +55486,13 @@
       "default_printing_id": "P003098",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001107.json",
       "kairos_url": "https://kairosarchive.net/cards/C001107",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003098.505d326beaf3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003098.505d326beaf3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003098.505d326beaf3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003098.505d326beaf3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55471,8 +55531,13 @@
       "default_printing_id": "P003102",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001108.json",
       "kairos_url": "https://kairosarchive.net/cards/C001108",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003102.3029326b9311.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003102.3029326b9311.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003102.3029326b9311.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003102.3029326b9311.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55511,8 +55576,13 @@
       "default_printing_id": "P003105",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001109.json",
       "kairos_url": "https://kairosarchive.net/cards/C001109",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003105.c62414fb7198.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003105.c62414fb7198.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003105.c62414fb7198.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003105.c62414fb7198.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55551,8 +55621,13 @@
       "default_printing_id": "P003106",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001110.json",
       "kairos_url": "https://kairosarchive.net/cards/C001110",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003106.83247d665a0a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003106.83247d665a0a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003106.83247d665a0a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003106.83247d665a0a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55591,8 +55666,13 @@
       "default_printing_id": "P003109",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001111.json",
       "kairos_url": "https://kairosarchive.net/cards/C001111",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003109.1041e7722370.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003109.1041e7722370.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003109.1041e7722370.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003109.1041e7722370.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55637,8 +55717,13 @@
       "default_printing_id": "P003114",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001112.json",
       "kairos_url": "https://kairosarchive.net/cards/C001112",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55682,8 +55767,13 @@
       "default_printing_id": "P003116",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001113.json",
       "kairos_url": "https://kairosarchive.net/cards/C001113",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55724,8 +55814,13 @@
       "default_printing_id": "P003121",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001114.json",
       "kairos_url": "https://kairosarchive.net/cards/C001114",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55768,8 +55863,13 @@
       "default_printing_id": "P003123",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001115.json",
       "kairos_url": "https://kairosarchive.net/cards/C001115",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003123.9d71480d279b.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003123.9d71480d279b.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003123.9d71480d279b.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003123.9d71480d279b.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55811,8 +55911,13 @@
       "default_printing_id": "P003125",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001116.json",
       "kairos_url": "https://kairosarchive.net/cards/C001116",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55853,8 +55958,13 @@
       "default_printing_id": "P003126",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001117.json",
       "kairos_url": "https://kairosarchive.net/cards/C001117",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55899,8 +56009,13 @@
       "default_printing_id": "P003127",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001118.json",
       "kairos_url": "https://kairosarchive.net/cards/C001118",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003127.1e34df769838.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003127.1e34df769838.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003127.1e34df769838.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003127.1e34df769838.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55941,8 +56056,13 @@
       "default_printing_id": "P003128",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001119.json",
       "kairos_url": "https://kairosarchive.net/cards/C001119",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -55986,8 +56106,13 @@
       "default_printing_id": "P003130",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001120.json",
       "kairos_url": "https://kairosarchive.net/cards/C001120",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56028,8 +56153,13 @@
       "default_printing_id": "P003132",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001121.json",
       "kairos_url": "https://kairosarchive.net/cards/C001121",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003132.54a282888a25.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003132.54a282888a25.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003132.54a282888a25.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003132.54a282888a25.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56069,8 +56199,13 @@
       "default_printing_id": "P003133",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001122.json",
       "kairos_url": "https://kairosarchive.net/cards/C001122",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003133.882bf4733f25.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003133.882bf4733f25.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003133.882bf4733f25.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003133.882bf4733f25.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56118,8 +56253,13 @@
       "default_printing_id": "P003134",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001123.json",
       "kairos_url": "https://kairosarchive.net/cards/C001123",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56162,8 +56302,13 @@
       "default_printing_id": "P003138",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001124.json",
       "kairos_url": "https://kairosarchive.net/cards/C001124",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003138.71db775188b4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003138.71db775188b4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003138.71db775188b4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003138.71db775188b4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56204,8 +56349,13 @@
       "default_printing_id": "P003139",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001125.json",
       "kairos_url": "https://kairosarchive.net/cards/C001125",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003139.868877df68f3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003139.868877df68f3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003139.868877df68f3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003139.868877df68f3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56246,8 +56396,13 @@
       "default_printing_id": "P003141",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001126.json",
       "kairos_url": "https://kairosarchive.net/cards/C001126",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56289,8 +56444,13 @@
       "default_printing_id": "P003143",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001127.json",
       "kairos_url": "https://kairosarchive.net/cards/C001127",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003143.5e674902490a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003143.5e674902490a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003143.5e674902490a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003143.5e674902490a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56333,8 +56493,13 @@
       "default_printing_id": "P003145",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001128.json",
       "kairos_url": "https://kairosarchive.net/cards/C001128",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56379,8 +56544,13 @@
       "default_printing_id": "P003146",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001129.json",
       "kairos_url": "https://kairosarchive.net/cards/C001129",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56426,8 +56596,13 @@
       "default_printing_id": "P003147",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001130.json",
       "kairos_url": "https://kairosarchive.net/cards/C001130",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003147.20a34dabd834.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003147.20a34dabd834.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003147.20a34dabd834.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003147.20a34dabd834.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56466,8 +56641,13 @@
       "default_printing_id": "P003149",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001131.json",
       "kairos_url": "https://kairosarchive.net/cards/C001131",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56512,8 +56692,13 @@
       "default_printing_id": "P003150",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001132.json",
       "kairos_url": "https://kairosarchive.net/cards/C001132",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003150.3b73913701ff.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003150.3b73913701ff.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003150.3b73913701ff.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003150.3b73913701ff.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56552,8 +56737,13 @@
       "default_printing_id": "P003152",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001133.json",
       "kairos_url": "https://kairosarchive.net/cards/C001133",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56596,8 +56786,13 @@
       "default_printing_id": "P003155",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001134.json",
       "kairos_url": "https://kairosarchive.net/cards/C001134",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56638,8 +56833,13 @@
       "default_printing_id": "P003156",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001135.json",
       "kairos_url": "https://kairosarchive.net/cards/C001135",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56682,8 +56882,13 @@
       "default_printing_id": "P003160",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001136.json",
       "kairos_url": "https://kairosarchive.net/cards/C001136",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56726,8 +56931,13 @@
       "default_printing_id": "P003161",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001137.json",
       "kairos_url": "https://kairosarchive.net/cards/C001137",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003161.3133170259f9.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003161.3133170259f9.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003161.3133170259f9.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003161.3133170259f9.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56770,8 +56980,13 @@
       "default_printing_id": "P003162",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001138.json",
       "kairos_url": "https://kairosarchive.net/cards/C001138",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56812,8 +57027,13 @@
       "default_printing_id": "P003163",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001139.json",
       "kairos_url": "https://kairosarchive.net/cards/C001139",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56857,8 +57077,13 @@
       "default_printing_id": "P003164",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001140.json",
       "kairos_url": "https://kairosarchive.net/cards/C001140",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56897,8 +57122,13 @@
       "default_printing_id": "P003165",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001141.json",
       "kairos_url": "https://kairosarchive.net/cards/C001141",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56938,8 +57168,13 @@
       "default_printing_id": "P003168",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001142.json",
       "kairos_url": "https://kairosarchive.net/cards/C001142",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -56982,8 +57217,13 @@
       "default_printing_id": "P003169",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001143.json",
       "kairos_url": "https://kairosarchive.net/cards/C001143",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003169.594a699c28c4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003169.594a699c28c4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003169.594a699c28c4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003169.594a699c28c4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57022,8 +57262,13 @@
       "default_printing_id": "P003170",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001144.json",
       "kairos_url": "https://kairosarchive.net/cards/C001144",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57063,8 +57308,13 @@
       "default_printing_id": "P003171",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001145.json",
       "kairos_url": "https://kairosarchive.net/cards/C001145",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57108,8 +57358,13 @@
       "default_printing_id": "P003175",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001146.json",
       "kairos_url": "https://kairosarchive.net/cards/C001146",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57148,8 +57403,13 @@
       "default_printing_id": "P003176",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001147.json",
       "kairos_url": "https://kairosarchive.net/cards/C001147",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003176.45459a7770c8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003176.45459a7770c8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003176.45459a7770c8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003176.45459a7770c8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57190,8 +57450,13 @@
       "default_printing_id": "P003177",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001148.json",
       "kairos_url": "https://kairosarchive.net/cards/C001148",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003177.39814c6bc924.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003177.39814c6bc924.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003177.39814c6bc924.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003177.39814c6bc924.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57234,8 +57499,13 @@
       "default_printing_id": "P003180",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001149.json",
       "kairos_url": "https://kairosarchive.net/cards/C001149",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57277,8 +57547,13 @@
       "default_printing_id": "P003181",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001150.json",
       "kairos_url": "https://kairosarchive.net/cards/C001150",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57319,8 +57594,13 @@
       "default_printing_id": "P003182",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001151.json",
       "kairos_url": "https://kairosarchive.net/cards/C001151",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57361,8 +57641,13 @@
       "default_printing_id": "P003184",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001152.json",
       "kairos_url": "https://kairosarchive.net/cards/C001152",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003184.dee905df6724.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003184.dee905df6724.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003184.dee905df6724.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003184.dee905df6724.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57406,8 +57691,13 @@
       "default_printing_id": "P003185",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001153.json",
       "kairos_url": "https://kairosarchive.net/cards/C001153",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57448,8 +57738,13 @@
       "default_printing_id": "P003187",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001154.json",
       "kairos_url": "https://kairosarchive.net/cards/C001154",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57488,8 +57783,13 @@
       "default_printing_id": "P003188",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001155.json",
       "kairos_url": "https://kairosarchive.net/cards/C001155",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57528,8 +57828,13 @@
       "default_printing_id": "P003189",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001156.json",
       "kairos_url": "https://kairosarchive.net/cards/C001156",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57570,8 +57875,13 @@
       "default_printing_id": "P003191",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001157.json",
       "kairos_url": "https://kairosarchive.net/cards/C001157",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003191.1470019587d4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003191.1470019587d4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003191.1470019587d4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003191.1470019587d4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57612,8 +57922,13 @@
       "default_printing_id": "P003192",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001158.json",
       "kairos_url": "https://kairosarchive.net/cards/C001158",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003192.53055b16e01d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003192.53055b16e01d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003192.53055b16e01d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003192.53055b16e01d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57652,8 +57967,13 @@
       "default_printing_id": "P003193",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001159.json",
       "kairos_url": "https://kairosarchive.net/cards/C001159",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57694,8 +58014,13 @@
       "default_printing_id": "P003194",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001160.json",
       "kairos_url": "https://kairosarchive.net/cards/C001160",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57736,8 +58061,13 @@
       "default_printing_id": "P003195",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001161.json",
       "kairos_url": "https://kairosarchive.net/cards/C001161",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57778,8 +58108,13 @@
       "default_printing_id": "P003196",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001162.json",
       "kairos_url": "https://kairosarchive.net/cards/C001162",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57818,8 +58153,13 @@
       "default_printing_id": "P003197",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001163.json",
       "kairos_url": "https://kairosarchive.net/cards/C001163",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57864,8 +58204,13 @@
       "default_printing_id": "P003198",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001164.json",
       "kairos_url": "https://kairosarchive.net/cards/C001164",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003198.17bddda237da.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003198.17bddda237da.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003198.17bddda237da.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003198.17bddda237da.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57906,8 +58251,13 @@
       "default_printing_id": "P003201",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001165.json",
       "kairos_url": "https://kairosarchive.net/cards/C001165",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003201.7d6772df9447.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003201.7d6772df9447.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003201.7d6772df9447.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003201.7d6772df9447.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57946,8 +58296,13 @@
       "default_printing_id": "P003203",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001166.json",
       "kairos_url": "https://kairosarchive.net/cards/C001166",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -57988,8 +58343,13 @@
       "default_printing_id": "P003204",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001167.json",
       "kairos_url": "https://kairosarchive.net/cards/C001167",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -58028,8 +58388,13 @@
       "default_printing_id": "P003205",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001168.json",
       "kairos_url": "https://kairosarchive.net/cards/C001168",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003205.da407f58ec12.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003205.da407f58ec12.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003205.da407f58ec12.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003205.da407f58ec12.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -58071,8 +58436,13 @@
       "default_printing_id": "P003206",
       "api_url": "https://api.kairosarchive.net/v3/cards/C001169.json",
       "kairos_url": "https://kairosarchive.net/cards/C001169",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -156966,13 +157336,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of molten mystery",
       "back": null,
-      "image_hash": null,
+      "image_hash": "fc3504aa5d4e",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003089.json",
       "kairos_url": "https://kairosarchive.net/printings/P003089",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003089.fc3504aa5d4e.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003089.fc3504aa5d4e.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003089.fc3504aa5d4e.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003089.fc3504aa5d4e.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -156993,13 +157368,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Mortals of magnificent stature",
       "back": null,
-      "image_hash": null,
+      "image_hash": "a77d8785cb6b",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003090.json",
       "kairos_url": "https://kairosarchive.net/printings/P003090",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003090.a77d8785cb6b.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003090.a77d8785cb6b.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003090.a77d8785cb6b.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003090.a77d8785cb6b.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157020,13 +157400,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site where the first age stirs",
       "back": null,
-      "image_hash": null,
+      "image_hash": "aef33d7f03b6",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003091.json",
       "kairos_url": "https://kairosarchive.net/printings/P003091",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003091.aef33d7f03b6.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157047,13 +157432,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of focused fulmination",
       "back": null,
-      "image_hash": null,
+      "image_hash": "5fc4f71d2dbb",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003092.json",
       "kairos_url": "https://kairosarchive.net/printings/P003092",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003092.5fc4f71d2dbb.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003092.5fc4f71d2dbb.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003092.5fc4f71d2dbb.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003092.5fc4f71d2dbb.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157074,13 +157464,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Beast of cozy cover",
       "back": null,
-      "image_hash": null,
+      "image_hash": "78e429dcc91a",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003093.json",
       "kairos_url": "https://kairosarchive.net/printings/P003093",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003093.78e429dcc91a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157101,13 +157496,18 @@
       "flavour_text": null,
       "typeline": "An Elite Spirit of fracturing chorus",
       "back": null,
-      "image_hash": null,
+      "image_hash": "3de8718bbf10",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003094.json",
       "kairos_url": "https://kairosarchive.net/printings/P003094",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003094.3de8718bbf10.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157128,13 +157528,18 @@
       "flavour_text": null,
       "typeline": "Elite Magic of obscene incentive",
       "back": null,
-      "image_hash": null,
+      "image_hash": "2f939114d99c",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003095.json",
       "kairos_url": "https://kairosarchive.net/printings/P003095",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003095.2f939114d99c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003095.2f939114d99c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003095.2f939114d99c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003095.2f939114d99c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157155,13 +157560,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site and the fastest way down",
       "back": null,
-      "image_hash": null,
+      "image_hash": "b98a85cfd7e1",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003096.json",
       "kairos_url": "https://kairosarchive.net/printings/P003096",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003096.b98a85cfd7e1.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157182,13 +157592,18 @@
       "flavour_text": null,
       "typeline": "An Elite Giant too scared to say hi",
       "back": null,
-      "image_hash": null,
+      "image_hash": "fedf3917289c",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003097.json",
       "kairos_url": "https://kairosarchive.net/printings/P003097",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003097.fedf3917289c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003097.fedf3917289c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003097.fedf3917289c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003097.fedf3917289c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157209,13 +157624,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Mortal with the heart of a Beast",
       "back": null,
-      "image_hash": null,
+      "image_hash": "505d326beaf3",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003098.json",
       "kairos_url": "https://kairosarchive.net/printings/P003098",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003098.505d326beaf3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003098.505d326beaf3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003098.505d326beaf3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003098.505d326beaf3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157236,13 +157656,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic of blistering speed",
       "back": null,
-      "image_hash": null,
+      "image_hash": "e55b680efcfc",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003099.json",
       "kairos_url": "https://kairosarchive.net/printings/P003099",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003099.e55b680efcfc.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003099.e55b680efcfc.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003099.e55b680efcfc.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003099.e55b680efcfc.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157263,13 +157688,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Aura of forestalling frost",
       "back": null,
-      "image_hash": null,
+      "image_hash": "1e838aa792fc",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003100.json",
       "kairos_url": "https://kairosarchive.net/printings/P003100",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003100.1e838aa792fc.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003100.1e838aa792fc.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003100.1e838aa792fc.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003100.1e838aa792fc.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157290,13 +157720,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of sudden scalding",
       "back": null,
-      "image_hash": null,
+      "image_hash": "7b419046ddef",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003101.json",
       "kairos_url": "https://kairosarchive.net/printings/P003101",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003101.7b419046ddef.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003101.7b419046ddef.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003101.7b419046ddef.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003101.7b419046ddef.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157317,13 +157752,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site, this ride flattens pride!",
       "back": null,
-      "image_hash": null,
+      "image_hash": "3029326b9311",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003102.json",
       "kairos_url": "https://kairosarchive.net/printings/P003102",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003102.3029326b9311.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003102.3029326b9311.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003102.3029326b9311.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003102.3029326b9311.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157344,13 +157784,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of terranean internment",
       "back": null,
-      "image_hash": null,
+      "image_hash": "e8a66083a4ae",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003103.json",
       "kairos_url": "https://kairosarchive.net/printings/P003103",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003103.e8a66083a4ae.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003103.e8a66083a4ae.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003103.e8a66083a4ae.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003103.e8a66083a4ae.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157371,13 +157816,18 @@
       "flavour_text": null,
       "typeline": "The sea's Elite Magic beckons us home",
       "back": null,
-      "image_hash": null,
+      "image_hash": "94e667b6cd94",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003104.json",
       "kairos_url": "https://kairosarchive.net/printings/P003104",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003104.94e667b6cd94.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003104.94e667b6cd94.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003104.94e667b6cd94.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003104.94e667b6cd94.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157398,13 +157848,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic to plan an expedition",
       "back": null,
-      "image_hash": null,
+      "image_hash": "c62414fb7198",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003105.json",
       "kairos_url": "https://kairosarchive.net/printings/P003105",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003105.c62414fb7198.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003105.c62414fb7198.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003105.c62414fb7198.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003105.c62414fb7198.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157425,13 +157880,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Site, misstep and you're dust!",
       "back": null,
-      "image_hash": null,
+      "image_hash": "83247d665a0a",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003106.json",
       "kairos_url": "https://kairosarchive.net/printings/P003106",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003106.83247d665a0a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003106.83247d665a0a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003106.83247d665a0a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003106.83247d665a0a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157452,13 +157912,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Merfolk of comely appearance",
       "back": null,
-      "image_hash": null,
+      "image_hash": "caad7face882",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003107.json",
       "kairos_url": "https://kairosarchive.net/printings/P003107",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003107.caad7face882.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003107.caad7face882.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003107.caad7face882.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003107.caad7face882.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157479,13 +157944,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of abyssal brine",
       "back": null,
-      "image_hash": null,
+      "image_hash": "2b2a17e9c0f8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003108.json",
       "kairos_url": "https://kairosarchive.net/printings/P003108",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003108.2b2a17e9c0f8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003108.2b2a17e9c0f8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003108.2b2a17e9c0f8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003108.2b2a17e9c0f8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157506,13 +157976,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Site of impeding powder",
       "back": null,
-      "image_hash": null,
+      "image_hash": "1041e7722370",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003109.json",
       "kairos_url": "https://kairosarchive.net/printings/P003109",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003109.1041e7722370.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003109.1041e7722370.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003109.1041e7722370.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003109.1041e7722370.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157533,13 +158008,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of fractured fascination",
       "back": null,
-      "image_hash": null,
+      "image_hash": "80d6462af79f",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003110.json",
       "kairos_url": "https://kairosarchive.net/printings/P003110",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003110.80d6462af79f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003110.80d6462af79f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003110.80d6462af79f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003110.80d6462af79f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157560,13 +158040,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of shattered vanity",
       "back": null,
-      "image_hash": null,
+      "image_hash": "ae38f20ed57f",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003111.json",
       "kairos_url": "https://kairosarchive.net/printings/P003111",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003111.ae38f20ed57f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003111.ae38f20ed57f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003111.ae38f20ed57f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003111.ae38f20ed57f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157587,13 +158072,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic where you least expect it",
       "back": null,
-      "image_hash": null,
+      "image_hash": "a2fd3287b0a6",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003112.json",
       "kairos_url": "https://kairosarchive.net/printings/P003112",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003112.a2fd3287b0a6.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003112.a2fd3287b0a6.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003112.a2fd3287b0a6.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003112.a2fd3287b0a6.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157614,13 +158104,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of downward descent",
       "back": null,
-      "image_hash": null,
+      "image_hash": "381ec1b4dada",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003113.json",
       "kairos_url": "https://kairosarchive.net/printings/P003113",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003113.381ec1b4dada.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003113.381ec1b4dada.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003113.381ec1b4dada.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003113.381ec1b4dada.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157641,13 +158136,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Demon of blinding fury",
       "back": null,
-      "image_hash": null,
+      "image_hash": "b76e3bf81037",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003114.json",
       "kairos_url": "https://kairosarchive.net/printings/P003114",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003114.b76e3bf81037.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157668,13 +158168,18 @@
       "flavour_text": null,
       "typeline": "Elite Magic of violent upheaval",
       "back": null,
-      "image_hash": null,
+      "image_hash": "8d1b5ed44b43",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003115.json",
       "kairos_url": "https://kairosarchive.net/printings/P003115",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003115.8d1b5ed44b43.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003115.8d1b5ed44b43.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003115.8d1b5ed44b43.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003115.8d1b5ed44b43.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157695,13 +158200,18 @@
       "flavour_text": null,
       "typeline": "An Elite Spirit of ash and bloom",
       "back": null,
-      "image_hash": null,
+      "image_hash": "a6d092f2bf32",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003116.json",
       "kairos_url": "https://kairosarchive.net/printings/P003116",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003116.a6d092f2bf32.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157722,13 +158232,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Monster and arcane accident",
       "back": null,
-      "image_hash": null,
+      "image_hash": "7cdf7624b971",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003117.json",
       "kairos_url": "https://kairosarchive.net/printings/P003117",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003117.7cdf7624b971.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003117.7cdf7624b971.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003117.7cdf7624b971.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003117.7cdf7624b971.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157749,13 +158264,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of plenteous manna",
       "back": null,
-      "image_hash": null,
+      "image_hash": "daf3a4363f25",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003118.json",
       "kairos_url": "https://kairosarchive.net/printings/P003118",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003118.daf3a4363f25.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003118.daf3a4363f25.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003118.daf3a4363f25.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003118.daf3a4363f25.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157776,13 +158296,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Faerie and unwelcome guest",
       "back": null,
-      "image_hash": null,
+      "image_hash": "1f63567c82bf",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003119.json",
       "kairos_url": "https://kairosarchive.net/printings/P003119",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003119.1f63567c82bf.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003119.1f63567c82bf.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003119.1f63567c82bf.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003119.1f63567c82bf.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157803,13 +158328,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic of deflagrant destruction",
       "back": null,
-      "image_hash": null,
+      "image_hash": "388058db2c56",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003120.json",
       "kairos_url": "https://kairosarchive.net/printings/P003120",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003120.388058db2c56.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003120.388058db2c56.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003120.388058db2c56.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003120.388058db2c56.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157830,13 +158360,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Beast is fiery but cute",
       "back": null,
-      "image_hash": null,
+      "image_hash": "49c5bcdad110",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003121.json",
       "kairos_url": "https://kairosarchive.net/printings/P003121",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003121.49c5bcdad110.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157857,13 +158392,18 @@
       "flavour_text": null,
       "typeline": "Elite Magic ravages the realm",
       "back": null,
-      "image_hash": null,
+      "image_hash": "af183fc28811",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003122.json",
       "kairos_url": "https://kairosarchive.net/printings/P003122",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003122.af183fc28811.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003122.af183fc28811.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003122.af183fc28811.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003122.af183fc28811.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157884,13 +158424,18 @@
       "flavour_text": null,
       "typeline": "Unique Mortals were right all along",
       "back": null,
-      "image_hash": null,
+      "image_hash": "9d71480d279b",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003123.json",
       "kairos_url": "https://kairosarchive.net/printings/P003123",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003123.9d71480d279b.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003123.9d71480d279b.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003123.9d71480d279b.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003123.9d71480d279b.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157911,13 +158456,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Demon revels in rending",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4a27334fb3a6",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003124.json",
       "kairos_url": "https://kairosarchive.net/printings/P003124",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003124.4a27334fb3a6.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003124.4a27334fb3a6.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003124.4a27334fb3a6.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003124.4a27334fb3a6.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157938,13 +158488,18 @@
       "flavour_text": null,
       "typeline": "Flash-frozen by Exceptional Magic!",
       "back": null,
-      "image_hash": null,
+      "image_hash": "16c80870ab3d",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003125.json",
       "kairos_url": "https://kairosarchive.net/printings/P003125",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003125.16c80870ab3d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157965,13 +158520,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic of winter's kiss",
       "back": null,
-      "image_hash": null,
+      "image_hash": "39cfd1e48d5c",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003126.json",
       "kairos_url": "https://kairosarchive.net/printings/P003126",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003126.39cfd1e48d5c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -157992,13 +158552,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Spirit of bitter hatred",
       "back": null,
-      "image_hash": null,
+      "image_hash": "1e34df769838",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003127.json",
       "kairos_url": "https://kairosarchive.net/printings/P003127",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003127.1e34df769838.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003127.1e34df769838.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003127.1e34df769838.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003127.1e34df769838.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158019,13 +158584,18 @@
       "flavour_text": null,
       "typeline": "Your Avatar knocks them out cold",
       "back": null,
-      "image_hash": null,
+      "image_hash": "0f5bdfdf60b8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003128.json",
       "kairos_url": "https://kairosarchive.net/printings/P003128",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003128.0f5bdfdf60b8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158046,13 +158616,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Undead chills thought and thew",
       "back": null,
-      "image_hash": null,
+      "image_hash": "1517c30b652e",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003129.json",
       "kairos_url": "https://kairosarchive.net/printings/P003129",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003129.1517c30b652e.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003129.1517c30b652e.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003129.1517c30b652e.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003129.1517c30b652e.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158073,13 +158648,18 @@
       "flavour_text": null,
       "typeline": "Elite Giants enjoy the thrill of the hill",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4e70a77e084f",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003130.json",
       "kairos_url": "https://kairosarchive.net/printings/P003130",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003130.4e70a77e084f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158100,13 +158680,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of poisonous provision",
       "back": null,
-      "image_hash": null,
+      "image_hash": "db2f7525757a",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003131.json",
       "kairos_url": "https://kairosarchive.net/printings/P003131",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003131.db2f7525757a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003131.db2f7525757a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003131.db2f7525757a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003131.db2f7525757a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158127,13 +158712,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Mortals under the lash",
       "back": null,
-      "image_hash": null,
+      "image_hash": "54a282888a25",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003132.json",
       "kairos_url": "https://kairosarchive.net/printings/P003132",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003132.54a282888a25.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003132.54a282888a25.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003132.54a282888a25.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003132.54a282888a25.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158154,13 +158744,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic drops the hammer",
       "back": null,
-      "image_hash": null,
+      "image_hash": "882bf4733f25",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003133.json",
       "kairos_url": "https://kairosarchive.net/printings/P003133",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003133.882bf4733f25.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003133.882bf4733f25.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003133.882bf4733f25.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003133.882bf4733f25.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158181,13 +158776,18 @@
       "flavour_text": null,
       "typeline": "An Elite Demon brings a boreal barrage",
       "back": null,
-      "image_hash": null,
+      "image_hash": "7063eccb99e4",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003134.json",
       "kairos_url": "https://kairosarchive.net/printings/P003134",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003134.7063eccb99e4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158208,13 +158808,18 @@
       "flavour_text": null,
       "typeline": "An Aura of Ordinary arson",
       "back": null,
-      "image_hash": null,
+      "image_hash": "297ca695591d",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003135.json",
       "kairos_url": "https://kairosarchive.net/printings/P003135",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003135.297ca695591d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003135.297ca695591d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003135.297ca695591d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003135.297ca695591d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158235,13 +158840,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of focused fire",
       "back": null,
-      "image_hash": null,
+      "image_hash": "76b5db6a04a0",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003136.json",
       "kairos_url": "https://kairosarchive.net/printings/P003136",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003136.76b5db6a04a0.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158262,13 +158872,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Demons come hot from hell",
       "back": null,
-      "image_hash": null,
+      "image_hash": "6a93abf3fec5",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003137.json",
       "kairos_url": "https://kairosarchive.net/printings/P003137",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003137.6a93abf3fec5.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003137.6a93abf3fec5.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003137.6a93abf3fec5.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003137.6a93abf3fec5.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158289,13 +158904,18 @@
       "flavour_text": null,
       "typeline": "Elite Spirits bring a boundless brume",
       "back": null,
-      "image_hash": null,
+      "image_hash": "71db775188b4",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003138.json",
       "kairos_url": "https://kairosarchive.net/printings/P003138",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003138.71db775188b4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003138.71db775188b4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003138.71db775188b4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003138.71db775188b4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158316,13 +158936,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Mortal leads the way",
       "back": null,
-      "image_hash": null,
+      "image_hash": "868877df68f3",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003139.json",
       "kairos_url": "https://kairosarchive.net/printings/P003139",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003139.868877df68f3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003139.868877df68f3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003139.868877df68f3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003139.868877df68f3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158343,13 +158968,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Mortals storm the gates",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4b6a6ca6a536",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003140.json",
       "kairos_url": "https://kairosarchive.net/printings/P003140",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003140.4b6a6ca6a536.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003140.4b6a6ca6a536.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003140.4b6a6ca6a536.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003140.4b6a6ca6a536.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158370,13 +159000,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site where stones sing of safety",
       "back": null,
-      "image_hash": null,
+      "image_hash": "9e8df3cb13b2",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003141.json",
       "kairos_url": "https://kairosarchive.net/printings/P003141",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003141.9e8df3cb13b2.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158397,13 +159032,18 @@
       "flavour_text": null,
       "typeline": "A frozen fusillade of Ordinary Magic",
       "back": null,
-      "image_hash": null,
+      "image_hash": "bcb2fd69dedf",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003142.json",
       "kairos_url": "https://kairosarchive.net/printings/P003142",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003142.bcb2fd69dedf.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003142.bcb2fd69dedf.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003142.bcb2fd69dedf.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003142.bcb2fd69dedf.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158424,13 +159064,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site puts them out of their misery",
       "back": null,
-      "image_hash": null,
+      "image_hash": "5e674902490a",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003143.json",
       "kairos_url": "https://kairosarchive.net/printings/P003143",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003143.5e674902490a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003143.5e674902490a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003143.5e674902490a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003143.5e674902490a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158451,13 +159096,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Automaton with a will of iron",
       "back": null,
-      "image_hash": null,
+      "image_hash": "8f3e65183f9e",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003144.json",
       "kairos_url": "https://kairosarchive.net/printings/P003144",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003144.8f3e65183f9e.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003144.8f3e65183f9e.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003144.8f3e65183f9e.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003144.8f3e65183f9e.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158478,13 +159128,18 @@
       "flavour_text": null,
       "typeline": "A Unique Monster girds the realm",
       "back": null,
-      "image_hash": null,
+      "image_hash": "1d1729c1251e",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003145.json",
       "kairos_url": "https://kairosarchive.net/printings/P003145",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003145.1d1729c1251e.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158505,13 +159160,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Beasts of curious migration",
       "back": null,
-      "image_hash": null,
+      "image_hash": "efac25ec2e5f",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003146.json",
       "kairos_url": "https://kairosarchive.net/printings/P003146",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003146.efac25ec2e5f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158532,13 +159192,18 @@
       "flavour_text": null,
       "typeline": "A Unique Demon of ruinous reign",
       "back": null,
-      "image_hash": null,
+      "image_hash": "20a34dabd834",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003147.json",
       "kairos_url": "https://kairosarchive.net/printings/P003147",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003147.20a34dabd834.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003147.20a34dabd834.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003147.20a34dabd834.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003147.20a34dabd834.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158559,13 +159224,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic breaks new ground",
       "back": null,
-      "image_hash": null,
+      "image_hash": "34554d5992ef",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003148.json",
       "kairos_url": "https://kairosarchive.net/printings/P003148",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003148.34554d5992ef.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003148.34554d5992ef.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003148.34554d5992ef.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003148.34554d5992ef.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158586,13 +159256,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Site shifts underfoot",
       "back": null,
-      "image_hash": null,
+      "image_hash": "ddde334fe7aa",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003149.json",
       "kairos_url": "https://kairosarchive.net/printings/P003149",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003149.ddde334fe7aa.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158613,13 +159288,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Spirit of seething desire",
       "back": null,
-      "image_hash": null,
+      "image_hash": "3b73913701ff",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003150.json",
       "kairos_url": "https://kairosarchive.net/printings/P003150",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003150.3b73913701ff.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003150.3b73913701ff.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003150.3b73913701ff.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003150.3b73913701ff.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158640,13 +159320,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic of molten animosity",
       "back": null,
-      "image_hash": null,
+      "image_hash": "42f47b859121",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003151.json",
       "kairos_url": "https://kairosarchive.net/printings/P003151",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003151.42f47b859121.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003151.42f47b859121.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003151.42f47b859121.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003151.42f47b859121.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158667,13 +159352,18 @@
       "flavour_text": null,
       "typeline": "Your Avatar turns up the heat",
       "back": null,
-      "image_hash": null,
+      "image_hash": "24d5bbadc9a5",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003152.json",
       "kairos_url": "https://kairosarchive.net/printings/P003152",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003152.24d5bbadc9a5.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158694,13 +159384,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of Water and Air",
       "back": null,
-      "image_hash": null,
+      "image_hash": "f8a4f0538b59",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003153.json",
       "kairos_url": "https://kairosarchive.net/printings/P003153",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003153.f8a4f0538b59.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003153.f8a4f0538b59.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003153.f8a4f0538b59.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003153.f8a4f0538b59.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158721,13 +159416,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Magic of shocking uncertainty",
       "back": null,
-      "image_hash": null,
+      "image_hash": "48d94eec1bf5",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003154.json",
       "kairos_url": "https://kairosarchive.net/printings/P003154",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003154.48d94eec1bf5.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003154.48d94eec1bf5.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003154.48d94eec1bf5.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003154.48d94eec1bf5.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158748,13 +159448,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Beast howls to none",
       "back": null,
-      "image_hash": null,
+      "image_hash": "93af48bd44f8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003155.json",
       "kairos_url": "https://kairosarchive.net/printings/P003155",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003155.93af48bd44f8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158775,13 +159480,18 @@
       "flavour_text": null,
       "typeline": "All is frozen solid in this Unique Aura",
       "back": null,
-      "image_hash": null,
+      "image_hash": "aa144b011ed1",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003156.json",
       "kairos_url": "https://kairosarchive.net/printings/P003156",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003156.aa144b011ed1.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158802,13 +159512,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site opens its ruby lips",
       "back": null,
-      "image_hash": null,
+      "image_hash": "71753e5f4172",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003157.json",
       "kairos_url": "https://kairosarchive.net/printings/P003157",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003157.71753e5f4172.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003157.71753e5f4172.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003157.71753e5f4172.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003157.71753e5f4172.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158829,13 +159544,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of narrow passage",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4f1867f98576",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003158.json",
       "kairos_url": "https://kairosarchive.net/printings/P003158",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003158.4f1867f98576.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003158.4f1867f98576.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003158.4f1867f98576.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003158.4f1867f98576.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158856,13 +159576,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of rugged grandeur",
       "back": null,
-      "image_hash": null,
+      "image_hash": "b0bb90cb0ac0",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003159.json",
       "kairos_url": "https://kairosarchive.net/printings/P003159",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003159.b0bb90cb0ac0.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003159.b0bb90cb0ac0.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003159.b0bb90cb0ac0.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003159.b0bb90cb0ac0.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158883,13 +159608,18 @@
       "flavour_text": null,
       "typeline": "Elite Beasts go marching one by one",
       "back": null,
-      "image_hash": null,
+      "image_hash": "80c95fc5b1c0",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003160.json",
       "kairos_url": "https://kairosarchive.net/printings/P003160",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003160.80c95fc5b1c0.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158910,13 +159640,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Beast, fleet of foot",
       "back": null,
-      "image_hash": null,
+      "image_hash": "3133170259f9",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003161.json",
       "kairos_url": "https://kairosarchive.net/printings/P003161",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003161.3133170259f9.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003161.3133170259f9.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003161.3133170259f9.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003161.3133170259f9.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158937,13 +159672,18 @@
       "flavour_text": null,
       "typeline": "A Unique Spirit Beast, blizzard given flesh",
       "back": null,
-      "image_hash": null,
+      "image_hash": "819c0a3cf23f",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003162.json",
       "kairos_url": "https://kairosarchive.net/printings/P003162",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003162.819c0a3cf23f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158964,13 +159704,18 @@
       "flavour_text": null,
       "typeline": "You'd better run from this Unique Aura",
       "back": null,
-      "image_hash": null,
+      "image_hash": "36a9658a41f8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003163.json",
       "kairos_url": "https://kairosarchive.net/printings/P003163",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003163.36a9658a41f8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -158991,13 +159736,18 @@
       "flavour_text": null,
       "typeline": "Suddenly, an Elite Beast blocks the path!",
       "back": null,
-      "image_hash": null,
+      "image_hash": "66f0a316e8fd",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003164.json",
       "kairos_url": "https://kairosarchive.net/printings/P003164",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003164.66f0a316e8fd.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159018,13 +159768,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site and final resting place",
       "back": null,
-      "image_hash": null,
+      "image_hash": "ef7a0daf91be",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003165.json",
       "kairos_url": "https://kairosarchive.net/printings/P003165",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003165.ef7a0daf91be.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159045,13 +159800,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Beast of extraordinary extravagance",
       "back": null,
-      "image_hash": null,
+      "image_hash": "fb2e43e58c39",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003166.json",
       "kairos_url": "https://kairosarchive.net/printings/P003166",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003166.fb2e43e58c39.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003166.fb2e43e58c39.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003166.fb2e43e58c39.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003166.fb2e43e58c39.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159072,13 +159832,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Beasts of extreme latitudes",
       "back": null,
-      "image_hash": null,
+      "image_hash": "c4ed4b40f179",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003167.json",
       "kairos_url": "https://kairosarchive.net/printings/P003167",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003167.c4ed4b40f179.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159099,13 +159864,18 @@
       "flavour_text": null,
       "typeline": "Unique Magic confounds the compass",
       "back": null,
-      "image_hash": null,
+      "image_hash": "0737d80b1aac",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003168.json",
       "kairos_url": "https://kairosarchive.net/printings/P003168",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003168.0737d80b1aac.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159126,13 +159896,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Mortal sets the bounds",
       "back": null,
-      "image_hash": null,
+      "image_hash": "594a699c28c4",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003169.json",
       "kairos_url": "https://kairosarchive.net/printings/P003169",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003169.594a699c28c4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003169.594a699c28c4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003169.594a699c28c4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003169.594a699c28c4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159153,13 +159928,18 @@
       "flavour_text": null,
       "typeline": "The Ordinary Magic behind every spell",
       "back": null,
-      "image_hash": null,
+      "image_hash": "7c8ba25b88b7",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003170.json",
       "kairos_url": "https://kairosarchive.net/printings/P003170",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003170.7c8ba25b88b7.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159180,13 +159960,18 @@
       "flavour_text": null,
       "typeline": "A Unique Aura of pressurized trauma",
       "back": null,
-      "image_hash": null,
+      "image_hash": "03345ffbe48c",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003171.json",
       "kairos_url": "https://kairosarchive.net/printings/P003171",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003171.03345ffbe48c.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159207,13 +159992,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site of crashing currents",
       "back": null,
-      "image_hash": null,
+      "image_hash": "84d5720b37f2",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003172.json",
       "kairos_url": "https://kairosarchive.net/printings/P003172",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003172.84d5720b37f2.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003172.84d5720b37f2.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003172.84d5720b37f2.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003172.84d5720b37f2.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159234,13 +160024,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Relic that gathers no moss",
       "back": null,
-      "image_hash": null,
+      "image_hash": "38b7443bf5a7",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003173.json",
       "kairos_url": "https://kairosarchive.net/printings/P003173",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003173.38b7443bf5a7.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003173.38b7443bf5a7.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003173.38b7443bf5a7.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003173.38b7443bf5a7.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159261,13 +160056,18 @@
       "flavour_text": null,
       "typeline": "A scorched Site, riven and scarred",
       "back": null,
-      "image_hash": null,
+      "image_hash": "c1260628abcc",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003174.json",
       "kairos_url": "https://kairosarchive.net/printings/P003174",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003174.c1260628abcc.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003174.c1260628abcc.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003174.c1260628abcc.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003174.c1260628abcc.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159288,13 +160088,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Mortal, newly etched",
       "back": null,
-      "image_hash": null,
+      "image_hash": "bc5c30741fd3",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003175.json",
       "kairos_url": "https://kairosarchive.net/printings/P003175",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003175.bc5c30741fd3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159315,13 +160120,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site where ember becomes ore",
       "back": null,
-      "image_hash": null,
+      "image_hash": "45459a7770c8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003176.json",
       "kairos_url": "https://kairosarchive.net/printings/P003176",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003176.45459a7770c8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003176.45459a7770c8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003176.45459a7770c8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003176.45459a7770c8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159342,13 +160152,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic breaks the ice",
       "back": null,
-      "image_hash": null,
+      "image_hash": "39814c6bc924",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003177.json",
       "kairos_url": "https://kairosarchive.net/printings/P003177",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003177.39814c6bc924.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003177.39814c6bc924.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003177.39814c6bc924.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003177.39814c6bc924.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159369,13 +160184,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site of impending collapse",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4785e816d454",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003178.json",
       "kairos_url": "https://kairosarchive.net/printings/P003178",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003178.4785e816d454.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003178.4785e816d454.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003178.4785e816d454.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003178.4785e816d454.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159396,13 +160216,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Faerie, ash in her wake",
       "back": null,
-      "image_hash": null,
+      "image_hash": "7cc77c080e0d",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003179.json",
       "kairos_url": "https://kairosarchive.net/printings/P003179",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003179.7cc77c080e0d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003179.7cc77c080e0d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003179.7cc77c080e0d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003179.7cc77c080e0d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159423,13 +160248,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Mortals harry from on high",
       "back": null,
-      "image_hash": null,
+      "image_hash": "b18b53eb2b26",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003180.json",
       "kairos_url": "https://kairosarchive.net/printings/P003180",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003180.b18b53eb2b26.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159450,13 +160280,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Beast is very, very sorry",
       "back": null,
-      "image_hash": null,
+      "image_hash": "cc96d1915dba",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003181.json",
       "kairos_url": "https://kairosarchive.net/printings/P003181",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003181.cc96d1915dba.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159477,13 +160312,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic of glacial gliding",
       "back": null,
-      "image_hash": null,
+      "image_hash": "2b1e3ca059b8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003182.json",
       "kairos_url": "https://kairosarchive.net/printings/P003182",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003182.2b1e3ca059b8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159504,13 +160344,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Giant dozes peacefully",
       "back": null,
-      "image_hash": null,
+      "image_hash": "ee959d1d710f",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003183.json",
       "kairos_url": "https://kairosarchive.net/printings/P003183",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003183.ee959d1d710f.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003183.ee959d1d710f.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003183.ee959d1d710f.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003183.ee959d1d710f.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159531,13 +160376,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site adds insult to injury",
       "back": null,
-      "image_hash": null,
+      "image_hash": "dee905df6724",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003184.json",
       "kairos_url": "https://kairosarchive.net/printings/P003184",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003184.dee905df6724.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003184.dee905df6724.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003184.dee905df6724.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003184.dee905df6724.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159558,13 +160408,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Beast, ever so clever",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4dfa0b256b02",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003185.json",
       "kairos_url": "https://kairosarchive.net/printings/P003185",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003185.4dfa0b256b02.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159585,13 +160440,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Magic picks up speed",
       "back": null,
-      "image_hash": null,
+      "image_hash": "9af0b35a519d",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003186.json",
       "kairos_url": "https://kairosarchive.net/printings/P003186",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003186.9af0b35a519d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003186.9af0b35a519d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003186.9af0b35a519d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003186.9af0b35a519d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159612,13 +160472,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Beast with a sinister side",
       "back": null,
-      "image_hash": null,
+      "image_hash": "aa45cc1897f6",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003187.json",
       "kairos_url": "https://kairosarchive.net/printings/P003187",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003187.aa45cc1897f6.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159639,13 +160504,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Site of barbed betrayal",
       "back": null,
-      "image_hash": null,
+      "image_hash": "9f821b195fc2",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003188.json",
       "kairos_url": "https://kairosarchive.net/printings/P003188",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003188.9f821b195fc2.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159666,13 +160536,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Site of buoyant jounce",
       "back": null,
-      "image_hash": null,
+      "image_hash": "b1a32c84cdce",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003189.json",
       "kairos_url": "https://kairosarchive.net/printings/P003189",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003189.b1a32c84cdce.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159693,13 +160568,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of Earth and Fire",
       "back": null,
-      "image_hash": null,
+      "image_hash": "926dc485320d",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003190.json",
       "kairos_url": "https://kairosarchive.net/printings/P003190",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003190.926dc485320d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003190.926dc485320d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003190.926dc485320d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003190.926dc485320d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159720,13 +160600,18 @@
       "flavour_text": null,
       "typeline": "Elite Spirits return to sender",
       "back": null,
-      "image_hash": null,
+      "image_hash": "1470019587d4",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003191.json",
       "kairos_url": "https://kairosarchive.net/printings/P003191",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003191.1470019587d4.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003191.1470019587d4.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003191.1470019587d4.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003191.1470019587d4.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159747,13 +160632,18 @@
       "flavour_text": null,
       "typeline": "Trampled by an Exceptional Beast!",
       "back": null,
-      "image_hash": null,
+      "image_hash": "53055b16e01d",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003192.json",
       "kairos_url": "https://kairosarchive.net/printings/P003192",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003192.53055b16e01d.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003192.53055b16e01d.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003192.53055b16e01d.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003192.53055b16e01d.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159774,13 +160664,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Site chokes the air",
       "back": null,
-      "image_hash": null,
+      "image_hash": "86c33bd63b3a",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003193.json",
       "kairos_url": "https://kairosarchive.net/printings/P003193",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003193.86c33bd63b3a.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159801,13 +160696,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Mortals as inevitable as dawn",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4242bcf59de8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003194.json",
       "kairos_url": "https://kairosarchive.net/printings/P003194",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003194.4242bcf59de8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159828,13 +160728,18 @@
       "flavour_text": null,
       "typeline": "A Unique Site at the heart of extinction",
       "back": null,
-      "image_hash": null,
+      "image_hash": "a60e018aceb5",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003195.json",
       "kairos_url": "https://kairosarchive.net/printings/P003195",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003195.a60e018aceb5.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159855,13 +160760,18 @@
       "flavour_text": null,
       "typeline": "Exceptional Mortals claim the shallows",
       "back": null,
-      "image_hash": null,
+      "image_hash": "e5b691aabc00",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003196.json",
       "kairos_url": "https://kairosarchive.net/printings/P003196",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003196.e5b691aabc00.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159882,13 +160792,18 @@
       "flavour_text": null,
       "typeline": "A realm reborn by Unique Magic",
       "back": null,
-      "image_hash": null,
+      "image_hash": "e9fcbe46c754",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003197.json",
       "kairos_url": "https://kairosarchive.net/printings/P003197",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003197.e9fcbe46c754.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159909,13 +160824,18 @@
       "flavour_text": null,
       "typeline": "A Unique Mortal with an iron-blue sight",
       "back": null,
-      "image_hash": null,
+      "image_hash": "17bddda237da",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003198.json",
       "kairos_url": "https://kairosarchive.net/printings/P003198",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003198.17bddda237da.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003198.17bddda237da.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003198.17bddda237da.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003198.17bddda237da.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159936,13 +160856,18 @@
       "flavour_text": null,
       "typeline": "Tread carefully at this Exceptional Site",
       "back": null,
-      "image_hash": null,
+      "image_hash": "4f6d3991e935",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003199.json",
       "kairos_url": "https://kairosarchive.net/printings/P003199",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003199.4f6d3991e935.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003199.4f6d3991e935.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003199.4f6d3991e935.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003199.4f6d3991e935.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159963,13 +160888,18 @@
       "flavour_text": null,
       "typeline": "A Relic offers Exceptionally simple solutions",
       "back": null,
-      "image_hash": null,
+      "image_hash": "c2eb72591c89",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003200.json",
       "kairos_url": "https://kairosarchive.net/printings/P003200",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003200.c2eb72591c89.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003200.c2eb72591c89.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003200.c2eb72591c89.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003200.c2eb72591c89.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -159990,13 +160920,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site where patience pays off",
       "back": null,
-      "image_hash": null,
+      "image_hash": "7d6772df9447",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003201.json",
       "kairos_url": "https://kairosarchive.net/printings/P003201",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003201.7d6772df9447.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003201.7d6772df9447.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003201.7d6772df9447.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003201.7d6772df9447.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -160017,13 +160952,18 @@
       "flavour_text": null,
       "typeline": "Ordinary Beasts with plated pelt",
       "back": null,
-      "image_hash": null,
+      "image_hash": "0c8bddf78feb",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003202.json",
       "kairos_url": "https://kairosarchive.net/printings/P003202",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003202.0c8bddf78feb.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003202.0c8bddf78feb.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003202.0c8bddf78feb.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003202.0c8bddf78feb.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -160044,13 +160984,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site where breath becomes mist",
       "back": null,
-      "image_hash": null,
+      "image_hash": "6946cb2fad97",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003203.json",
       "kairos_url": "https://kairosarchive.net/printings/P003203",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003203.6946cb2fad97.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -160071,13 +161016,18 @@
       "flavour_text": null,
       "typeline": "Elite Giants form a fit of flailing fists",
       "back": null,
-      "image_hash": null,
+      "image_hash": "7d0ca2e2a5b1",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003204.json",
       "kairos_url": "https://kairosarchive.net/printings/P003204",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003204.7d0ca2e2a5b1.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -160098,13 +161048,18 @@
       "flavour_text": null,
       "typeline": "An Exceptional Site of tectonic release",
       "back": null,
-      "image_hash": null,
+      "image_hash": "da407f58ec12",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003205.json",
       "kairos_url": "https://kairosarchive.net/printings/P003205",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003205.da407f58ec12.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003205.da407f58ec12.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003205.da407f58ec12.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003205.da407f58ec12.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -160125,13 +161080,18 @@
       "flavour_text": null,
       "typeline": "Unique Magic thunders down the mountain",
       "back": null,
-      "image_hash": null,
+      "image_hash": "cf08663ef4b8",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003206.json",
       "kairos_url": "https://kairosarchive.net/printings/P003206",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003206.cf08663ef4b8.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -160152,13 +161112,18 @@
       "flavour_text": null,
       "typeline": "An Ordinary Site of cold crisp recovery",
       "back": null,
-      "image_hash": null,
+      "image_hash": "b847ba9b11f3",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003207.json",
       "kairos_url": "https://kairosarchive.net/printings/P003207",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003207.b847ba9b11f3.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
@@ -160179,13 +161144,18 @@
       "flavour_text": null,
       "typeline": "An Elite Site and tempest in a teacup",
       "back": null,
-      "image_hash": null,
+      "image_hash": "938cf8583f13",
       "printed_as_current": true,
       "retired_at": null,
       "api_url": "https://api.kairosarchive.net/v3/printings/P003208.json",
       "kairos_url": "https://kairosarchive.net/printings/P003208",
-      "image_urls": null,
-      "image_status": "missing",
+      "image_urls": {
+        "small": "https://api.kairosarchive.net/images/P003208.938cf8583f13.small.webp",
+        "normal": "https://api.kairosarchive.net/images/P003208.938cf8583f13.normal.webp",
+        "large": "https://api.kairosarchive.net/images/P003208.938cf8583f13.large.webp",
+        "original": "https://api.kairosarchive.net/images/P003208.938cf8583f13.original.png"
+      },
+      "image_status": "ok",
       "origin": "api",
       "manual": null,
       "notes": []
