@@ -210,5 +210,25 @@
       "product": "Kickstarter"
     },
     "reason": "API data error: upstream files the Alpha Frog tokens under BoxTopper. They were not in the box topper: they came with the Alpha pledge pack, the $1.75 million Kickstarter stretch goal. Confirmed by the registry owner, 2026-11-14."
+  },
+  {
+    "match": {
+      "card_name": "Reed Cord Measurer"
+    },
+    "set_fields": {
+      "rarity": "Exceptional"
+    },
+    "retroactive": true,
+    "reason": "API data error: upstream serves Reed Cord Measurer (Frost Mage Vs. Lavamancer, set 008) with rarity Ordinary and slot Exceptional. The card is an Exceptional: its own typeline reads \"An Exceptional Mortal sets the bounds\". Retroactive because the card never changed, only the record was wrong. Confirmed by the registry owner, 2026-11-18."
+  },
+  {
+    "match": {
+      "card_name": "Runeling"
+    },
+    "set_fields": {
+      "rarity": "Exceptional"
+    },
+    "retroactive": true,
+    "reason": "API data error: upstream serves Runeling (Frost Mage Vs. Lavamancer, set 008) with rarity Ordinary and slot Exceptional. The card is an Exceptional: its own typeline reads \"An Exceptional Mortal, newly etched\". Retroactive because the card never changed, only the record was wrong. Confirmed by the registry owner, 2026-11-18."
   }
 ]
