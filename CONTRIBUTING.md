@@ -60,7 +60,7 @@ When a new set drops, this is the whole flow. Existing IDs never change; a set r
 4. Watch the override notes: if upstream fixed an error we correct in `data/overrides.json`, the sync reports the entry as matching nothing - delete it in this same PR.
 5. Apply against the exact reviewed bytes: `python -m registry.sync --from-file review/upstream-snapshot.json`.
 6. `python -m registry.validate --against origin/main`, then push and open the PR. CI re-proves everything, including that every pre-existing ID survived.
-7. After merge: tag a data release. Bump the minor version for data (a new set, corrections) and for additive shape changes: a `schema_version` bump that only adds fields or sections is a minor release, as v3.1 through v3.4 were. Bump the major version only for a breaking change, one that removes or renames a field or changes what a value means. Write the release notes as the tag message and push the tag:
+7. After merge: tag a data release. Bump the patch version for a correction to records the registry already holds (an override, an errata entry) that adds no cards, printings or fields, as v3.5.1 and v3.5.2 were. Bump the minor version for new data (a new set) and for additive shape changes: a `schema_version` bump that only adds fields or sections is a minor release, as v3.1 through v3.4 were. Bump the major version only for a breaking change, one that removes or renames a field or changes what a value means. Write the release notes as the tag message and push the tag:
 
    ```bash
    git tag -a vX.Y.Z -m "<what changed, for consumers>"
