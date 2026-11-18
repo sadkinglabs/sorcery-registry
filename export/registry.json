@@ -57184,7 +57184,7 @@
       "name": "Reed Cord Measurer",
       "type": "Minion",
       "category": "Spell",
-      "rarity": "Ordinary",
+      "rarity": "Exceptional",
       "slot": "Exceptional",
       "subtypes": [
         "Mortal"
@@ -57324,7 +57324,7 @@
       "name": "Runeling",
       "type": "Minion",
       "category": "Spell",
-      "rarity": "Ordinary",
+      "rarity": "Exceptional",
       "slot": "Exceptional",
       "subtypes": [
         "Mortal"
@@ -222375,7 +222375,7 @@
       "source": "api",
       "type": "Minion",
       "category": "Spell",
-      "rarity": "Ordinary",
+      "rarity": "Exceptional",
       "slot": "Exceptional",
       "subtypes": [
         "Mortal"
@@ -222461,7 +222461,7 @@
       "source": "api",
       "type": "Minion",
       "category": "Spell",
-      "rarity": "Ordinary",
+      "rarity": "Exceptional",
       "slot": "Exceptional",
       "subtypes": [
         "Mortal"
